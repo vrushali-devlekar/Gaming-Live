@@ -1,0 +1,104 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Outfit', sans-serif;
+  
+  /* Deep dark gamer aesthetic color palette */
+  --color-dark-bg: #070611;
+  --color-card-bg: #110f24;
+  --color-panel-bg: #14122b;
+  --color-accent-pink: #d926a9;
+  --color-accent-purple: #6d28d9;
+  --color-neon-pink: #ff007f;
+  --color-neon-purple: #8a2be2;
+  --color-neon-cyan: #00f0ff;
+  --color-neon-green: #39ff14;
+  --color-neon-blue: #0070f3;
+  
+  /* Border colors */
+  --color-neon-border: rgba(139, 92, 246, 0.15);
+}
+
+@layer base {
+  body {
+    background-color: var(--color-dark-bg);
+    color: #e2e8f0;
+    font-family: 'Outfit', sans-serif;
+    overflow-x: hidden;
+  }
+  
+  /* Scrollbar styles */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: #0d0b1a;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: #231e3d;
+    border-radius: 9999px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #3c3468;
+  }
+}
+
+/* Custom Utilities for Neon Gaming Dashboard */
+.neon-text-pink {
+  text-shadow: 0 0 10px rgba(255, 0, 127, 0.5), 0 0 20px rgba(255, 0, 127, 0.3);
+}
+
+.neon-text-purple {
+  text-shadow: 0 0 10px rgba(138, 43, 226, 0.5), 0 0 20px rgba(138, 43, 226, 0.3);
+}
+
+.neon-shadow-pink {
+  box-shadow: 0 0 15px rgba(255, 0, 127, 0.3);
+}
+
+.neon-shadow-purple {
+  box-shadow: 0 0 15px rgba(138, 43, 226, 0.3);
+}
+
+.neon-shadow-cyan {
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+}
+
+.neon-border-glow {
+  border: 1px solid rgba(138, 43, 226, 0.25);
+  box-shadow: 0 0 10px rgba(138, 43, 226, 0.1);
+}
+
+.neon-border-glow-pink {
+  border: 1px solid rgba(255, 0, 127, 0.3);
+  box-shadow: 0 0 10px rgba(255, 0, 127, 0.15);
+}
+
+.gradient-pink-purple {
+  background: linear-gradient(135deg, #ff007f 0%, #8a2be2 100%);
+}
+
+.gradient-dark-card {
+  background: linear-gradient(180deg, #16142e 0%, #0d0c1d 100%);
+}
+
+/* Subtle Pulsing Animation */
+@keyframes neon-pulse {
+  0%, 100% {
+    opacity: 0.9;
+    box-shadow: 0 0 12px rgba(255, 0, 127, 0.3);
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 20px rgba(255, 0, 127, 0.6);
+  }
+}
+
+.animate-neon-pulse {
+  animation: neon-pulse 2s infinite ease-in-out;
+}

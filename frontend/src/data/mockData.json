@@ -1,0 +1,50 @@
+{
+  "categories": [
+    {
+      "id": 1,
+      "title": "Call of Duty",
+      "imageKey": "call_of_duty",
+      "followers": "7.8M followers",
+      "tags": ["Shooting", "FPS"]
+    },
+    {
+      "id": 2,
+      "title": "NFS: Payback",
+      "imageKey": "nfs_payback",
+      "followers": "7.8M followers",
+      "tags": ["Racing", "Cars"]
+    }
+  ],
+  "otherVideos": [
+    {
+      "id": 1,
+      "title": "Build up domination over time!!!",
+      "imageKey": "video_cyberpunk",
+      "streamer": "Alpha Strike",
+      "streamerAvatar": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop&q=60",
+      "tag": "Cyber Punk",
+      "views": "338M views",
+      "date": "Jan 10, 2022"
+    },
+    {
+      "id": 2,
+      "title": "Egypt falling at sunrise where...",
+      "imageKey": "video_egypt",
+      "streamer": "Alpha Strike",
+      "streamerAvatar": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop&q=60",
+      "tag": "AC: Origin",
+      "views": "338M views",
+      "date": "Jan 10, 2022"
+    },
+    {
+      "id": 3,
+      "title": "Match with only headshot...",
+      "imageKey": "video_pubg",
+      "streamer": "Alpha Strike",
+      "streamerAvatar": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop&q=60",
+      "tag": "PUBG",
+      "views": "338M views",
+      "date": "Jan 10, 2022"
+    }
+  ]
+}
