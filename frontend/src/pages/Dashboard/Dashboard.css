@@ -1,0 +1,125 @@
+/* PUBG/BGMI inspired Dashboard Styling */
+
+.gaming-dashboard-page {
+  background-color: #0c0d12;
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+  color: #e2e8f0;
+}
+
+/* Subtle grid matrix overlay */
+.grid-matrix-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: 
+    linear-gradient(to right, rgba(245, 158, 11, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(245, 158, 11, 0.03) 1px, transparent 1px);
+  background-size: 30px 30px;
+  background-position: center;
+  mask-image: radial-gradient(circle at center, black 60%, transparent 100%);
+  -webkit-mask-image: radial-gradient(circle at center, black 60%, transparent 100%);
+  opacity: 0.75;
+  z-index: 1;
+}
+
+/* Custom Clip Paths for hard edges */
+.clip-industrial-card {
+  clip-path: polygon(
+    0 0,
+    calc(100% - 20px) 0,
+    100% 20px,
+    100% 100%,
+    20px 100%,
+    0 calc(100% - 20px)
+  );
+}
+
+.clip-hero-stand {
+  clip-path: polygon(
+    10% 0%,
+    90% 0%,
+    100% 100%,
+    0% 100%
+  );
+}
+
+.clip-angular-btn {
+  clip-path: polygon(
+    15px 0,
+    100% 0,
+    100% calc(100% - 15px),
+    calc(100% - 15px) 100%,
+    0 100%,
+    0 15px
+  );
+}
+
+/* Iron Gray Container Style */
+.bg-iron-gray {
+  background-color: #171923;
+  border: 1px solid #2d3142;
+  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.6);
+}
+
+.bg-iron-gray-dark {
+  background-color: #0f1016;
+  border: 1px solid #1f2230;
+}
+
+/* Neon Text Highlight Effects */
+.neon-yellow-glow {
+  text-shadow: 0 0 10px rgba(250, 204, 21, 0.5), 0 0 20px rgba(250, 204, 21, 0.2);
+}
+
+.neon-cyan-glow {
+  text-shadow: 0 0 10px rgba(6, 182, 212, 0.5), 0 0 20px rgba(6, 182, 212, 0.2);
+}
+
+/* START MATCH Button Glow & Inner Border Styling */
+.start-match-glow {
+  box-shadow: 0 0 25px rgba(250, 204, 21, 0.45);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.start-match-glow:hover {
+  box-shadow: 0 0 35px rgba(250, 204, 21, 0.7);
+  transform: scale(1.02);
+}
+
+.start-match-glow:active {
+  transform: scale(0.98);
+}
+
+.btn-inner-border {
+  position: absolute;
+  inset: 3px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+}
+
+/* Spotify Hook / Media Spinner */
+@keyframes spin-slow {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 12s infinite linear;
+}
+
+/* Diagonal scanning lines */
+.scanlines-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    rgba(18, 19, 26, 0) 50%, 
+    rgba(0, 0, 0, 0.15) 50%
+  );
+  background-size: 100% 4px;
+  z-index: 2;
+  opacity: 0.4;
+}

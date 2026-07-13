@@ -1,0 +1,233 @@
+.room-browse-card {
+  width: 100%;
+}
+
+.browse-controls-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+/* Search bar styling */
+.search-hud-box {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  background-color: rgba(13, 14, 20, 0.7);
+  border: 1px solid var(--color-steel-border);
+  padding: 0 12px;
+  height: 38px;
+  gap: 10px;
+  transition: all 0.2s ease;
+  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+}
+
+.search-hud-box:focus-within {
+  border-color: var(--color-gold);
+  box-shadow: 0 0 10px rgba(255, 193, 7, 0.15);
+}
+
+.search-icon {
+  color: #718096;
+}
+
+.search-input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  color: #ffffff;
+  font-size: 11px;
+  height: 100%;
+}
+
+.search-input::placeholder {
+  color: rgba(160, 174, 192, 0.4);
+}
+
+/* Refresh Button */
+.refresh-hud-btn {
+  width: 38px;
+  height: 38px;
+  background-color: rgba(37, 40, 54, 0.6);
+  border: 1px solid var(--color-steel-border);
+  color: #a0aec0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+}
+
+.refresh-hud-btn:hover {
+  color: var(--color-gold);
+  border-color: var(--color-gold);
+  background-color: rgba(255, 193, 7, 0.05);
+}
+
+.refresh-hud-btn:active .refresh-icon {
+  transform: rotate(180deg);
+}
+
+.refresh-icon {
+  transition: transform 0.3s ease;
+}
+
+/* Room list box */
+.rooms-container-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 420px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+/* Room list items */
+.room-item-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background-color: rgba(21, 23, 34, 0.5);
+  border: 1px solid rgba(59, 63, 79, 0.3);
+  transition: all 0.2s ease;
+  clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+}
+
+.room-item-card:hover {
+  border-color: rgba(255, 193, 7, 0.25);
+  background-color: rgba(21, 23, 34, 0.7);
+}
+
+.room-card-full {
+  opacity: 0.75;
+}
+
+.room-card-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Security Lock Badge */
+.room-security-badge {
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  background-color: rgba(13, 14, 20, 0.6);
+  border: 1px solid rgba(59, 63, 79, 0.4);
+}
+
+.sec-locked {
+  color: var(--color-gold);
+  border-color: rgba(255, 193, 7, 0.3);
+}
+
+.sec-open {
+  color: #718096;
+}
+
+.room-meta-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.room-card-name {
+  font-size: 15px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.05em;
+}
+
+.room-host-row {
+  display: flex;
+  gap: 4px;
+  font-size: 9px;
+  color: #718096;
+}
+
+.host-value {
+  color: #cbd5e0;
+  font-weight: bold;
+}
+
+.room-theme-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 8px;
+  color: var(--color-gold);
+  background-color: rgba(255, 193, 7, 0.05);
+  border: 1px solid rgba(255, 193, 7, 0.2);
+  padding: 1px 6px;
+  width: fit-content;
+  margin-top: 2px;
+  clip-path: polygon(3px 0, 100% 0, 100% calc(100% - 3px), calc(100% - 3px) 100%, 0 100%, 0 3px);
+}
+
+.theme-disc-icon {
+  animation: spin-slow 8s infinite linear;
+}
+
+.room-card-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Capacity Badge */
+.slots-filled-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 8px;
+  background-color: rgba(13, 14, 20, 0.6);
+  border: 1px solid var(--color-steel-border);
+  border-radius: 4px;
+}
+
+.capacity-open {
+  color: var(--color-hud-green);
+  border-color: rgba(57, 255, 20, 0.25);
+  box-shadow: inset 0 0 6px rgba(57, 255, 20, 0.05);
+}
+
+.capacity-warning {
+  color: var(--color-gold);
+  border-color: rgba(255, 193, 7, 0.25);
+}
+
+.capacity-full {
+  color: #718096;
+  border-color: rgba(59, 63, 79, 0.4);
+}
+
+.join-squad-btn {
+  min-width: 90px;
+}
+
+/* Fallback message */
+.no-rooms-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 40px 16px;
+  color: #718096;
+  font-size: 11px;
+  border: 1px dashed rgba(59, 63, 79, 0.4);
+  text-align: center;
+}
+
+.text-hud-red {
+  color: var(--color-hud-red);
+  font-weight: 900;
+}

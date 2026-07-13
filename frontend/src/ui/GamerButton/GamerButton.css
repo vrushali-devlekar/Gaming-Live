@@ -1,0 +1,192 @@
+.gamer-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  user-select: none;
+  transition: all 0.2s cubic-bezier(0.1, 0.8, 0.25, 1);
+  clip-path: polygon(
+    12px 0%, 
+    100% 0%, 
+    100% calc(100% - 12px), 
+    calc(100% - 12px) 100%, 
+    0% 100%, 
+    0% 12px
+  );
+}
+
+.btn-content {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: inherit;
+}
+
+/* Grids & Accents overlay */
+.btn-grid-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 0.08;
+  background-size: 6px 6px;
+  background-image: 
+    linear-gradient(to right, #ffffff 1px, transparent 1px),
+    linear-gradient(to bottom, #ffffff 1px, transparent 1px);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.btn-accent-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+  z-index: 1;
+}
+
+/* Bracket details */
+.btn-bracket-tl {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 6px;
+  height: 6px;
+  border-top: 2px solid currentColor;
+  border-left: 2px solid currentColor;
+  opacity: 0.8;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.btn-bracket-br {
+  position: absolute;
+  bottom: 3px;
+  right: 3px;
+  width: 6px;
+  height: 6px;
+  border-bottom: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+  opacity: 0.8;
+  z-index: 4;
+  pointer-events: none;
+}
+
+/* --- Sizes --- */
+.btn-size-sm {
+  padding: 8px 16px;
+  font-size: 14px;
+}
+
+.btn-size-md {
+  padding: 12px 28px;
+  font-size: 18px;
+}
+
+.btn-size-lg {
+  padding: 16px 40px;
+  font-size: 24px;
+  clip-path: polygon(
+    18px 0%, 
+    100% 0%, 
+    100% calc(100% - 18px), 
+    calc(100% - 18px) 100%, 
+    0% 100%, 
+    0% 18px
+  );
+}
+
+/* --- Variants --- */
+
+/* Primary: Neon Yellow / Gold (BGMI CTA button style) */
+.btn-variant-primary {
+  background: linear-gradient(180deg, #ffd359 0%, var(--color-gold) 50%, #cca000 100%);
+  color: #12131a;
+  border: 1px solid #ffde7a;
+  box-shadow: 
+    0 4px 10px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    0 0 15px rgba(255, 193, 7, 0.25);
+}
+
+.btn-variant-primary:hover:not(:disabled) {
+  background: linear-gradient(180deg, #ffe082 0%, #ffca28 50%, #e6b400 100%);
+  box-shadow: 
+    0 6px 14px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 0 25px rgba(255, 193, 7, 0.6);
+  transform: translateY(-2px);
+}
+
+.btn-variant-primary:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.6),
+    0 0 10px rgba(255, 193, 7, 0.4);
+}
+
+/* Secondary: Steel Gray with Gold accents */
+.btn-variant-secondary {
+  background: linear-gradient(180deg, #2b2e3e 0%, #1e202b 100%);
+  color: #e2e8f0;
+  border: 1px solid #3c4056;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+.btn-variant-secondary:hover:not(:disabled) {
+  background: linear-gradient(180deg, #373b50 0%, #222533 100%);
+  color: var(--color-gold);
+  border-color: var(--color-gold);
+  box-shadow: 
+    0 6px 12px rgba(0, 0, 0, 0.5),
+    0 0 12px rgba(255, 193, 7, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Danger: Pulsing red indicator */
+.btn-variant-danger {
+  background: linear-gradient(180deg, #ff4c5a 0%, #e63946 100%);
+  color: #ffffff;
+  border: 1px solid #ff7a86;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+.btn-variant-danger:hover:not(:disabled) {
+  background: linear-gradient(180deg, #ff6672 0%, #d62828 100%);
+  box-shadow: 
+    0 6px 12px rgba(0, 0, 0, 0.5),
+    0 0 15px rgba(230, 57, 70, 0.5);
+  transform: translateY(-2px);
+}
+
+/* Steel: Plain military panel styling */
+.btn-variant-steel {
+  background: linear-gradient(180deg, #1d1e26 0%, #121319 100%);
+  color: #8f96a3;
+  border: 1px solid var(--color-steel-border);
+}
+
+.btn-variant-steel:hover:not(:disabled) {
+  background: linear-gradient(180deg, #262834 0%, #161821 100%);
+  color: #ffffff;
+  border-color: #555b75;
+}
+
+/* Disabled State */
+.btn-disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}

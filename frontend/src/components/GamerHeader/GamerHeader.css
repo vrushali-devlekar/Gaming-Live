@@ -1,0 +1,232 @@
+.gamer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 70px;
+  padding: 0 24px;
+  position: relative;
+  background-color: var(--color-lobby-bg);
+  border-bottom: 2px solid var(--color-steel-border);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  z-index: 10;
+}
+
+.header-left, .header-right, .header-center {
+  display: flex;
+  align-items: center;
+}
+
+/* Player Profile Layout */
+.player-profile {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.avatar-wrapper {
+  position: relative;
+  width: 50px;
+  height: 50px;
+}
+
+.avatar-border {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  padding: 2px;
+  background: linear-gradient(135deg, var(--color-gold) 0%, #151722 100%);
+  position: relative;
+}
+
+.avatar-svg {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+.online-dot {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  background-color: var(--color-hud-green);
+  border: 2px solid var(--color-lobby-bg);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--color-hud-green);
+}
+
+.avatar-wrapper .level-badge-container {
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.profile-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.profile-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.player-name {
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.05em;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.tier-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background-color: rgba(255, 193, 7, 0.1);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  padding: 1px 6px;
+  font-size: 9px;
+  font-weight: bold;
+  color: var(--color-gold);
+  clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
+}
+
+.tier-icon {
+  color: var(--color-gold);
+}
+
+.xp-container {
+  width: 130px;
+  margin-top: 1px;
+}
+
+/* Tokens and Currencies */
+.token-display {
+  display: flex;
+  gap: 16px;
+}
+
+.token-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: rgba(18, 19, 26, 0.6);
+  border: 1px solid rgba(59, 63, 79, 0.5);
+  padding: 6px 14px;
+  border-radius: 4px;
+  clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+}
+
+.token-icon-wrapper {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.token-icon-wrapper.gold-bg {
+  background: linear-gradient(135deg, #ffd54f 0%, var(--color-gold) 100%);
+  color: #12131a;
+  box-shadow: 0 0 6px rgba(255, 193, 7, 0.4);
+}
+
+.token-icon-wrapper.dark-bg {
+  background-color: #252836;
+  border: 1px solid #3b3f4f;
+}
+
+.yellow-color {
+  color: var(--color-gold);
+}
+
+.token-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.token-label {
+  font-size: 8px;
+  color: #a0aec0;
+  letter-spacing: 0.05em;
+  font-weight: bold;
+}
+
+.token-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+/* Navigation Tabs */
+.nav-buttons {
+  display: flex;
+  gap: 6px;
+  margin-right: 20px;
+}
+
+.nav-btn {
+  background: none;
+  border: 1px solid transparent;
+  color: #a0aec0;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 6px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+}
+
+.nav-btn:hover {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.03);
+  border-color: rgba(59, 63, 79, 0.6);
+}
+
+.nav-btn.active-tab {
+  color: #12131a;
+  background: var(--color-gold);
+  border-color: var(--color-gold);
+  font-weight: 800;
+  box-shadow: 0 0 10px var(--color-gold-glow);
+}
+
+/* Right Section System Icons */
+.control-icons {
+  display: flex;
+  gap: 10px;
+}
+
+.control-icon-btn {
+  width: 36px;
+  height: 36px;
+  background-color: rgba(37, 40, 54, 0.6);
+  border: 1px solid var(--color-steel-border);
+  color: #a0aec0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+}
+
+.control-icon-btn:hover {
+  color: var(--color-gold);
+  border-color: var(--color-gold);
+  background-color: rgba(255, 193, 7, 0.05);
+  box-shadow: 0 0 8px rgba(255, 193, 7, 0.15);
+}
+
+.logout-btn:hover {
+  color: var(--color-hud-red);
+  border-color: var(--color-hud-red);
+  background-color: rgba(255, 51, 68, 0.05);
+  box-shadow: 0 0 8px rgba(255, 51, 68, 0.15);
+}

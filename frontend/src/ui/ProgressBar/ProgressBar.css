@@ -1,0 +1,82 @@
+.gamer-progress-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: #a0aec0;
+}
+
+.progress-label {
+  color: #a0aec0;
+}
+
+.progress-values {
+  color: var(--color-gold);
+  font-weight: 600;
+  text-shadow: 0 0 6px var(--color-gold-glow);
+}
+
+.progress-bar-track {
+  position: relative;
+  height: 10px;
+  background-color: rgba(25, 27, 38, 0.8);
+  border: 1px solid var(--color-steel-border);
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+  clip-path: polygon(
+    0% 0%, 
+    100% 0%, 
+    100% 100%, 
+    0% 100%
+  );
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #b28a1c 0%, var(--color-gold) 100%);
+  transition: width 0.4s cubic-bezier(0.1, 0.8, 0.25, 1);
+  position: relative;
+}
+
+.progress-bar-glow {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.25) 50%,
+    transparent 100%
+  );
+  box-shadow: 0 0 10px var(--color-gold);
+}
+
+.progress-bar-segments {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  pointer-events: none;
+}
+
+.progress-segment-divider {
+  flex: 1;
+  border-right: 2px solid #0c0d12;
+  height: 100%;
+}
+
+.progress-segment-divider:last-child {
+  border-right: none;
+}
