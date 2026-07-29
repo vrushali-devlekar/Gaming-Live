@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Play, Pause, SkipForward, SkipBack, Music, Disc, Trophy, Shield, Flame, Radio, Volume2, Gamepad2 } from 'lucide-react';
+import { Play, Pause, SkipForward, SkipBack, Music, Disc, Trophy, Shield, Flame, Radio, Volume2, Gamepad2, UserPlus, Check, RefreshCw } from 'lucide-react';
 import GamerHeader from '../../components/GamerHeader/GamerHeader';
 import SettingsModal from '../../components/SettingsModal/SettingsModal';
 import cyberpunkBanner from '../../assets/cyberpunk_banner.png';
@@ -20,6 +20,29 @@ export default function Dashboard() {
     artist: "DJ KO-DER ft. ANTIGRAVITY",
     duration: "2:45"
   });
+
+  // Invite / Duel Challenge states
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+  const [challengeUsername, setChallengeUsername] = useState('');
+  const [selectedQuestion, setSelectedQuestion] = useState('');
+  const [isSendingChallenge, setIsSendingChallenge] = useState(false);
+  const [challengeSuccess, setChallengeSuccess] = useState(false);
+  const [challengeCountdown, setChallengeCountdown] = useState(null);
+
+  const availablePlayers = ['NEON_VIPER', 'CYBER_ACE'];
+
+  // Duel Challenge Accepted Countdown timer
+  useEffect(() => {
+    if (challengeCountdown === null) return;
+    if (challengeCountdown <= 0) {
+      navigate('/arena');
+      return;
+    }
+    const timer = setTimeout(() => {
+      setChallengeCountdown((prev) => prev - 1);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [challengeCountdown, navigate]);
 
   // Matchmaking timer effect
   useEffect(() => {
@@ -214,24 +237,37 @@ export default function Dashboard() {
                 </div>
               </div>
             )}
-          </div>
-
-          {/* START MATCH CTA */}
-          <div className="w-full max-w-md pb-6 relative z-10 px-4">
+          </div>          {/* START MATCH & INVITE CTA */}
+          <div className="w-full max-w-md pb-6 relative z-10 px-4 flex flex-col sm:flex-row gap-3">
             <button
               onClick={handleStartMatch}
-              className={`relative w-full py-4.5 bg-[#FACC15] hover:bg-[#ebd510] text-black font-military font-black text-2xl tracking-widest clip-angular-btn start-match-glow transition-all duration-300 flex flex-col items-center justify-center border-none cursor-pointer select-none`}
+              className={`relative flex-1 py-4 bg-[#FACC15] hover:bg-[#ebd510] text-black font-military font-black text-lg tracking-widest clip-angular-btn start-match-glow transition-all duration-300 flex flex-col items-center justify-center border-none cursor-pointer select-none`}
             >
               {/* Inner border lines */}
               <div className="btn-inner-border"></div>
-              <div className="absolute top-1 left-4 w-4 h-[1px] bg-black/40"></div>
-              <div className="absolute bottom-1 right-4 w-4 h-[1px] bg-black/40"></div>
-
               <span className="relative z-10 flex items-center gap-2">
-                {isMatching ? 'CANCEL MATCH' : 'START MATCH'}
+                {isMatching ? 'CANCEL' : 'START MATCH'}
               </span>
-              <span className="text-[10px] tracking-normal font-mono relative z-10 text-black/60 mt-0.5">
-                {isMatching ? 'MATCHMAKING ACTIVE' : `MODE: CODE DUEL 1V1 | MAP: ${activeTheme.name}`}
+              <span className="text-[9px] tracking-normal font-mono relative z-10 text-black/60 mt-0.5">
+                {isMatching ? 'MATCHMAKING...' : '1V1 MATCHMAKING'}
+              </span>
+            </button>
+            
+            <button
+              onClick={() => {
+                setChallengeSuccess(false);
+                setIsSendingChallenge(false);
+                setChallengeCountdown(null);
+                setChallengeUsername('');
+                setIsInviteModalOpen(true);
+              }}
+              className={`relative flex-1 py-4 bg-[#00ffcc] hover:bg-[#00cca3] text-black font-military font-black text-lg tracking-widest clip-angular-btn start-match-glow transition-all duration-300 flex flex-col items-center justify-center border-none cursor-pointer select-none`}
+            >
+              <span className="relative z-10 flex items-center gap-1.5">
+                INVITE TO DUEL
+              </span>
+              <span className="text-[9px] tracking-normal font-mono relative z-10 text-black/60 mt-0.5">
+                CHALLENGE SQUAD MATE
               </span>
             </button>
           </div>
@@ -368,6 +404,128 @@ export default function Dashboard() {
         isOpen={isSettingsOpen} 
         onClose={() => setIsSettingsOpen(false)} 
       />
+
+      {/* Challenge Invite Modal */}
+      {isInviteModalOpen && (
+        <div className="absolute inset-0 bg-black/90 backdrop-blur-sm z-50 flex flex-col items-center justify-center p-6">
+          <div className="max-w-md w-full bg-[#0b0e14] border-2 border-[#00ffcc] p-6 text-center clip-steel-widget shadow-[0_0_40px_rgba(0,255,204,0.3)] relative">
+            <div className="absolute top-0 right-14 w-12 h-[2px] bg-[#00ffcc]"></div>
+            
+            <div className="flex items-center gap-2 justify-center border-b border-[#2d3142]/60 pb-3 mb-4">
+              <span className="w-2.5 h-2.5 bg-[#00ffcc] rounded-full animate-ping"></span>
+              <h2 className="font-military text-xl text-[#00ffcc] tracking-widest font-black">CHALLENGE PROTOCOL</h2>
+            </div>
+
+            {challengeSuccess ? (
+              <div className="flex flex-col gap-4 py-4 items-center">
+                <div className="w-12 h-12 bg-green-500/10 border border-green-500 text-green-400 rounded-full flex items-center justify-center mb-1 animate-bounce">
+                  <Check size={24} />
+                </div>
+                <h3 className="font-military text-lg text-white tracking-wide">CHALLENGE ACCEPTED!</h3>
+                <p className="text-xs font-mono text-gray-400">
+                  Player <span className="text-[#00ffcc] font-bold">{challengeUsername}</span> accepted your duel invitation.
+                </p>
+                <div className="mt-4 px-6 py-2 bg-red-950/40 border border-red-500/30 clip-steel-sm">
+                  <span className="font-military text-xl text-red-500 font-bold tracking-widest">
+                    LAUNCHING ARENA IN: {challengeCountdown}s
+                  </span>
+                </div>
+              </div>
+            ) : isSendingChallenge ? (
+              <div className="flex flex-col gap-4 py-8 items-center">
+                <RefreshCw className="animate-spin w-8 h-8 text-[#00ffcc]" />
+                <span className="font-military text-xs text-white tracking-wider">
+                  TRANSMITTING ENCRYPTED CHALLENGE PROTOCOL...
+                </span>
+                <span className="text-[9px] font-mono text-gray-500 uppercase">Awaiting opponent confirmation response</span>
+              </div>
+            ) : (
+              <div className="text-left flex flex-col gap-4">
+                
+                {/* Available Players Box */}
+                <div>
+                  <span className="text-[10px] font-mono text-gray-500 block mb-2 uppercase">
+                    Available Players Online (2):
+                  </span>
+                  <div className="grid grid-cols-2 gap-2">
+                    {availablePlayers.map((player) => (
+                      <div
+                        key={player}
+                        onClick={() => setChallengeUsername(player)}
+                        className={`p-2.5 bg-black/40 border cursor-pointer clip-steel-sm flex items-center justify-between transition-colors ${
+                          challengeUsername === player 
+                            ? 'border-[#00ffcc] bg-black/60 text-white' 
+                            : 'border-slate-800 text-gray-400 hover:border-slate-700 hover:text-gray-300'
+                        }`}
+                      >
+                        <span className="font-military text-[11px] tracking-wide font-bold">{player}</span>
+                        <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Username Input */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-mono text-gray-500 uppercase">Target Operator Username:</label>
+                  <input
+                    type="text"
+                    value={challengeUsername}
+                    onChange={(e) => setChallengeUsername(e.target.value)}
+                    placeholder="Enter username (e.g. NEON_VIPER)"
+                    className="w-full bg-[#121620] border border-[#252e3d] text-white font-mono text-xs p-3 rounded focus:outline-none focus:border-[#00ffcc] tracking-wide"
+                  />
+                </div>
+
+                {/* Challenge Question input */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-mono text-gray-500 uppercase">Type Target Coding Question:</label>
+                  <input
+                    type="text"
+                    value={selectedQuestion}
+                    onChange={(e) => setSelectedQuestion(e.target.value)}
+                    placeholder="Enter custom question (e.g. Reverse Binary Tree)"
+                    className="w-full bg-[#121620] border border-[#252e3d] text-white font-mono text-xs p-3 rounded focus:outline-none focus:border-[#00ffcc] tracking-wide"
+                  />
+                </div>
+
+                {/* Action Row */}
+                <div className="flex gap-3 pt-3 border-t border-[#2d3142]/60">
+                  <button
+                    onClick={() => {
+                      if (!challengeUsername.trim()) {
+                        alert("Please select or enter a username to challenge.");
+                        return;
+                      }
+                      if (!selectedQuestion.trim()) {
+                        alert("Please type a challenge question.");
+                        return;
+                      }
+                      setIsSendingChallenge(true);
+                      setTimeout(() => {
+                        setIsSendingChallenge(false);
+                        setChallengeSuccess(true);
+                        setChallengeCountdown(3);
+                      }, 1800);
+                    }}
+                    className="flex-1 py-3 bg-[#00ffcc] hover:bg-[#00cca3] text-black font-military font-black text-sm tracking-widest clip-angular-btn transition-colors border-none cursor-pointer"
+                  >
+                    SEND CHALLENGE
+                  </button>
+                  <button
+                    onClick={() => setIsInviteModalOpen(false)}
+                    className="py-3 px-6 bg-transparent border border-[#2d3142] hover:border-gray-500 text-gray-300 font-military text-xs tracking-widest clip-industrial-card transition-all duration-200 cursor-pointer"
+                  >
+                    CANCEL
+                  </button>
+                </div>
+
+              </div>
+            )}
+
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,0 +1,18 @@
+/* Clan & Squad Operations styling */
+
+.clan-main-grid {
+  flex: 1;
+  width: 100%;
+}
+
+@media (min-width: 1024px) {
+  .clan-main-grid {
+    align-items: stretch;
+  }
+}
+
+@media (max-width: 1024px) {
+  .clan-main-grid {
+    grid-template-cols: 1fr;
+  }
+}

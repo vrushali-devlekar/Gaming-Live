@@ -16,9 +16,17 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background-image: 
-    linear-gradient(to right, var(--theme-grid-color, rgba(6, 182, 212, 0.02)) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--theme-grid-color, rgba(6, 182, 212, 0.02)) 1px, transparent 1px);
+  background-image:
+    linear-gradient(
+      to right,
+      var(--theme-grid-color, rgba(6, 182, 212, 0.02)) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      var(--theme-grid-color, rgba(6, 182, 212, 0.02)) 1px,
+      transparent 1px
+    );
   background-size: 20px 20px;
   opacity: 0.8;
   z-index: 1;
@@ -34,7 +42,7 @@
 
 /* Steel Panel Header Accent */
 .steel-panel::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 10%;
@@ -70,7 +78,7 @@
 .vscode-editor-mock {
   background-color: var(--theme-editor-bg, #0b0c10);
   border: 1px solid var(--theme-panel-border, #1f2230);
-  font-family: 'Space Grotesk', 'Fira Code', monospace;
+  font-family: "Space Grotesk", "Fira Code", monospace;
   position: relative;
   overflow: auto;
   box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
@@ -117,14 +125,24 @@
 
 /* Blinking animations */
 @keyframes cursor-blink {
-  from, to { opacity: 1; }
-  50% { opacity: 0; }
+  from,
+  to {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
 }
 
 /* Sound Wave animation for Bottom Spotify HUD */
 @keyframes soundwave-pulse {
-  0%, 100% { height: 4px; }
-  50% { height: 16px; }
+  0%,
+  100% {
+    height: 4px;
+  }
+  50% {
+    height: 16px;
+  }
 }
 
 .bar-animate {
@@ -152,16 +170,118 @@
 
 /* Red-hot Timer Alert effect */
 @keyframes urgency-glow {
-  0%, 100% {
+  0%,
+  100% {
     text-shadow: 0 0 6px rgba(239, 68, 68, 0.4);
     color: #ef4444;
   }
   50% {
-    text-shadow: 0 0 16px rgba(239, 68, 68, 0.8), 0 0 24px rgba(249, 115, 22, 0.4);
+    text-shadow:
+      0 0 16px rgba(239, 68, 68, 0.8),
+      0 0 24px rgba(249, 115, 22, 0.4);
     color: #f97316;
   }
 }
 
 .timer-urgency {
   animation: urgency-glow 1.5s infinite ease-in-out;
+}
+
+/* ================= RESPONSIVE DESIGN ================= */
+@media (max-width: 1024px) {
+  .arena-container {
+    height: auto;
+    min-height: 100vh;
+    overflow-y: auto;
+  }
+
+  .arena-container main {
+    grid-template-cols: 1fr;
+    height: auto;
+    min-height: 0;
+    overflow-y: visible;
+  }
+
+  /* Prevent code editor from collapsing to 0 height when stacked */
+  .vscode-editor-mock {
+    min-height: 400px;
+  }
+}
+
+/* ================= GAMEPLAY ANIMATIONS ================= */
+.animate-flashbang {
+  animation: flashbang-effect 10s forwards ease-out;
+}
+
+@keyframes flashbang-effect {
+  0% {
+    opacity: 1;
+    background-color: #ffffff;
+  }
+  15% {
+    opacity: 0.95;
+    background-color: #ffffff;
+  }
+  100% {
+    opacity: 0;
+    background-color: transparent;
+  }
+}
+
+.animate-ptt-wave {
+  animation: ptt-pulse 0.6s infinite ease-in-out alternate;
+}
+
+.animate-ptt-wave-slow {
+  animation: ptt-pulse 0.9s infinite ease-in-out alternate;
+}
+
+.animate-ptt-wave-fast {
+  animation: ptt-pulse 0.3s infinite ease-in-out alternate;
+}
+
+@keyframes ptt-pulse {
+  0% {
+    height: 4px;
+  }
+  100% {
+    height: 14px;
+  }
+}
+
+/* Monaco Custom Editor Themes overrides */
+.editor-theme-awm {
+  background-color: #0b1410 !important; /* Forest green */
+  border-color: #1a3327 !important;
+}
+.editor-theme-awm .text-blue-400 {
+  color: #10b981 !important; /* Moss Green keywords */
+}
+.editor-theme-awm .text-yellow-400 {
+  color: #34d399 !important; /* Lighter emerald functions */
+}
+
+.editor-theme-kar98 {
+  background-color: #181410 !important; /* Desert Gold */
+  border-color: #33271a !important;
+}
+.editor-theme-kar98 .text-blue-400 {
+  color: #fbbf24 !important; /* Desert Gold keywords */
+}
+.editor-theme-kar98 .text-yellow-400 {
+  color: #f59e0b !important; /* Amber functions */
+}
+
+/* Combat Red Damage Flash Overlay */
+.animate-damage-flash {
+  animation: damage-red-flash 0.8s ease-out forwards;
+}
+
+@keyframes damage-red-flash {
+  0% {
+    box-shadow: inset 0 0 100px rgba(239, 68, 68, 0.8);
+  }
+  100% {
+    box-shadow: inset 0 0 0px rgba(239, 68, 68, 0);
+  }
 }

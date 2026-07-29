@@ -135,3 +135,52 @@
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: var(--theme-accent-color);
 }
+
+/* Tab list horizontal scroll styling */
+.tab-list-container {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+.tab-list-container::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+.tab-list-container .tab-btn {
+  white-space: nowrap;
+}
+
+/* ================= RESPONSIVE DESIGN ================= */
+@media (max-width: 1024px) {
+  .analytics-page {
+    overflow-y: auto;
+    height: auto;
+  }
+  
+  .analytics-main {
+    grid-template-cols: 1fr;
+    height: auto;
+    min-height: 0;
+  }
+  
+  /* Disable inner scroll lock on mobile for natural page scrolling */
+  .analytics-main .custom-scrollbar {
+    max-height: none !important;
+    overflow-y: visible !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .analytics-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .analytics-header div:last-child {
+    display: none; /* Hide secure ID to save space */
+  }
+}

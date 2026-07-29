@@ -1,17 +1,25 @@
+/* PUBG/BGMI Tactical Character Canvas Viewport */
 .three-character-viewport {
   width: 100%;
-  height: 350px;
+  height: 380px;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   overflow: hidden;
-  /* Filter drop-shadow maps to active theme glows */
-  filter: drop-shadow(0 0 20px var(--theme-accent-glow));
+  filter: drop-shadow(0 0 30px rgba(0, 229, 255, 0.25));
   transition: filter 0.3s ease;
+  user-select: none;
 }
 
 .three-character-viewport canvas {
   display: block;
   outline: none;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.backdrop-blur-xs {
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
 }

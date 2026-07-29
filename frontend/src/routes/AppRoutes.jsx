@@ -7,6 +7,9 @@ import Arena from '../pages/Arena/Arena';
 import ThemeSelector from '../pages/ThemeSelector/ThemeSelector';
 import Analytics from '../pages/Analytics/Analytics';
 import Landing from '../pages/Landing/Landing';
+import Inventory from '../pages/Inventory/Inventory';
+import Result from '../pages/Result/Result';
+import Clan from '../pages/Clan/Clan';
 
 export default function AppRoutes() {
   return (
@@ -32,6 +35,15 @@ export default function AppRoutes() {
 
         {/* Collaborative Code Arena */}
         <Route path="/arena" element={<Arena />} />
+
+        {/* Inventory & Locker Room */}
+        <Route path="/inventory" element={<Inventory />} />
+
+        {/* Match Settlement / Victory Result Screen */}
+        <Route path="/result" element={<Result />} />
+
+        {/* Clan Operations */}
+        <Route path="/clan" element={<Clan />} />
         
         {/* Redirect unknown routes */}
         <Route path="*" element={<Navigate to="/" replace />} />

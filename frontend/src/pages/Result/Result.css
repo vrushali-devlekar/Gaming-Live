@@ -1,0 +1,15 @@
+/* Match Settlement Settle page styling */
+
+.result-settlement-card {
+  width: 100%;
+}
+
+.result-settlement-card .three-character-viewport {
+  height: 280px !important;
+}
+
+@media (max-width: 1024px) {
+  .result-settlement-card {
+    flex-direction: column;
+  }
+}

@@ -96,16 +96,16 @@ export const THEMES = [
     image: nfsPayback,
     desc: 'Ancient temple overgrown ruins. Deep mossy emerald shade, damp stone gray walls, and bright gold relic highlights.',
     size: '14.9 MB',
-    accentColor: '#10b981', // Moss green
-    accentHover: '#059669',
-    accentGlow: 'rgba(16, 185, 129, 0.45)',
-    editorBg: '#0b1410',
-    containerBg: '#060c09',
-    secondaryColor: '#facc15', // Gold
+    accentColor: '#00ffcc', // Neon green
+    accentHover: '#00cca3',
+    accentGlow: 'rgba(0, 255, 204, 0.45)',
+    editorBg: '#0b0e14', // Dark battle royale background
+    containerBg: '#0b0e14',
+    secondaryColor: '#facc15', // Gold callouts
     secondaryGlow: 'rgba(250, 204, 21, 0.35)',
-    gridColor: 'rgba(16, 185, 129, 0.04)',
-    panelBg: '#12251a',
-    panelBorder: '#254a34',
+    gridColor: 'rgba(0, 255, 204, 0.04)',
+    panelBg: '#121620',
+    panelBorder: '#252e3d',
     textColor: '#f4fbf7',
     musicTitle: 'SANHOK ECO TEMPLE CHANTS',
     musicArtist: 'RAINFOREST RHYTHMS'
@@ -114,7 +114,7 @@ export const THEMES = [
 
 export const themeService = {
   getCurrentTheme() {
-    const savedId = localStorage.getItem('gaming_live_code_theme') || 'cyberpunk';
+    const savedId = localStorage.getItem('gaming_live_code_theme') || 'sanhok';
     return THEMES.find(t => t.id === savedId) || THEMES[0];
   },
 
@@ -130,9 +130,9 @@ export const themeService = {
   getDownloadedThemes() {
     try {
       const list = localStorage.getItem('gaming_live_downloaded_themes');
-      return list ? JSON.parse(list) : ['cyberpunk'];
+      return list ? JSON.parse(list) : ['sanhok', 'cyberpunk'];
     } catch (e) {
-      return ['cyberpunk'];
+      return ['sanhok', 'cyberpunk'];
     }
   },
 

@@ -212,7 +212,7 @@ export default function Analytics() {
         <section className="lg:col-span-9 flex flex-col gap-5">
           
           {/* TAB SYSTEM */}
-          <div className="flex gap-2 border-b border-steel-border/60 pb-1 flex-shrink-0">
+          <div className="tab-list-container border-b border-steel-border/60 pb-1 flex-shrink-0">
             <button 
               onClick={() => handleTabChange('overview')}
               className={`tab-btn font-military text-sm px-6 py-2 transition-all ${
@@ -443,10 +443,10 @@ export default function Analytics() {
               <div className="bg-[#0f1016] border border-steel-border/60 p-3 clip-industrial-card flex items-center justify-between text-[10px] font-military text-gray-400 tracking-wider">
                 <span className="w-16">RESULT</span>
                 <span className="flex-1 px-4">DECENT ARENA / MODE</span>
-                <span className="w-20 text-center">BP CREDITS</span>
+                <span className="w-20 text-center hidden md:block">BP CREDITS</span>
                 <span className="w-20 text-center">RATING BP</span>
-                <span className="w-20 text-center">TIME TIME</span>
-                <span className="w-20 text-right">OPER. DATE</span>
+                <span className="w-20 text-center hidden md:block">TIME TIME</span>
+                <span className="w-20 text-right hidden md:block">OPER. DATE</span>
               </div>
 
               {/* Logs Rows */}
@@ -481,7 +481,7 @@ export default function Analytics() {
                     </div>
 
                     {/* BP Credits */}
-                    <div className="w-20 text-center text-gold font-bold">
+                    <div className="w-20 text-center text-gold font-bold hidden md:block">
                       {oper.bp}
                     </div>
 
@@ -491,12 +491,12 @@ export default function Analytics() {
                     </div>
 
                     {/* Match Time Duration */}
-                    <div className="w-20 text-center text-gray-500">
+                    <div className="w-20 text-center text-gray-500 hidden md:block">
                       {oper.time}
                     </div>
 
                     {/* Operation Date */}
-                    <div className="w-20 text-right text-gray-600 text-[10px]">
+                    <div className="w-20 text-right text-gray-600 text-[10px] hidden md:block">
                       {oper.date}
                     </div>
                   </div>

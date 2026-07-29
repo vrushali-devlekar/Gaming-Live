@@ -17,7 +17,7 @@ const Header = () => {
       </div>
 
       {/* Search Bar */}
-      <div className="flex-1 max-w-xl mx-8 relative">
+      <div className="hidden md:block flex-1 max-w-xl mx-8 relative">
         <div className="relative flex items-center w-full bg-[#13112a] rounded-full border border-slate-800 focus-within:border-purple-500/60 focus-within:shadow-[0_0_15px_rgba(139,92,246,0.15)] transition-all duration-300">
           <div className="pl-4 text-slate-400">
             <Search size={18} />
@@ -39,7 +39,7 @@ const Header = () => {
         {/* Start Stream CTA */}
         <button className="flex items-center gap-2 px-4 py-2 rounded-full gradient-pink-purple hover:opacity-95 hover:scale-102 active:scale-98 transition-all duration-200 shadow-md shadow-pink-500/10 text-sm font-semibold text-white">
           <Video size={16} />
-          <span>Start Stream</span>
+          <span className="hidden sm:inline">Start Stream</span>
         </button>
 
         {/* Notifications */}

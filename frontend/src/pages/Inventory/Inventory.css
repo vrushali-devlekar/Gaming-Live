@@ -1,0 +1,29 @@
+/* Inventory / Locker Room Page styling */
+
+.inventory-main-grid {
+  flex: 1;
+  width: 100%;
+}
+
+@media (min-width: 1024px) {
+  .inventory-main-grid {
+    height: calc(100vh - 150px);
+    align-items: stretch;
+  }
+}
+
+.inventory-main-grid .three-character-viewport {
+  height: 380px !important;
+}
+
+/* Custom layout behaviors for responsive grids */
+@media (max-width: 1024px) {
+  .inventory-main-grid {
+    grid-template-cols: 1fr;
+  }
+  
+  .inventory-main-grid section {
+    min-height: 0 !important;
+    height: auto !important;
+  }
+}

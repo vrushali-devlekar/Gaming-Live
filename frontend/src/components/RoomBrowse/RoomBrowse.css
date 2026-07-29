@@ -231,3 +231,21 @@
   color: var(--color-hud-red);
   font-weight: 900;
 }
+
+/* ================= RESPONSIVE DESIGN ================= */
+@media (max-width: 540px) {
+  .room-item-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .room-card-left {
+    width: 100%;
+  }
+  .room-card-right {
+    justify-content: space-between;
+    width: 100%;
+    border-top: 1px solid rgba(59, 63, 79, 0.2);
+    padding-top: 10px;
+  }
+}

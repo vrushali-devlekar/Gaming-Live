@@ -250,3 +250,50 @@
   box-shadow: 0 0 10px var(--color-gold-glow);
   background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-hover) 100%);
 }
+
+/* ================= RESPONSIVE MEDIA QUERIES ================= */
+@media (max-width: 1024px) {
+  .gamer-header {
+    padding: 0 16px;
+  }
+  .token-display {
+    gap: 8px;
+  }
+  .token-item {
+    padding: 4px 10px;
+  }
+  .token-label {
+    display: none; /* Hide labels like 'FREE ROOM CREDITS' to save space */
+  }
+  .nav-buttons {
+    margin-right: 10px;
+    gap: 4px;
+  }
+  .nav-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .header-center {
+    display: none; /* Hide tokens on tablet and mobile */
+  }
+  .nav-buttons {
+    display: none; /* Hide tab buttons on tablet and mobile */
+  }
+  .xp-container {
+    width: 90px; /* Shrink XP progress bar */
+  }
+}
+
+@media (max-width: 480px) {
+  .xp-container {
+    display: none; /* Hide XP bar on small screens */
+  }
+  .profile-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+}

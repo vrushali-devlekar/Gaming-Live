@@ -28,21 +28,19 @@ export default function RoomLobby() {
   };
 
   const handleCreateRoom = (newRoomData) => {
+    const roomId = newRoomData.roomId || '849201';
     const newRoom = {
       id: Date.now(),
-      name: newRoomData.name.toUpperCase(),
-      host: newRoomData.host,
+      name: `SQUAD ROOM #${roomId}`,
+      host: "GHOST_CODER",
       filled: 1,
-      max: newRoomData.maxUsers,
-      locked: newRoomData.password !== null,
-      theme: newRoomData.theme.toUpperCase() === 'CYBERPUNK' ? 'CYBERPUNK NEON' :
-             newRoomData.theme.toUpperCase() === 'MONOCHROME' ? 'RETRO TERMINAL' :
-             newRoomData.theme.toUpperCase() === 'WASTELAND' ? 'WASTELAND STEEL' :
-             'COSMIC ORBIT'
+      max: newRoomData.selectedMode === '4v4' ? 8 : newRoomData.selectedMode === '100-royale' ? 100 : 2,
+      locked: Boolean(newRoomData.roomPassword && newRoomData.roomPassword.length > 0),
+      theme: (newRoomData.selectedMap || 'SANHOK').toUpperCase()
     };
 
     setRooms(prev => [newRoom, ...prev]);
-    triggerAlert('success', `SQUAD ROOM "${newRoom.name}" SUCCESSFULLY COMPILED & REGISTERED!`);
+    triggerAlert('success', `TACTICAL ROOM #${roomId} REGISTERED! (1 ROOM CARD CONSUMED)`);
   };
 
   const handleJoinRoom = (room) => {

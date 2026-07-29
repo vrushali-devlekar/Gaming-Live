@@ -18,7 +18,7 @@ export default function Stream() {
         <Header />
 
         {/* Dash Grid Dashboard Layout */}
-        <main className="p-6 flex-1 grid grid-cols-1 xl:grid-cols-4 gap-6 max-w-[1600px] mx-auto w-full">
+        <main className="p-6 pb-20 md:pb-6 flex-1 grid grid-cols-1 xl:grid-cols-4 gap-6 max-w-[1600px] mx-auto w-full">
           
           {/* Main Video & Content Column */}
           <section className="xl:col-span-3 flex flex-col gap-6">

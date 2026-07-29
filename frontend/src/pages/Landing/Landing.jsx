@@ -64,7 +64,7 @@ export default function Landing() {
           </div>
         </div>
 
-        <div className="flex items-center gap-6 text-[10px] font-mono text-gray-500">
+        <div className="hidden sm:flex items-center gap-6 text-[10px] font-mono text-gray-500">
           <div className="flex items-center gap-1.5">
             <Wifi size={12} className="text-green-500 animate-pulse" />
             <span>LATENCY: 12ms</span>
@@ -119,7 +119,7 @@ export default function Landing() {
             </div>
             <div>
               <h3 className="font-military text-lg text-white font-bold leading-tight">3D HOLOGRAM AVATAR</h3>
-              <p className="text-[10px] text-gray-400 font-mono leading-relaxed mt-2 h-14">
+              <p className="text-[10px] text-gray-400 font-mono leading-relaxed mt-2 h-auto md:h-14">
                 Procedurally rendered 3D hologram player matching the iconic BGMI White Mummy outfit, spiky Level 3 helmet, and Glacier M416 skin.
               </p>
             </div>
@@ -133,7 +133,7 @@ export default function Landing() {
             </div>
             <div>
               <h3 className="font-military text-lg text-white font-bold leading-tight">COLLABORATIVE ARENA</h3>
-              <p className="text-[10px] text-gray-400 font-mono leading-relaxed mt-2 h-14">
+              <p className="text-[10px] text-gray-400 font-mono leading-relaxed mt-2 h-auto md:h-14">
                 Real-time collaborative duels. Monitor cursor grids, test case runs, and track squad mates HP compiler logs.
               </p>
             </div>
@@ -147,7 +147,7 @@ export default function Landing() {
             </div>
             <div>
               <h3 className="font-military text-lg text-white font-bold leading-tight">DYNAMIC MAP THEMES</h3>
-              <p className="text-[10px] text-gray-400 font-mono leading-relaxed mt-2 h-14">
+              <p className="text-[10px] text-gray-400 font-mono leading-relaxed mt-2 h-auto md:h-14">
                 Switch environments dynamically, pulling custom theme properties for Erangel Forest, Miramar Desert, Vikendi Blizzard, or Cyberpunk Neon.
               </p>
             </div>
