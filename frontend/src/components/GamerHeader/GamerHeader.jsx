@@ -1,15 +1,17 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Settings, Shield, Zap, Coins, LogOut } from 'lucide-react';
 import LevelBadge from '../../ui/LevelBadge/LevelBadge';
 import ProgressBar from '../../ui/ProgressBar/ProgressBar';
 import './GamerHeader.css';
 
 export default function GamerHeader({ onOpenSettings, currentXP = 2450, maxXP = 5000, username = "TACTICAL_DEVEL" }) {
+  const navigate = useNavigate();
   return (
     <header className="gamer-header bg-brushed-steel">
       <div className="header-left">
         {/* Player Profile Section */}
-        <div className="player-profile">
+        <div className="player-profile player-profile-clickable" onClick={() => navigate('/analytics')}>
           <div className="avatar-wrapper">
             <div className="avatar-border">
               {/* Sleek SVG Hacker/Soldier icon as mini-avatar */}

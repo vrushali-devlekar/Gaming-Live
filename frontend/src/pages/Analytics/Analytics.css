@@ -1,0 +1,137 @@
+/* BGMI-Style Player Profile & Analytics Stylesheet */
+
+.analytics-page {
+  background-color: var(--theme-container-bg);
+  min-height: 100vh;
+  width: 100%;
+  color: #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow-x: hidden;
+  font-family: 'Outfit', sans-serif;
+  user-select: none;
+}
+
+/* Custom Grid Matrix Overlay */
+.analytics-grid-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: 
+    linear-gradient(to right, var(--theme-grid-color) 1.2px, transparent 1.2px),
+    linear-gradient(to bottom, var(--theme-grid-color) 1.2px, transparent 1.2px);
+  background-size: 30px 30px;
+  background-position: center;
+  opacity: 0.85;
+  z-index: 1;
+}
+
+/* Subtle scanlines overlay */
+.analytics-scanlines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    rgba(18, 19, 26, 0) 50%, 
+    rgba(0, 0, 0, 0.22) 50%
+  );
+  background-size: 100% 4px;
+  opacity: 0.35;
+  z-index: 2;
+}
+
+/* Header layout */
+.analytics-header {
+  background-color: var(--theme-panel-bg);
+  border-bottom: 1px solid var(--theme-panel-border);
+  position: relative;
+  z-index: 10;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+}
+
+.back-btn:hover {
+  background-color: rgba(250, 204, 21, 0.1);
+  color: var(--theme-accent-color);
+  box-shadow: 0 0 10px rgba(250, 204, 21, 0.15);
+}
+
+/* Sidebar Avatar Glow */
+.avatar-container-lg {
+  position: relative;
+  width: 90px;
+  height: 90px;
+}
+
+.avatar-frame-glow {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  padding: 3px;
+  background: linear-gradient(135deg, var(--theme-accent-color) 0%, #151722 100%);
+  box-shadow: 0 0 15px var(--theme-accent-glow);
+  position: relative;
+}
+
+.level-badge-lg {
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #0c0d12;
+  color: var(--theme-accent-color);
+  border: 1.5px solid var(--theme-accent-color);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 10px;
+  clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px);
+  text-shadow: 0 0 6px var(--theme-accent-glow);
+  white-space: nowrap;
+}
+
+/* Tab button headers */
+.tab-btn {
+  position: relative;
+  letter-spacing: 0.1em;
+  padding: 10px 24px;
+  cursor: pointer;
+}
+
+.tab-btn.active-tab {
+  text-shadow: 0 0 10px var(--theme-accent-glow);
+  background: linear-gradient(to top, var(--theme-accent-glow), transparent);
+}
+
+/* Radar polygon scaling animation */
+@keyframes radarPulse {
+  0%, 100% {
+    fill-opacity: 0.2;
+  }
+  50% {
+    fill-opacity: 0.35;
+  }
+}
+
+.radar-poly-pulse {
+  animation: radarPulse 3s infinite ease-in-out;
+  filter: drop-shadow(0 0 4px var(--theme-accent-glow));
+}
+
+/* Scrollbar customizations */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--theme-panel-border);
+  border-radius: 999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--theme-accent-color);
+}

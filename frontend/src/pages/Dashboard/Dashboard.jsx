@@ -3,13 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { Play, Pause, SkipForward, SkipBack, Music, Disc, Trophy, Shield, Flame, Radio, Volume2, Gamepad2 } from 'lucide-react';
 import GamerHeader from '../../components/GamerHeader/GamerHeader';
 import SettingsModal from '../../components/SettingsModal/SettingsModal';
-import coderSilhouette from '../../assets/coder_silhouette.png';
 import cyberpunkBanner from '../../assets/cyberpunk_banner.png';
+import { themeService } from '../../services/themeService';
+import ThreeCharacter from '../../components/ThreeCharacter/ThreeCharacter';
 import './Dashboard.css';
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [activeTheme, setActiveTheme] = useState(themeService.getCurrentTheme());
   const [isMatching, setIsMatching] = useState(false);
   const [matchTime, setMatchTime] = useState(0);
   const [isPlayingMusic, setIsPlayingMusic] = useState(true);
@@ -192,12 +194,8 @@ export default function Dashboard() {
             )}
 
             {/* Character Stand Graphic */}
-            <div className="relative z-10 flex flex-col items-center justify-center">
-              <img 
-                src={coderSilhouette} 
-                alt="Player Character Silhouette" 
-                className="h-[350px] object-contain drop-shadow-[0_0_20px_rgba(6,182,212,0.15)] filter brightness-95" 
-              />
+            <div className="relative z-10 flex flex-col items-center justify-center w-full max-w-[320px]">
+              <ThreeCharacter activeTheme={activeTheme} />
               
               {/* Stand Platform (clip-hero-stand) */}
               <div className="w-[300px] h-8 bg-gradient-to-b from-[#1b1c28] to-[#0c0d12] border-t border-b border-[#2d3142] clip-hero-stand flex items-center justify-center relative -mt-3 shadow-lg">
@@ -233,7 +231,7 @@ export default function Dashboard() {
                 {isMatching ? 'CANCEL MATCH' : 'START MATCH'}
               </span>
               <span className="text-[10px] tracking-normal font-mono relative z-10 text-black/60 mt-0.5">
-                {isMatching ? 'MATCHMAKING ACTIVE' : 'MODE: CODE DUEL 1V1 | ASIA'}
+                {isMatching ? 'MATCHMAKING ACTIVE' : `MODE: CODE DUEL 1V1 | MAP: ${activeTheme.name}`}
               </span>
             </button>
           </div>
@@ -266,21 +264,27 @@ export default function Dashboard() {
                 {/* Thumbnail */}
                 <div className="h-44 w-full relative overflow-hidden">
                   <img 
-                    src={cyberpunkBanner} 
-                    alt="Map Synthwave Cyberpunk" 
+                    src={activeTheme.image} 
+                    alt={`Map ${activeTheme.name}`} 
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/35 to-transparent"></div>
                   
-                  {/* Subtle Grid Lines inside image */}
-                  <div className="absolute inset-0 bg-[linear-gradient(rgba(6,182,212,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(6,182,212,0.05)_1px,transparent_1px)] bg-[size:10px_10px]"></div>
+                  {/* Dynamic Grid Lines inside image */}
+                  <div 
+                    className="absolute inset-0 bg-[linear-gradient(rgba(6,182,212,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(6,182,212,0.05)_1px,transparent_1px)] bg-[size:10px_10px]"
+                    style={{
+                      backgroundImage: `linear-gradient(to right, ${activeTheme.gridColor} 1px, transparent 1px), linear-gradient(to bottom, ${activeTheme.gridColor} 1px, transparent 1px)`,
+                      backgroundSize: '10px 10px'
+                    }}
+                  ></div>
                 </div>
 
                 {/* Map Name Overlay */}
                 <div className="absolute bottom-3 left-4 right-4">
-                  <span className="block font-military text-[10px] text-cyan-400 tracking-widest font-bold">MAP</span>
-                  <h3 className="font-military text-xl text-white tracking-wide neon-cyan-glow">
-                    SYNTHWAVE CYBERPUNK
+                  <span className="block font-military text-[10px] text-cyan-400 tracking-widest font-bold" style={{ color: activeTheme.accentColor }}>MAP</span>
+                  <h3 className="font-military text-xl text-white tracking-wide" style={{ textShadow: `0 0 10px ${activeTheme.accentGlow}` }}>
+                    {activeTheme.name}
                   </h3>
                 </div>
               </div>
@@ -346,7 +350,10 @@ export default function Dashboard() {
 
             {/* Bottom Actions Selector */}
             <div className="mt-8">
-              <button className="w-full py-2.5 bg-transparent border border-[#2d3142] hover:border-cyan-400 hover:text-cyan-400 font-military text-xs tracking-wider transition-all duration-300 clip-industrial-card flex items-center justify-center gap-2 text-gray-300">
+              <button 
+                onClick={() => navigate('/theme')}
+                className="w-full py-2.5 bg-transparent border border-[#2d3142] hover:border-cyan-400 hover:text-cyan-400 font-military text-xs tracking-wider transition-all duration-300 clip-industrial-card flex items-center justify-center gap-2 text-gray-300 cursor-pointer"
+              >
                 <span>CHANGE ARENA MODE</span>
               </button>
             </div>

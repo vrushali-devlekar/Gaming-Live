@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mic, MicOff, Terminal, Code2, Play, Pause, SkipForward, SkipBack, Disc, Volume2, ShieldAlert, Award, ArrowLeft, RefreshCw, Send, Check } from 'lucide-react';
+import { themeService } from '../../services/themeService';
 import './Arena.css';
 
 export default function Arena() {
   const navigate = useNavigate();
+  const activeTheme = themeService.getCurrentTheme();
 
   // Simulated squad state
   const [squad, setSquad] = useState([
@@ -193,7 +195,7 @@ export default function Arena() {
       <header className="relative z-10 bg-iron-gray border-b border-[#2d3142] px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button 
-            onClick={() => navigate('/')} 
+            onClick={() => navigate('/lobby')} 
             className="flex items-center gap-1.5 text-xs font-military text-gray-400 hover:text-white transition-colors border border-gray-800 hover:border-gray-600 px-3 py-1 bg-black/30 rounded"
           >
             <ArrowLeft size={14} />
@@ -209,6 +211,11 @@ export default function Arena() {
         </div>
 
         <div className="bg-black/45 border border-red-950/60 px-4 py-1 flex items-center gap-4 text-xs font-mono text-gray-400">
+          <div>
+            <span className="text-gray-600 mr-1.5">MAP THEME:</span>
+            <span className="font-semibold" style={{ color: activeTheme.accentColor }}>{activeTheme.name}</span>
+          </div>
+          <div className="w-[1px] h-3 bg-gray-800"></div>
           <div>
             <span className="text-gray-600 mr-1.5">SERVER:</span>
             <span className="text-white font-semibold">TOKYO_BATTLE_2</span>
@@ -226,27 +233,27 @@ export default function Arena() {
         
         {/* ================= LEFT COLUMN: SQUAD STATUS ================= */}
         <section className="lg:col-span-1 flex flex-col gap-4 overflow-y-auto custom-scrollbar pr-1">
-          <div className="bg-iron-gray border border-[#2d3142] p-4 flex flex-col justify-between h-full clip-steel-widget relative">
-            <div className="absolute top-0 right-4 w-8 h-[2px] bg-cyan-400"></div>
+          <div className="bg-iron-gray border border-steel-border p-4 flex flex-col justify-between h-full clip-steel-widget relative">
+            <div className="absolute top-0 right-4 w-8 h-[2px]" style={{ backgroundColor: activeTheme.accentColor }}></div>
             
             <div className="flex flex-col gap-4">
-              <div className="flex items-center gap-2 border-b border-[#2d3142]/60 pb-2">
-                <Code2 className="text-cyan-400 w-5 h-5" />
+              <div className="flex items-center gap-2 border-b border-steel-border/60 pb-2">
+                <Code2 className="w-5 h-5" style={{ color: activeTheme.accentColor }} />
                 <h3 className="font-military text-sm text-white tracking-widest">SQUAD DIRECTORY</h3>
               </div>
 
               {squad.map((player) => (
                 <div 
                   key={player.id} 
-                  className={`p-3 bg-black/40 border border-[#1f2230] relative clip-steel-sm transition-all duration-300 ${
-                    player.id === 'ghost' ? 'border-l-4 border-l-[#FACC15]' : ''
+                  className={`p-3 bg-black/40 border border-steel-border/40 relative clip-steel-sm transition-all duration-300 ${
+                    player.id === 'ghost' ? 'border-l-4 border-l-gold' : ''
                   }`}
                 >
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       {/* Mini Avatar dot */}
                       <span className={`w-2 h-2 rounded-full ${
-                        player.id === 'ghost' ? 'bg-[#FACC15]' : player.id === 'viper' ? 'bg-green-500' : 'bg-purple-500'
+                        player.id === 'ghost' ? 'bg-gold' : player.id === 'viper' ? 'bg-green-500' : 'bg-purple-500'
                       }`}></span>
                       <span className="font-military text-sm text-white font-semibold tracking-wide">
                         {player.name} {player.id === 'ghost' && "(YOU)"}
@@ -278,7 +285,7 @@ export default function Arena() {
                   <div>
                     <div className="flex justify-between items-center text-[10px] font-mono text-gray-400 mb-1">
                       <span>COMPILER HEALTH (HP)</span>
-                      <span className="text-[#FACC15] font-semibold">
+                      <span className="text-gold font-semibold">
                         {player.testsPassed} / {player.totalTests} TESTS
                       </span>
                     </div>
@@ -305,9 +312,9 @@ export default function Arena() {
 
         {/* ================= MIDDLE COLUMN: WORKSPACE CODE EDITOR ================= */}
         <section className="lg:col-span-2 flex flex-col min-h-0">
-          <div className="steel-panel border-2 border-[#2d3142] flex-1 flex flex-col clip-steel-widget min-h-0">
+          <div className="steel-panel border-2 border-steel-border flex-1 flex flex-col clip-steel-widget min-h-0">
             {/* Visual Header Skew Tabs */}
-            <div className="flex items-center justify-between bg-black/60 border-b border-[#2d3142] px-4 py-2">
+            <div className="flex items-center justify-between bg-black/60 border-b border-steel-border px-4 py-2">
               <div className="flex items-center gap-2">
                 <div className="flex gap-1.5">
                   <span className="w-3 h-3 rounded-full bg-red-500/60"></span>
@@ -315,8 +322,8 @@ export default function Arena() {
                   <span className="w-3 h-3 rounded-full bg-green-500/60"></span>
                 </div>
                 <div className="h-4 w-[1px] bg-gray-800 mx-2"></div>
-                <div className="flex items-center gap-1.5 px-3 py-1 bg-[#151722] border-t-2 border-t-[#FACC15] text-xs font-mono text-white">
-                  <Code2 size={12} className="text-[#FACC15]" />
+                <div className="flex items-center gap-1.5 px-3 py-1 bg-panel-bg border-t-2 border-t-gold text-xs font-mono text-white">
+                  <Code2 size={12} className="text-gold" />
                   <span>grid_perimeter_secure.js</span>
                 </div>
               </div>
@@ -401,7 +408,7 @@ export default function Arena() {
             </div>
 
             {/* Code status bar details */}
-            <div className="bg-black/60 border-t border-[#2d3142] px-4 py-1.5 text-[10px] font-mono text-gray-500 flex justify-between">
+            <div className="bg-black/60 border-t border-steel-border px-4 py-1.5 text-[10px] font-mono text-gray-500 flex justify-between">
               <div className="flex gap-4">
                 <span>Ln 14, Col 22</span>
                 <span>Spaces: 2</span>
@@ -416,16 +423,16 @@ export default function Arena() {
         <section className="lg:col-span-1 flex flex-col gap-4 overflow-y-auto custom-scrollbar">
           
           {/* TOP BOX: BATTLE MISSION */}
-          <div className="bg-iron-gray border border-[#2d3142] p-4 flex-1 min-h-[220px] flex flex-col clip-steel-widget">
-            <div className="flex items-center gap-2 border-b border-[#2d3142]/60 pb-2 mb-3">
-              <ShieldAlert className="text-[#FACC15] w-4.5 h-4.5 animate-pulse" />
+          <div className="bg-iron-gray border border-steel-border p-4 flex-1 min-h-[220px] flex flex-col clip-steel-widget">
+            <div className="flex items-center gap-2 border-b border-steel-border/60 pb-2 mb-3">
+              <ShieldAlert className="text-gold w-4.5 h-4.5 animate-pulse" />
               <h3 className="font-military text-sm text-white tracking-widest">BATTLE MISSION</h3>
             </div>
             
             <div className="flex-1 overflow-y-auto custom-scrollbar pr-1 text-xs font-mono leading-relaxed text-gray-300">
               <p className="text-cyan-400 font-bold mb-2">OBJECTIVE: ESCAPE SCANNERS</p>
               <p className="mb-3">
-                Intrusion alerts have shut down normal output lines. Write an algorithm that takes a <span className="text-[#FACC15]">grid</span> coordinate grid, finding the shortest secure path from the top-left to bottom-right corner.
+                Intrusion alerts have shut down normal output lines. Write an algorithm that takes a <span className="text-gold">grid</span> coordinate grid, finding the shortest secure path from the top-left to bottom-right corner.
               </p>
               <p className="mb-3">
                 Your path MUST NOT intersect with coordinates marked as <span className="text-red-500">"DETECTOR"</span>. Return an array of coordinates representing the secure path, or <span className="text-red-500">null</span> if no path exists.
@@ -437,8 +444,8 @@ export default function Arena() {
           </div>
 
           {/* BOTTOM BOX: COMPILATION TERMINAL */}
-          <div className="bg-iron-gray border border-[#2d3142] p-4 h-64 flex flex-col clip-steel-widget">
-            <div className="flex items-center justify-between border-b border-[#2d3142]/60 pb-2 mb-3">
+          <div className="bg-iron-gray border border-steel-border p-4 h-64 flex flex-col clip-steel-widget">
+            <div className="flex items-center justify-between border-b border-steel-border/60 pb-2 mb-3">
               <div className="flex items-center gap-2">
                 <Terminal className="text-green-500 w-4.5 h-4.5" />
                 <h3 className="font-military text-sm text-white tracking-widest">COMPILER TERMINAL</h3>
@@ -464,7 +471,7 @@ export default function Arena() {
                   key={index} 
                   className={`mb-1.5 ${
                     log.type === 'success' ? 'text-green-400' :
-                    log.type === 'warning' ? 'text-[#FACC15]' :
+                    log.type === 'warning' ? 'text-gold' :
                     'text-gray-400'
                   }`}
                 >
@@ -482,7 +489,7 @@ export default function Arena() {
       </main>
 
       {/* ================= BOTTOM HUD: TIMER, SPOTIFY, SUBMIT ================= */}
-      <footer className="relative z-10 bg-iron-gray border-t border-[#2d3142] px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <footer className="relative z-10 bg-iron-gray border-t border-steel-border px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
         
         {/* Count Down Timer */}
         <div className="flex items-center gap-3">
@@ -508,7 +515,7 @@ export default function Arena() {
               <span>1:34 / 2:45</span>
             </div>
             <p className="font-military text-xs text-white truncate tracking-wide">
-              SYNTHWAVE CYBERPUNK LOBBY
+              {activeTheme.musicTitle}
             </p>
             {/* Playback progress bar */}
             <div className="w-full h-[2px] bg-gray-800 mt-1 rounded">
@@ -542,7 +549,7 @@ export default function Arena() {
           <button
             onClick={handleSubmitCode}
             disabled={isSubmitting}
-            className="w-full sm:w-auto py-3 px-8 bg-[#FACC15] hover:bg-[#ebd510] text-black font-military font-black text-xl tracking-wider clip-angular-btn start-match-glow flex items-center justify-center gap-2 cursor-pointer transition-all duration-300"
+            className="w-full sm:w-auto py-3 px-8 bg-gold hover:bg-gold-hover text-black font-military font-black text-xl tracking-wider clip-angular-btn start-match-glow flex items-center justify-center gap-2 cursor-pointer transition-all duration-300"
           >
             {isSubmitting ? (
               <>
@@ -563,12 +570,12 @@ export default function Arena() {
       {/* Simulated Victory Overlay Modal */}
       {submissionCompleted && (
         <div className="absolute inset-0 bg-black/90 backdrop-blur-sm z-50 flex flex-col items-center justify-center p-6 animate-fade-in">
-          <div className="max-w-md w-full bg-iron-gray border-2 border-[#FACC15] p-8 text-center clip-steel-widget shadow-[0_0_50px_rgba(250,204,21,0.3)]">
-            <div className="w-16 h-16 bg-[#FACC15] text-black rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
+          <div className="max-w-md w-full bg-iron-gray border-2 border-gold p-8 text-center clip-steel-widget shadow-[0_0_50px_rgba(250,204,21,0.3)]">
+            <div className="w-16 h-16 bg-gold text-black rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
               <Award size={36} />
             </div>
 
-            <h2 className="font-military text-4xl text-[#FACC15] font-black tracking-widest mb-2">
+            <h2 className="font-military text-4xl text-gold font-black tracking-widest mb-2">
               VICTORY ROYALE!
             </h2>
             <h3 className="font-military text-xl text-white tracking-widest mb-6">
@@ -586,14 +593,14 @@ export default function Arena() {
               </div>
               <div className="flex justify-between py-1">
                 <span>TOTAL RATINGS GAIN:</span>
-                <span className="text-[#FACC15] font-bold">+45 BP CODES</span>
+                <span className="text-gold font-bold">+45 BP CODES</span>
               </div>
             </div>
 
             <button
               onClick={() => {
                 setSubmissionCompleted(false);
-                navigate('/');
+                navigate('/lobby');
               }}
               className="py-3 px-8 bg-cyan-500 hover:bg-cyan-400 text-black font-military font-bold text-lg tracking-wider clip-steel-sm w-full transition-colors flex items-center justify-center gap-2"
             >

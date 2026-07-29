@@ -230,3 +230,23 @@
   background-color: rgba(255, 51, 68, 0.05);
   box-shadow: 0 0 8px rgba(255, 51, 68, 0.15);
 }
+
+/* Hover effect for clickable player profile */
+.player-profile-clickable {
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+}
+
+.player-profile-clickable:hover {
+  transform: scale(1.02);
+}
+
+.player-profile-clickable:hover .player-name {
+  color: var(--color-gold);
+  text-shadow: 0 0 8px var(--color-gold-glow);
+}
+
+.player-profile-clickable:hover .avatar-border {
+  box-shadow: 0 0 10px var(--color-gold-glow);
+  background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-hover) 100%);
+}

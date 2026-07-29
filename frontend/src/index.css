@@ -1,34 +1,48 @@
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
+:root {
+  --theme-accent-color: #00f0ff;
+  --theme-accent-hover: #00b8c4;
+  --theme-accent-glow: rgba(0, 240, 255, 0.45);
+  --theme-editor-bg: #0b0c10;
+  --theme-container-bg: #0c0d12;
+  --theme-secondary-color: #ff007f;
+  --theme-secondary-glow: rgba(255, 0, 127, 0.45);
+  --theme-grid-color: rgba(6, 182, 212, 0.04);
+  --theme-panel-bg: #151722;
+  --theme-panel-border: #2d3142;
+  --theme-text-color: #e2e8f0;
+}
+
 @theme {
   --font-sans: 'Outfit', sans-serif;
   --font-military: 'Bebas Neue', sans-serif;
   --font-mono: 'Space Grotesk', monospace;
   
   /* BGMI Tactical / Military Theme Palette */
-  --color-dark-bg: #0c0d12;
-  --color-lobby-bg: #12131a;
-  --color-card-bg: #171822;
-  --color-panel-bg: #1b1c28;
-  --color-gold: #FFC107;
-  --color-gold-hover: #FFD54F;
-  --color-gold-glow: rgba(255, 193, 7, 0.35);
-  --color-steel-light: #252836;
-  --color-steel-dark: #1b1d28;
-  --color-steel-border: #35394b;
-  --color-hud-green: #39ff14;
+  --color-dark-bg: var(--theme-container-bg);
+  --color-lobby-bg: var(--theme-container-bg);
+  --color-card-bg: var(--theme-panel-bg);
+  --color-panel-bg: var(--theme-panel-bg);
+  --color-gold: var(--theme-accent-color);
+  --color-gold-hover: var(--theme-accent-hover);
+  --color-gold-glow: var(--theme-accent-glow);
+  --color-steel-light: var(--theme-panel-bg);
+  --color-steel-dark: var(--theme-editor-bg);
+  --color-steel-border: var(--theme-panel-border);
+  --color-hud-green: var(--theme-secondary-color);
   --color-hud-red: #ff3344;
   
   /* Legacy/Existing variables */
-  --color-accent-pink: #d926a9;
+  --color-accent-pink: var(--theme-secondary-color);
   --color-accent-purple: #6d28d9;
-  --color-neon-pink: #ff007f;
+  --color-neon-pink: var(--theme-secondary-color);
   --color-neon-purple: #8a2be2;
-  --color-neon-cyan: #00f0ff;
-  --color-neon-green: #39ff14;
+  --color-neon-cyan: var(--theme-accent-color);
+  --color-neon-green: var(--theme-secondary-color);
   --color-neon-blue: #0070f3;
-  --color-neon-border: rgba(139, 92, 246, 0.15);
+  --color-neon-border: var(--theme-panel-border);
 }
 
 @layer base {

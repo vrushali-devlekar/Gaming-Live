@@ -1,0 +1,158 @@
+/* BGMI-Style Arena Map & Theme Selector Stylesheet */
+
+.theme-selector-page {
+  background-color: var(--theme-container-bg);
+  min-height: 100vh;
+  width: 100%;
+  color: #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow-x: hidden;
+  font-family: 'Outfit', sans-serif;
+  user-select: none;
+}
+
+/* Custom Grid Matrix Background overlay */
+.theme-grid-matrix-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: 
+    linear-gradient(to right, var(--theme-grid-color) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--theme-grid-color) 1px, transparent 1px);
+  background-size: 25px 25px;
+  background-position: center;
+  opacity: 0.8;
+  z-index: 1;
+}
+
+/* Subtle scanlines overlay */
+.theme-scanline-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    rgba(18, 19, 26, 0) 50%, 
+    rgba(0, 0, 0, 0.2) 50%
+  );
+  background-size: 100% 4px;
+  opacity: 0.35;
+  z-index: 2;
+}
+
+/* Header layout */
+.theme-header {
+  background-color: var(--theme-panel-bg);
+  border-bottom: 1px solid var(--theme-panel-border);
+  position: relative;
+  z-index: 10;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+}
+
+.back-btn:hover {
+  background-color: rgba(6, 182, 212, 0.1);
+  color: var(--theme-accent-color);
+  box-shadow: 0 0 10px rgba(6, 182, 212, 0.15);
+}
+
+/* Tab styling like BGMI */
+.tab-btn {
+  position: relative;
+  letter-spacing: 0.1em;
+  padding: 10px 24px;
+  cursor: pointer;
+}
+
+.tab-btn.active-tab {
+  text-shadow: 0 0 10px rgba(250, 204, 21, 0.35);
+  background: linear-gradient(to top, rgba(250, 204, 21, 0.05), transparent);
+}
+
+/* Theme selector cards */
+.theme-card {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.theme-card:hover {
+  transform: translateY(-3px);
+}
+
+.theme-card:hover .card-image-scale {
+  transform: scale(1.06);
+}
+
+.card-image-scale {
+  transition: transform 0.5s ease;
+}
+
+.card-thumb-container {
+  border-bottom: 1px solid var(--theme-panel-border);
+}
+
+/* Download button */
+.download-btn:hover {
+  box-shadow: 0 0 12px rgba(6, 182, 212, 0.4);
+}
+
+/* Scrollbar styling */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--theme-panel-border);
+  border-radius: 999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--theme-accent-color);
+}
+
+/* Sync overlay modal */
+.sync-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.sync-modal-container {
+  background-color: var(--theme-panel-bg);
+  border: 2px solid var(--theme-accent-color);
+  clip-path: polygon(
+    0 0,
+    calc(100% - 20px) 0,
+    100% 20px,
+    100% 100%,
+    20px 100%,
+    0 calc(100% - 20px)
+  );
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes spin-slow {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.animate-spin {
+  animation: spin-slow 2s infinite linear;
+}

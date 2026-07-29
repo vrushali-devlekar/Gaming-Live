@@ -1,0 +1,17 @@
+.three-character-viewport {
+  width: 100%;
+  height: 350px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  /* Filter drop-shadow maps to active theme glows */
+  filter: drop-shadow(0 0 20px var(--theme-accent-glow));
+  transition: filter 0.3s ease;
+}
+
+.three-character-viewport canvas {
+  display: block;
+  outline: none;
+}
