@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Terminal, Swords, RefreshCw, Cpu, ShieldAlert, Wifi, Users, Server } from 'lucide-react';
 import { themeService } from '../../services/themeService';
+import { useAuth } from '../../context/AuthContext';
 import './Landing.css';
 
 export default function Landing() {
   const navigate = useNavigate();
+  const { isLoggedIn } = useAuth();
   const [isEntering, setIsEntering] = useState(false);
   const [syncStep, setSyncStep] = useState(0);
   const activeTheme = themeService.getCurrentTheme();
@@ -32,6 +34,13 @@ export default function Landing() {
   const handleEnterLobby = () => {
     if (isEntering) return;
     playBeep(900, 0.25, 'triangle');
+
+    // First check if user is logged in
+    if (!isLoggedIn) {
+      navigate('/login');
+      return;
+    }
+
     setIsEntering(true);
     setSyncStep(1);
 

@@ -1,29 +1,67 @@
+require('dotenv').config();
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
+const mongoose = require('mongoose');
+const passport = require('passport');
 const ws = require('ws');
 const url = require('url');
 
+// Passport configuration
+require('./config/passport');
+
+// Auth routes
+const authRoutes = require('./routes/authRoutes');
+
 const app = express();
-app.use(cors());
+
+// Express middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+
+// CORS configuration with credentials support
+const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+app.use(
+  cors({
+    origin: [frontendUrl, 'http://localhost:5173', 'http://127.0.0.1:5173'],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+  })
+);
+
+// Initialize Passport.js
+app.use(passport.initialize());
+
+// MongoDB Database Connection
+const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/codebattle';
+mongoose
+  .connect(mongoUri)
+  .then(() => console.log('MongoDB connected successfully for CodeBattle backend.'))
+  .catch((err) => console.warn('MongoDB connection warning (running in offline/mock mode):', err.message));
+
+// Mount Authentication Routes
+app.use('/api/auth', authRoutes);
+
+// Base route for health check
+app.get('/', (req, res) => {
+  res.send('CodeBattle Real-Time Engine & Auth Server is online.');
+});
 
 const server = http.createServer(app);
 
 // Keep existing Socket.io setup for Live Chat page compatibility
 const io = new Server(server, {
   cors: {
-    origin: '*',
+    origin: frontendUrl,
+    credentials: true,
     methods: ['GET', 'POST']
   }
 });
 
 const PORT = process.env.PORT || 3001;
-
-// Base route for health check
-app.get('/', (req, res) => {
-  res.send('Orizon Gaming Dashboard Socket Server is running.');
-});
 
 // Live Chat mock messages array (Socket.io)
 const randomMessages = [
@@ -71,9 +109,6 @@ setInterval(() => {
 // =========================================================================
 
 const wss = new ws.Server({ noServer: true });
-
-// Active Rooms State Map:
-// roomId -> Map(userId -> { ws, name, color, cursor: {line, ch}, hp, testsPassed })
 const rooms = new Map();
 
 wss.on('connection', (socket, request) => {
@@ -101,7 +136,6 @@ wss.on('connection', (socket, request) => {
 
           const roomMembers = rooms.get(roomId);
           
-          // Limit to 3-player squads
           if (roomMembers.size >= 3 && !roomMembers.has(userId)) {
             socket.send(JSON.stringify({
               type: 'ROOM_FULL',
@@ -111,7 +145,6 @@ wss.on('connection', (socket, request) => {
             return;
           }
 
-          // Register member state
           roomMembers.set(userId, {
             ws: socket,
             name,
@@ -121,7 +154,6 @@ wss.on('connection', (socket, request) => {
             testsPassed: 10
           });
 
-          // Broadcast updated squad state to all players in the room
           broadcastSquadState(roomId);
           break;
         }
@@ -130,7 +162,6 @@ wss.on('connection', (socket, request) => {
           if (!currentRoomId || !currentUserId) return;
           const { code } = payload;
           
-          // Broadcast raw code change to other members
           broadcastToRoomOthers(currentRoomId, currentUserId, {
             type: 'CODE_UPDATE',
             payload: { userId: currentUserId, code }
@@ -142,13 +173,11 @@ wss.on('connection', (socket, request) => {
           if (!currentRoomId || !currentUserId) return;
           const { line, ch } = payload;
 
-          // Update saved member cursor state
           const roomMembers = rooms.get(currentRoomId);
           if (roomMembers && roomMembers.has(currentUserId)) {
             roomMembers.get(currentUserId).cursor = { line, ch };
           }
 
-          // Broadcast to other members
           broadcastToRoomOthers(currentRoomId, currentUserId, {
             type: 'CURSOR_UPDATE',
             payload: { userId: currentUserId, cursor: { line, ch } }
@@ -181,7 +210,6 @@ wss.on('connection', (socket, request) => {
   });
 });
 
-// Helper to broadcast squad status list
 function broadcastSquadState(roomId) {
   const roomMembers = rooms.get(roomId);
   if (!roomMembers) return;
@@ -210,7 +238,6 @@ function broadcastSquadState(roomId) {
   });
 }
 
-// Helper to broadcast to room excluding sender
 function broadcastToRoomOthers(roomId, senderUserId, messageObj) {
   const roomMembers = rooms.get(roomId);
   if (!roomMembers) return;
@@ -223,7 +250,6 @@ function broadcastToRoomOthers(roomId, senderUserId, messageObj) {
   });
 }
 
-// Handle native upgrade events
 server.on('upgrade', (request, socket, head) => {
   const pathname = url.parse(request.url).pathname;
 
@@ -231,12 +257,9 @@ server.on('upgrade', (request, socket, head) => {
     wss.handleUpgrade(request, socket, head, (wsConnection) => {
       wss.emit('connection', wsConnection, request);
     });
-  } else {
-    // Socket.io upgrade handler will process other paths
   }
 });
 
-
 server.listen(PORT, () => {
-  console.log(`Socket & WebSocket Server is listening on port ${PORT}`);
+  console.log(`CodeBattle Auth & Real-Time Server listening on port ${PORT}`);
 });

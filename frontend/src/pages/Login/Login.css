@@ -1,0 +1,25 @@
+/* Login Page Cyberpunk Styling */
+.login-page {
+  font-family: "Space Grotesk", sans-serif;
+}
+
+.login-grid-bg {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(to right, rgba(0, 255, 204, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 255, 204, 0.04) 1px, transparent 1px);
+  background-size: 24px 24px;
+  pointer-events: none;
+}
+
+.login-scanlines {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%, 
+    rgba(0, 0, 0, 0.25) 50%
+  );
+  background-size: 100% 4px;
+  pointer-events: none;
+}

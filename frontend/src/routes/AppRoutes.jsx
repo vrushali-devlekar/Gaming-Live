@@ -1,5 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from '../context/AuthContext';
+import ProtectedRoute from './ProtectedRoute';
 import Dashboard from '../pages/Dashboard/Dashboard';
 import Stream from '../pages/Stream/Stream';
 import RoomLobby from '../pages/RoomLobby/RoomLobby';
@@ -7,47 +9,95 @@ import Arena from '../pages/Arena/Arena';
 import ThemeSelector from '../pages/ThemeSelector/ThemeSelector';
 import Analytics from '../pages/Analytics/Analytics';
 import Landing from '../pages/Landing/Landing';
+import Login from '../pages/Login/Login';
 import Inventory from '../pages/Inventory/Inventory';
 import Result from '../pages/Result/Result';
 import Clan from '../pages/Clan/Clan';
 
 export default function AppRoutes() {
   return (
-    <Router>
-      <Routes>
-        {/* Landing entryway page */}
-        <Route path="/" element={<Landing />} />
+    <AuthProvider>
+      <Router>
+        <Routes>
+          {/* Landing entryway page */}
+          <Route path="/" element={<Landing />} />
 
-        {/* Gaming theme dashboard lobby */}
-        <Route path="/lobby" element={<Dashboard />} />
-        
-        {/* Custom Room Lobby page */}
-        <Route path="/rooms" element={<RoomLobby />} />
-        
-        {/* Live stream section */}
-        <Route path="/stream" element={<Stream />} />
+          {/* Authentication Login page */}
+          <Route path="/login" element={<Login />} />
 
-        {/* Theme selection section */}
-        <Route path="/theme" element={<ThemeSelector />} />
+          {/* Protected Gaming theme dashboard lobby */}
+          <Route 
+            path="/lobby" 
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } 
+          />
+          
+          {/* Protected Custom Room Lobby page */}
+          <Route 
+            path="/rooms" 
+            element={
+              <ProtectedRoute>
+                <RoomLobby />
+              </ProtectedRoute>
+            } 
+          />
+          
+          {/* Live stream section */}
+          <Route path="/stream" element={<Stream />} />
 
-        {/* Player Analytics section */}
-        <Route path="/analytics" element={<Analytics />} />
+          {/* Theme selection section */}
+          <Route path="/theme" element={<ThemeSelector />} />
 
-        {/* Collaborative Code Arena */}
-        <Route path="/arena" element={<Arena />} />
+          {/* Player Analytics section */}
+          <Route path="/analytics" element={<Analytics />} />
 
-        {/* Inventory & Locker Room */}
-        <Route path="/inventory" element={<Inventory />} />
+          {/* Protected Collaborative Code Arena */}
+          <Route 
+            path="/arena" 
+            element={
+              <ProtectedRoute>
+                <Arena />
+              </ProtectedRoute>
+            } 
+          />
 
-        {/* Match Settlement / Victory Result Screen */}
-        <Route path="/result" element={<Result />} />
+          {/* Protected Inventory & Locker Room */}
+          <Route 
+            path="/inventory" 
+            element={
+              <ProtectedRoute>
+                <Inventory />
+              </ProtectedRoute>
+            } 
+          />
 
-        {/* Clan Operations */}
-        <Route path="/clan" element={<Clan />} />
-        
-        {/* Redirect unknown routes */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Router>
+          {/* Protected Match Settlement / Victory Result Screen */}
+          <Route 
+            path="/result" 
+            element={
+              <ProtectedRoute>
+                <Result />
+              </ProtectedRoute>
+            } 
+          />
+
+          {/* Protected Clan Operations */}
+          <Route 
+            path="/clan" 
+            element={
+              <ProtectedRoute>
+                <Clan />
+              </ProtectedRoute>
+            } 
+          />
+          
+          {/* Redirect unknown routes */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
