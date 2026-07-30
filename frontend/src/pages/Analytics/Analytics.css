@@ -69,7 +69,7 @@
   border-radius: 50%;
   padding: 3px;
   background: linear-gradient(135deg, var(--theme-accent-color) 0%, #151722 100%);
-  box-shadow: 0 0 15px var(--theme-accent-glow);
+  box-shadow: 0 0 20px rgba(0, 255, 204, 0.4);
   position: relative;
 }
 
@@ -141,19 +141,46 @@
   display: flex;
   gap: 8px;
   overflow-x: auto;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE/Edge */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .tab-list-container::-webkit-scrollbar {
-  display: none; /* Chrome/Safari */
+  display: none;
 }
 
 .tab-list-container .tab-btn {
   white-space: nowrap;
 }
 
-/* ================= RESPONSIVE DESIGN ================= */
+/* GITHUB ARSENAL REPO CARDS */
+.repo-card-industrial {
+  background: rgba(12, 14, 20, 0.75);
+  border: 1px solid rgba(0, 255, 204, 0.25);
+  transition: all 0.25s ease;
+  position: relative;
+}
+
+.repo-card-industrial:hover {
+  border-color: #00ffcc;
+  box-shadow: 0 0 20px rgba(0, 255, 204, 0.2);
+  transform: translateY(-2px);
+}
+
+.lang-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.lang-dot-js { background-color: #f1e05a; }
+.lang-dot-py { background-color: #3572A5; }
+.lang-dot-cpp { background-color: #f34b7d; }
+.lang-dot-ts { background-color: #3178c6; }
+.lang-dot-html { background-color: #e34c26; }
+
+/* Responsive Design */
 @media (max-width: 1024px) {
   .analytics-page {
     overflow-y: auto;
@@ -161,12 +188,11 @@
   }
   
   .analytics-main {
-    grid-template-cols: 1fr;
+    grid-template-columns: 1fr;
     height: auto;
     min-height: 0;
   }
   
-  /* Disable inner scroll lock on mobile for natural page scrolling */
   .analytics-main .custom-scrollbar {
     max-height: none !important;
     overflow-y: visible !important;
@@ -181,6 +207,6 @@
   }
   
   .analytics-header div:last-child {
-    display: none; /* Hide secure ID to save space */
+    display: none;
   }
 }
