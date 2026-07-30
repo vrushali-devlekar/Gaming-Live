@@ -12,8 +12,15 @@ const url = require('url');
 // Passport configuration
 require('./config/passport');
 
-// Auth routes
+// Auth & REST routes
 const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes');
+const leaderboardRoutes = require('./routes/leaderboardRoutes');
+const problemRoutes = require('./routes/problemRoutes');
+const inventoryRoutes = require('./routes/inventoryRoutes');
+
+// Socket controllers
+const initBattleSocket = require('./sockets/battleSocket');
 
 const app = express();
 
@@ -42,40 +49,47 @@ mongoose
   .then(() => console.log('MongoDB connected successfully for CodeBattle backend.'))
   .catch((err) => console.warn('MongoDB connection warning (running in offline/mock mode):', err.message));
 
-// Mount Authentication Routes
+// Mount REST API Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/user', userRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/leaderboard', leaderboardRoutes);
+app.use('/api/problems', problemRoutes);
+app.use('/api/inventory', inventoryRoutes);
 
 // Base route for health check
 app.get('/', (req, res) => {
-  res.send('CodeBattle Real-Time Engine & Auth Server is online.');
+  res.json({
+    status: 'ONLINE',
+    service: 'CodeBattle Real-Time Engine & REST API Server',
+    version: '4.2.0',
+    timestamp: new Date()
+  });
 });
 
 const server = http.createServer(app);
 
-// Keep existing Socket.io setup for Live Chat page compatibility
+// Initialize Socket.io Server
 const io = new Server(server, {
   cors: {
-    origin: frontendUrl,
+    origin: [frontendUrl, 'http://localhost:5173', 'http://127.0.0.1:5173'],
     credentials: true,
     methods: ['GET', 'POST']
   }
 });
 
-const PORT = process.env.PORT || 3001;
+// Initialize Socket.io Battle Real-Time Controller
+initBattleSocket(io);
 
-// Live Chat mock messages array (Socket.io)
+// Live Chat mock stream (for backward compatibility)
 const randomMessages = [
-  { sender: 'X_Gamer_X', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=60', text: 'Insane drive skills! 🔥' },
-  { sender: 'LizzieFan', avatar: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=100&auto=format&fit=crop&q=60', text: 'Love the neon graphics on the bridge' },
-  { sender: 'ShadowPro', avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=100&auto=format&fit=crop&q=60', text: 'Squad up after this?' },
-  { sender: 'Cyber_Knight', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=60', text: 'Poggers! 😮' },
-  { sender: 'VibeCheck99', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&auto=format&fit=crop&q=60', text: 'Which cyberware build is this?' },
-  { sender: 'Anderson', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=60', text: 'Let\'s goooo!!' }
+  { sender: 'X_Gamer_X', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=X_Gamer_X', text: 'Insane drive skills! 🔥' },
+  { sender: 'LizzieFan', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=LizzieFan', text: 'Love the neon graphics on the bridge' },
+  { sender: 'ShadowPro', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=ShadowPro', text: 'Squad up after this match?' },
+  { sender: 'Cyber_Knight', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=Cyber_Knight', text: 'Chicken dinner incoming! 🐔' }
 ];
 
 io.on('connection', (socket) => {
-  console.log(`Socket.io client connected: ${socket.id}`);
-
   socket.on('send_message', (data) => {
     io.emit('new_message', {
       id: Date.now() + Math.random(),
@@ -84,13 +98,8 @@ io.on('connection', (socket) => {
       text: data.text
     });
   });
-
-  socket.on('disconnect', () => {
-    console.log(`Socket.io client disconnected: ${socket.id}`);
-  });
 });
 
-// Periodic chat stream updates
 setInterval(() => {
   if (io.engine.clientsCount > 0) {
     const randomMsg = randomMessages[Math.floor(Math.random() * randomMessages.length)];
@@ -101,21 +110,17 @@ setInterval(() => {
       text: randomMsg.text
     });
   }
-}, 4000);
-
+}, 5000);
 
 // =========================================================================
 // NATIVE WEBSOCKET SERVER FOR COLLABORATIVE SQUAD SYNCING
 // =========================================================================
-
 const wss = new ws.Server({ noServer: true });
 const rooms = new Map();
 
 wss.on('connection', (socket, request) => {
   let currentRoomId = null;
   let currentUserId = null;
-
-  console.log('Native WS client handshake established.');
 
   socket.on('message', (messageBuffer) => {
     try {
@@ -128,30 +133,18 @@ wss.on('connection', (socket, request) => {
           currentRoomId = roomId;
           currentUserId = userId;
 
-          console.log(`User ${name} (${userId}) joining Room ${roomId}`);
-
           if (!rooms.has(roomId)) {
             rooms.set(roomId, new Map());
           }
 
           const roomMembers = rooms.get(roomId);
-          
-          if (roomMembers.size >= 3 && !roomMembers.has(userId)) {
-            socket.send(JSON.stringify({
-              type: 'ROOM_FULL',
-              payload: { message: 'This squad lobby is currently full (Max 3 players).' }
-            }));
-            socket.close();
-            return;
-          }
-
           roomMembers.set(userId, {
             ws: socket,
             name,
             color: color || '#FACC15',
             cursor: { line: 1, ch: 0 },
             hp: 100,
-            testsPassed: 10
+            testsPassed: 0
           });
 
           broadcastSquadState(roomId);
@@ -160,33 +153,24 @@ wss.on('connection', (socket, request) => {
 
         case 'CODE_UPDATE': {
           if (!currentRoomId || !currentUserId) return;
-          const { code } = payload;
-          
           broadcastToRoomOthers(currentRoomId, currentUserId, {
             type: 'CODE_UPDATE',
-            payload: { userId: currentUserId, code }
+            payload: { userId: currentUserId, code: payload.code }
           });
           break;
         }
 
         case 'CURSOR_UPDATE': {
           if (!currentRoomId || !currentUserId) return;
-          const { line, ch } = payload;
-
-          const roomMembers = rooms.get(currentRoomId);
-          if (roomMembers && roomMembers.has(currentUserId)) {
-            roomMembers.get(currentUserId).cursor = { line, ch };
-          }
-
           broadcastToRoomOthers(currentRoomId, currentUserId, {
             type: 'CURSOR_UPDATE',
-            payload: { userId: currentUserId, cursor: { line, ch } }
+            payload: { userId: currentUserId, cursor: payload }
           });
           break;
         }
 
         default:
-          console.warn(`Unhandled WS message type: ${type}`);
+          break;
       }
     } catch (err) {
       console.error('Failed to parse WS message packet:', err);
@@ -194,14 +178,12 @@ wss.on('connection', (socket, request) => {
   });
 
   socket.on('close', () => {
-    console.log(`WS Client disconnected: ${currentUserId || 'unknown'}`);
     if (currentRoomId && currentUserId) {
       const roomMembers = rooms.get(currentRoomId);
       if (roomMembers) {
         roomMembers.delete(currentUserId);
         if (roomMembers.size === 0) {
           rooms.delete(currentRoomId);
-          console.log(`Room ${currentRoomId} is empty. Disposing buffers.`);
         } else {
           broadcastSquadState(currentRoomId);
         }
@@ -252,7 +234,6 @@ function broadcastToRoomOthers(roomId, senderUserId, messageObj) {
 
 server.on('upgrade', (request, socket, head) => {
   const pathname = url.parse(request.url).pathname;
-
   if (pathname === '/ws') {
     wss.handleUpgrade(request, socket, head, (wsConnection) => {
       wss.emit('connection', wsConnection, request);
@@ -260,6 +241,7 @@ server.on('upgrade', (request, socket, head) => {
   }
 });
 
+const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
-  console.log(`CodeBattle Auth & Real-Time Server listening on port ${PORT}`);
+  console.log(`🚀 CodeBattle Express + Socket.io + MongoDB Engine listening on port ${PORT}`);
 });

@@ -45,6 +45,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
             avatar,
             authProvider: 'google',
             providerId,
+            isProfileSetup: false,
             stats: {
               level: 1,
               exp: 0,
@@ -90,6 +91,7 @@ if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
             avatar,
             authProvider: 'github',
             providerId,
+            isProfileSetup: false,
             stats: {
               level: 1,
               exp: 0,

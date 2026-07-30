@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import UsernameSetupModal from '../components/UsernameSetupModal/UsernameSetupModal';
 
 const AuthContext = createContext();
 
@@ -11,7 +12,6 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        // 1. Try checking backend JWT cookie endpoint
         const response = await fetch('http://localhost:3001/api/auth/me', {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }) => {
         console.info("Backend API offline or unreachable, falling back to local session state.");
       }
 
-      // 2. Check local storage session fallback
+      // Check local storage session fallback
       const cachedUser = localStorage.getItem('codebattle_authenticated_user');
       if (cachedUser) {
         try {
@@ -49,6 +49,13 @@ export const AuthProvider = ({ children }) => {
     checkAuthStatus();
   }, []);
 
+  // Update user profile in state and localStorage
+  const updateUserProfile = (updatedUser) => {
+    setUser(updatedUser);
+    setIsLoggedIn(true);
+    localStorage.setItem('codebattle_authenticated_user', JSON.stringify(updatedUser));
+  };
+
   // Quick Guest Login
   const loginAsGuest = (usernameInput) => {
     const guestUser = {
@@ -56,6 +63,7 @@ export const AuthProvider = ({ children }) => {
       email: `${(usernameInput || 'ghost').toLowerCase()}@codebattle.io`,
       avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=GhostCoder',
       authProvider: 'guest',
+      isProfileSetup: true,
       stats: {
         level: 1,
         exp: 250,
@@ -64,9 +72,7 @@ export const AuthProvider = ({ children }) => {
       }
     };
 
-    localStorage.setItem('codebattle_authenticated_user', JSON.stringify(guestUser));
-    setUser(guestUser);
-    setIsLoggedIn(true);
+    updateUserProfile(guestUser);
   };
 
   // Google OAuth Login Trigger
@@ -100,6 +106,7 @@ export const AuthProvider = ({ children }) => {
         user,
         isLoggedIn,
         isLoading,
+        updateUserProfile,
         loginAsGuest,
         loginWithGoogle,
         loginWithGithub,
@@ -107,6 +114,8 @@ export const AuthProvider = ({ children }) => {
       }}
     >
       {children}
+      {/* Global First-Time CallSign Setup Modal */}
+      <UsernameSetupModal />
     </AuthContext.Provider>
   );
 };

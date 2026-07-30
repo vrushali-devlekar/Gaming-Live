@@ -1,125 +1,230 @@
-/* PUBG/BGMI inspired Dashboard Styling */
+/* ==========================================================================
+   AAA GAMING LOBBY (DASHBOARD) - BGMI INDUSTRIAL STYLESHEET
+   ========================================================================== */
 
+/* Viewport Lock (Single Screen 100vh) */
 .gaming-dashboard-page {
-  background-color: #0c0d12;
-  position: relative;
-  min-height: 100vh;
-  width: 100%;
-  overflow-x: hidden;
-  color: #e2e8f0;
-}
-
-/* Subtle grid matrix overlay */
-.grid-matrix-overlay {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
+  width: 100vw;
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
+  background-color: #0b0e14;
   background-image: 
-    linear-gradient(to right, rgba(245, 158, 11, 0.03) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(245, 158, 11, 0.03) 1px, transparent 1px);
-  background-size: 30px 30px;
-  background-position: center;
-  mask-image: radial-gradient(circle at center, black 60%, transparent 100%);
-  -webkit-mask-image: radial-gradient(circle at center, black 60%, transparent 100%);
-  opacity: 0.75;
-  z-index: 1;
+    radial-gradient(circle at 50% 30%, rgba(0, 255, 204, 0.07) 0%, transparent 65%),
+    radial-gradient(circle at 20% 80%, rgba(250, 204, 21, 0.04) 0%, transparent 50%);
+  display: flex;
+  flex-direction: column;
+  color: #ffffff;
+  font-family: 'Rajdhani', 'Space Grotesk', sans-serif;
+  position: relative;
+  user-select: none;
 }
 
-/* Custom Clip Paths for hard edges */
-.clip-industrial-card {
-  clip-path: polygon(
-    0 0,
-    calc(100% - 20px) 0,
-    100% 20px,
-    100% 100%,
-    20px 100%,
-    0 calc(100% - 20px)
-  );
+/* Entry Animation */
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.clip-hero-stand {
-  clip-path: polygon(
-    10% 0%,
-    90% 0%,
-    100% 100%,
-    0% 100%
-  );
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.clip-angular-btn {
-  clip-path: polygon(
-    15px 0,
-    100% 0,
-    100% calc(100% - 15px),
-    calc(100% - 15px) 100%,
-    0 100%,
-    0 15px
-  );
+/* Glassmorphism Industrial Panel */
+.glass-panel-industrial {
+  background: rgba(13, 17, 23, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
 }
 
-/* Iron Gray Container Style */
-.bg-iron-gray {
-  background-color: #171923;
-  border: 1px solid #2d3142;
-  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.6);
+/* TACTICAL OPERATOR CARD (CENTER SHOWCASE) */
+.operator-card-container {
+  width: 100%;
+  max-width: 440px;
+  height: 480px;
+  background: linear-gradient(180deg, rgba(16, 22, 34, 0.9) 0%, rgba(10, 13, 20, 0.95) 100%);
+  border: 1.5px solid rgba(0, 255, 204, 0.4);
+  box-shadow: 0 0 35px rgba(0, 255, 204, 0.15), inset 0 0 25px rgba(0, 255, 204, 0.05);
+  clip-path: polygon(24px 0, 100% 0, 100% calc(100% - 24px), calc(100% - 24px) 100%, 0 100%, 0 24px);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 16px;
+  overflow: hidden;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.bg-iron-gray-dark {
-  background-color: #0f1016;
-  border: 1px solid #1f2230;
+.operator-card-container:hover {
+  border-color: #00ffcc;
+  box-shadow: 0 0 45px rgba(0, 255, 204, 0.25);
 }
 
-/* Neon Text Highlight Effects */
-.neon-yellow-glow {
-  text-shadow: 0 0 10px rgba(250, 204, 21, 0.5), 0 0 20px rgba(250, 204, 21, 0.2);
-}
-
-.neon-cyan-glow {
-  text-shadow: 0 0 10px rgba(6, 182, 212, 0.5), 0 0 20px rgba(6, 182, 212, 0.2);
-}
-
-/* START MATCH Button Glow & Inner Border Styling */
-.start-match-glow {
-  box-shadow: 0 0 25px rgba(250, 204, 21, 0.45);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.start-match-glow:hover {
-  box-shadow: 0 0 35px rgba(250, 204, 21, 0.7);
-  transform: scale(1.02);
-}
-
-.start-match-glow:active {
-  transform: scale(0.98);
-}
-
-.btn-inner-border {
+/* Operator Character Illustration Aura Glow */
+.operator-aura-glow {
   position: absolute;
-  inset: 3px;
-  border: 1px solid rgba(0, 0, 0, 0.2);
+  top: 45%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 280px;
+  height: 280px;
+  background: radial-gradient(circle, rgba(0, 255, 204, 0.2) 0%, rgba(250, 204, 21, 0.05) 50%, transparent 75%);
+  filter: blur(25px);
   pointer-events: none;
+  animation: auraPulse 4s infinite ease-in-out;
 }
 
-/* Spotify Hook / Media Spinner */
-@keyframes spin-slow {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+@keyframes auraPulse {
+  0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
 }
 
-.animate-spin-slow {
-  animation: spin-slow 12s infinite linear;
+/* Character HUD Top Badge */
+.loadout-badge-pill {
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(250, 204, 21, 0.5);
+  color: #facc15;
+  font-family: 'Space Grotesk', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  padding: 6px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+  align-self: center;
+  z-index: 10;
+  box-shadow: 0 0 12px rgba(250, 204, 21, 0.2);
 }
 
-/* Diagonal scanning lines */
-.scanlines-overlay {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(
-    rgba(18, 19, 26, 0) 50%, 
-    rgba(0, 0, 0, 0.15) 50%
-  );
-  background-size: 100% 4px;
-  z-index: 2;
-  opacity: 0.4;
+/* Character HUD Bottom Stats Strip */
+.operator-stats-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  z-index: 10;
+  background: rgba(6, 8, 12, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 8px 12px;
+  clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+}
+
+.stat-badge-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.stat-badge-label {
+  font-family: 'Space Grotesk', monospace;
+  font-size: 8px;
+  color: #94a3b8;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.stat-badge-val {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  color: #ffffff;
+  margin-top: 1px;
+}
+
+/* HIGH-CONTRAST SKEWED CTAS */
+.lobby-cta-row {
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  z-index: 10;
+}
+
+.cta-btn-gamer {
+  flex: 1;
+  padding: 14px 16px;
+  font-family: 'Orbitron', 'Rajdhani', sans-serif;
+  font-weight: 900;
+  font-size: 15px;
+  letter-spacing: 0.08em;
+  border: none;
+  cursor: pointer;
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.cta-btn-yellow {
+  background: #facc15;
+  color: #000000;
+  box-shadow: 0 0 20px rgba(250, 204, 21, 0.3);
+}
+
+.cta-btn-yellow:hover {
+  background: #ebd510;
+  box-shadow: 0 0 30px rgba(250, 204, 21, 0.6);
+  transform: translateY(-2px);
+}
+
+.cta-btn-cyan {
+  background: #00ffcc;
+  color: #000000;
+  box-shadow: 0 0 20px rgba(0, 255, 204, 0.3);
+}
+
+.cta-btn-cyan:hover {
+  background: #00cca3;
+  box-shadow: 0 0 30px rgba(0, 255, 204, 0.6);
+  transform: translateY(-2px);
+}
+
+.cta-subtext {
+  font-family: 'Space Grotesk', monospace;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  opacity: 0.7;
+  margin-top: 2px;
+}
+
+/* TOP SQUAD METALLIC BADGES */
+.metallic-badge-gold {
+  border: 1px solid #facc15;
+  box-shadow: 0 0 10px rgba(250, 204, 21, 0.3);
+}
+
+.metallic-badge-silver {
+  border: 1px solid #94a3b8;
+  box-shadow: 0 0 10px rgba(148, 163, 184, 0.3);
+}
+
+.metallic-badge-bronze {
+  border: 1px solid #b45309;
+  box-shadow: 0 0 10px rgba(180, 83, 9, 0.3);
+}
+
+/* Custom Scrollbar for compact panels */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 2px;
 }

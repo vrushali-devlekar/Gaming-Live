@@ -5,10 +5,12 @@ import GamerHeader from '../../components/GamerHeader/GamerHeader';
 import RoomCreate from '../../components/RoomCreate/RoomCreate';
 import RoomBrowse from '../../components/RoomBrowse/RoomBrowse';
 import SettingsModal from '../../components/SettingsModal/SettingsModal';
+import { useAuth } from '../../context/AuthContext';
 import './RoomLobby.css';
 
 export default function RoomLobby() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [alert, setAlert] = useState(null); // { type: 'success'|'info'|'error', message: '' }
 
@@ -32,7 +34,7 @@ export default function RoomLobby() {
     const newRoom = {
       id: Date.now(),
       name: `SQUAD ROOM #${roomId}`,
-      host: "GHOST_CODER",
+      host: user?.username || "GHOST_CODER",
       filled: 1,
       max: newRoomData.selectedMode === '4v4' ? 8 : newRoomData.selectedMode === '100-royale' ? 100 : 2,
       locked: Boolean(newRoomData.roomPassword && newRoomData.roomPassword.length > 0),
@@ -57,7 +59,7 @@ export default function RoomLobby() {
       {/* Top Header Profile bar */}
       <GamerHeader 
         onOpenSettings={() => setIsSettingsOpen(true)} 
-        username="GHOST_CODER" 
+        username={user?.username || "GHOST_CODER"} 
         currentXP={2840} 
         maxXP={5000} 
       />

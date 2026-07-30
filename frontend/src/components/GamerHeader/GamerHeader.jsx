@@ -3,10 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import { Settings, Shield, Zap, Coins, LogOut } from 'lucide-react';
 import LevelBadge from '../../ui/LevelBadge/LevelBadge';
 import ProgressBar from '../../ui/ProgressBar/ProgressBar';
+import { useAuth } from '../../context/AuthContext';
 import './GamerHeader.css';
 
-export default function GamerHeader({ onOpenSettings, currentXP = 2450, maxXP = 5000, username = "TACTICAL_DEVEL" }) {
+export default function GamerHeader({ onOpenSettings, currentXP = 2450, maxXP = 5000, username }) {
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const displayUsername = user && user.username
+    ? user.username
+    : (username && username !== "GHOST_CODER" && username !== "TACTICAL_DEVEL" ? username : "GHOST_OPERATOR");
+
   return (
     <header className="gamer-header bg-brushed-steel">
       <div className="header-left">
@@ -27,19 +34,19 @@ export default function GamerHeader({ onOpenSettings, currentXP = 2450, maxXP = 
               {/* Online Indicator */}
               <span className="online-dot"></span>
             </div>
-            <LevelBadge level={45} size="sm" />
+            <LevelBadge level={user?.stats?.level || 45} size="sm" />
           </div>
           
           <div className="profile-details">
             <div className="profile-top">
-              <span className="player-name font-military">{username}</span>
+              <span className="player-name font-military">{displayUsername}</span>
               <div className="tier-pill font-military">
                 <Shield size={12} className="tier-icon" />
-                <span>CONQUEROR</span>
+                <span>{user?.rank || "CONQUEROR"}</span>
               </div>
             </div>
             <div className="xp-container">
-              <ProgressBar value={currentXP} max={maxXP} label="EXP" showValues={true} />
+              <ProgressBar value={user?.stats?.exp || currentXP} max={maxXP} label="EXP" showValues={true} />
             </div>
           </div>
         </div>
@@ -54,7 +61,7 @@ export default function GamerHeader({ onOpenSettings, currentXP = 2450, maxXP = 
             </div>
             <div className="token-info">
               <span className="token-label font-military">FREE ROOM CREDITS</span>
-              <span className="token-value font-mono-tactical">1 / 1</span>
+              <span className="token-value font-mono-tactical">{user?.stats?.roomCredits || 5} / 5</span>
             </div>
           </div>
           <div className="token-item">
@@ -63,7 +70,7 @@ export default function GamerHeader({ onOpenSettings, currentXP = 2450, maxXP = 
             </div>
             <div className="token-info">
               <span className="token-label font-military">BP CODES</span>
-              <span className="token-value font-mono-tactical">124,500</span>
+              <span className="token-value font-mono-tactical">{(user?.stats?.bp || 124500).toLocaleString()}</span>
             </div>
           </div>
         </div>
@@ -73,9 +80,9 @@ export default function GamerHeader({ onOpenSettings, currentXP = 2450, maxXP = 
       <div className="header-right">
         {/* Navigation buttons */}
         <div className="nav-buttons font-military">
-          <button className="nav-btn active-tab">Lobby</button>
-          <button className="nav-btn">Rankings</button>
-          <button className="nav-btn">Clan</button>
+          <button className="nav-btn active-tab" onClick={() => navigate('/lobby')}>Lobby</button>
+          <button className="nav-btn" onClick={() => navigate('/analytics')}>Rankings</button>
+          <button className="nav-btn" onClick={() => navigate('/clan')}>Clan</button>
         </div>
 
         <div className="control-icons">
@@ -89,6 +96,7 @@ export default function GamerHeader({ onOpenSettings, currentXP = 2450, maxXP = 
           <button 
             className="control-icon-btn logout-btn tooltip-container" 
             title="EXIT MATCH"
+            onClick={() => navigate('/')}
           >
             <LogOut size={18} />
           </button>

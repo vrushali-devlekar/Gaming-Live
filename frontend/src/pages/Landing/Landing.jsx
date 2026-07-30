@@ -1,19 +1,63 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Terminal, Swords, RefreshCw, Cpu, ShieldAlert, Wifi, Users, Server } from 'lucide-react';
+import { 
+  Terminal, 
+  Swords, 
+  RefreshCw, 
+  Cpu, 
+  ShieldAlert, 
+  Wifi, 
+  Users, 
+  Server, 
+  Zap, 
+  Trophy, 
+  Flame, 
+  Crosshair, 
+  Box, 
+  Eye, 
+  Volume2, 
+  VolumeX,
+  Search,
+  CheckCircle,
+  Sparkles,
+  Lock,
+  ArrowRight,
+  Shield,
+  HelpCircle,
+  Award
+} from 'lucide-react';
 import { themeService } from '../../services/themeService';
 import { useAuth } from '../../context/AuthContext';
 import './Landing.css';
 
+// Import generated map & tactical assets
+import sanhokMapImg from '../../assets/sanhok_map.png';
+import erangelMapImg from '../../assets/erangel_map.png';
+import airDropCrateImg from '../../assets/air_drop_crate.png';
+
 export default function Landing() {
   const navigate = useNavigate();
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, loginWithGoogle, loginWithGithub } = useAuth();
+  
+  // Interactive state management
   const [isEntering, setIsEntering] = useState(false);
   const [syncStep, setSyncStep] = useState(0);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [selectedMode, setSelectedMode] = useState('royale');
+  const [activeDebuffTab, setActiveDebuffTab] = useState('smoke');
+  const [leaderboardFilter, setLeaderboardFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  
+  // Modal visibility states
+  const [showRoyalePassModal, setShowRoyalePassModal] = useState(false);
+  const [showRulesModal, setShowRulesModal] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
   const activeTheme = themeService.getCurrentTheme();
 
-  // Play a soft gaming beep sound
+  // Tactical Gaming Audio Synthesizer Beep
   const playBeep = (freq = 800, duration = 0.08, type = 'sine') => {
+    if (!soundEnabled) return;
     try {
       const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       const oscillator = audioCtx.createOscillator();
@@ -27,173 +71,823 @@ export default function Landing() {
       oscillator.start();
       oscillator.stop(audioCtx.currentTime + duration);
     } catch (e) {
-      console.warn("Audio Context blocked");
+      // Audio context fallbacks
     }
   };
 
+  // Smooth scroll handler
+  const scrollToSection = (id) => {
+    playBeep(600, 0.05, 'triangle');
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  // Enter Lobby sync sequence handler
   const handleEnterLobby = () => {
     if (isEntering) return;
     playBeep(900, 0.25, 'triangle');
 
-    // First check if user is logged in
     if (!isLoggedIn) {
-      navigate('/login');
+      setShowAuthModal(true);
       return;
     }
 
     setIsEntering(true);
     setSyncStep(1);
 
-    // Simulated network authentication steps
     setTimeout(() => {
       setSyncStep(2);
       playBeep(700, 0.08, 'sine');
       setTimeout(() => {
         setSyncStep(3);
-        playBeep(800, 0.08, 'sine');
+        playBeep(850, 0.08, 'sine');
         setTimeout(() => {
           navigate('/lobby');
-        }, 1200);
-      }, 900);
-    }, 800);
+        }, 1100);
+      }, 800);
+    }, 700);
   };
+
+  // Auth Handler helper
+  const handleAuthAction = (provider) => {
+    playBeep(1000, 0.1, 'sine');
+    setShowAuthModal(false);
+    if (provider === 'google' && loginWithGoogle) {
+      loginWithGoogle();
+    } else if (provider === 'github' && loginWithGithub) {
+      loginWithGithub();
+    } else {
+      navigate('/login');
+    }
+  };
+
+  // Mock Leaderboard Data
+  const leaderboardData = [
+    { rank: 1, handle: 'ViperX_Coder', tier: 'CONQUEROR', winRate: '94.2%', kdRatio: '14.8', bp: '24,850', lang: 'C++', avatar: '🌟' },
+    { rank: 2, handle: 'Shadow_Ninja', tier: 'CONQUEROR', winRate: '91.8%', kdRatio: '12.4', bp: '22,400', lang: 'Rust', avatar: '🔥' },
+    { rank: 3, handle: 'NullPointer_God', tier: 'ACE MASTER', winRate: '88.5%', kdRatio: '10.9', bp: '19,950', lang: 'Python', avatar: '⚡' },
+    { rank: 4, handle: 'Erangel_King', tier: 'ACE MASTER', winRate: '86.1%', kdRatio: '9.7', bp: '18,200', lang: 'JS/TS', avatar: '👑' },
+    { rank: 5, handle: 'Glacier_M416', tier: 'CROWN I', winRate: '82.4%', kdRatio: '8.5', bp: '16,750', lang: 'Go', avatar: '💎' },
+    { rank: 6, handle: 'Sanhok_Ghost', tier: 'CROWN I', winRate: '80.0%', kdRatio: '7.8', bp: '15,300', lang: 'C++', avatar: '🎯' },
+    { rank: 7, handle: 'Cyber_Mummy', tier: 'DIAMOND II', winRate: '77.3%', kdRatio: '6.9', bp: '14,100', lang: 'Java', avatar: '🛡️' },
+  ];
+
+  const filteredLeaderboard = leaderboardData.filter((item) =>
+    item.handle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    item.lang.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="landing-page">
+      {/* Background Matrix & Overlay FX */}
       <div className="landing-grid-bg"></div>
       <div className="landing-scanlines"></div>
+      <div className="bg-glow-orb-cyan"></div>
+      <div className="bg-glow-orb-yellow"></div>
 
-      {/* TOP HEADER DETAILS */}
-      <header className="landing-header relative z-10 flex items-center justify-between px-8 py-5 border-b border-steel-border/50 bg-panel-bg/30 backdrop-blur-sm">
-        <div className="flex items-center gap-3">
-          <div className="w-3 h-3 bg-gold animate-ping rounded-full"></div>
+      {/* --------------------------------------------------------------------------
+          1. NAVIGATION BAR
+          -------------------------------------------------------------------------- */}
+      <nav className="landing-navbar px-6 py-4 flex items-center justify-between">
+        {/* Tactical Logo */}
+        <div className="nav-logo-box" onClick={() => navigate('/')}>
+          <div className="nav-logo-icon-wrapper">
+            <Swords size={22} className="text-[#00ffcc] animate-pulse" />
+          </div>
           <div>
-            <span className="font-mono text-[9px] text-gold tracking-[0.25em] block leading-none">DEPLOYMENT GATEWAY</span>
-            <h1 className="font-military text-xl text-white tracking-widest mt-1">GAMING-LIVE // SERVER</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="font-military text-2xl tracking-widest text-white leading-none font-bold">
+                CODE<span className="text-[#00ffcc]">BATTLE</span>
+              </h1>
+              <span className="text-[10px] font-mono px-1.5 py-0.5 bg-[#00ffcc]/10 border border-[#00ffcc]/30 text-[#00ffcc] font-bold rounded">
+                v4.2
+              </span>
+            </div>
+            <span className="text-[9px] font-mono text-gray-400 tracking-[0.25em] block uppercase mt-0.5">
+              Multiplayer Algorithmic Royale
+            </span>
           </div>
         </div>
 
-        <div className="hidden sm:flex items-center gap-6 text-[10px] font-mono text-gray-500">
-          <div className="flex items-center gap-1.5">
-            <Wifi size={12} className="text-green-500 animate-pulse" />
-            <span>LATENCY: 12ms</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <Users size={12} className="text-cyan-400" />
-            <span>PLAYERS: 4,850 Active</span>
-          </div>
+        {/* Center Nav Links */}
+        <div className="hidden md:flex items-center gap-2">
+          <button className="nav-link-btn" onClick={() => scrollToSection('arenas-section')}>
+            ARENAS
+          </button>
+          <button className="nav-link-btn" onClick={() => scrollToSection('leaderboard-section')}>
+            LEADERBOARD
+          </button>
+          <button className="nav-link-btn flex items-center gap-1.5" onClick={() => setShowRoyalePassModal(true)}>
+            <Sparkles size={13} className="text-[#facc15]" />
+            <span>ROYALE PASS</span>
+          </button>
+          <button className="nav-link-btn" onClick={() => setShowRulesModal(true)}>
+            RULES
+          </button>
         </div>
-      </header>
 
-      {/* MAIN CONTAINER */}
-      <main className="landing-main relative z-10 flex-1 flex flex-col justify-center items-center p-6 max-w-6xl mx-auto w-full gap-8">
-        
-        {/* HERO SECTION */}
-        <section className="text-center max-w-2xl flex flex-col items-center gap-4">
-          <div className="flex items-center gap-2 px-3 py-1 bg-gold/10 border border-gold/30 text-gold font-military text-xs clip-industrial-card tracking-wider">
-            <Swords size={12} />
-            <span>TACTICAL COLLABORATIVE CODESPACE</span>
+        {/* Auth & Audio Actions */}
+        <div className="flex items-center gap-3">
+          {/* Sound Toggle */}
+          <button
+            onClick={() => setSoundEnabled(!soundEnabled)}
+            className="p-2 bg-black/40 border border-white/10 hover:border-[#00ffcc]/50 text-gray-400 hover:text-white rounded transition-all cursor-pointer"
+            title={soundEnabled ? 'Mute SFX' : 'Enable SFX'}
+          >
+            {soundEnabled ? <Volume2 size={16} className="text-[#00ffcc]" /> : <VolumeX size={16} />}
+          </button>
+
+          {!isLoggedIn ? (
+            <button
+              onClick={() => setShowAuthModal(true)}
+              className="hidden sm:inline-flex px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/15 text-white font-military text-xs tracking-wider clip-badge-sm transition-all cursor-pointer"
+            >
+              LOGIN / AUTH
+            </button>
+          ) : null}
+
+          <button
+            onClick={handleEnterLobby}
+            className="btn-tactical-yellow px-5 py-2.5 text-sm clip-angular-btn flex items-center gap-2 cursor-pointer"
+          >
+            <Zap size={16} className="fill-black" />
+            <span>ENTER LOBBY</span>
+          </button>
+        </div>
+      </nav>
+
+      {/* --------------------------------------------------------------------------
+          2. HERO SECTION
+          -------------------------------------------------------------------------- */}
+      <section className="relative z-10 max-w-7xl mx-auto px-6 pt-12 pb-20 w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        {/* Left Column: Aggressive Headlines & CTAs */}
+        <div className="lg:col-span-7 flex flex-col items-start gap-6">
+          {/* Live Player Counter Pill */}
+          <div className="hero-live-pill">
+            <div className="live-pulse-dot"></div>
+            <span className="font-bold text-white">1,420 ACTIVE CODERS</span>
+            <span className="text-gray-400">IN BATTLE ZONE</span>
           </div>
-          
-          <h2 className="font-military text-5xl md:text-6xl text-white tracking-wider leading-none select-none">
-            MULTIPLAYER <span style={{ color: activeTheme.accentColor }}>CODE BATTLE</span>
-          </h2>
-          
-          <p className="font-mono text-xs text-gray-400 leading-relaxed max-w-md">
-            Enter the perimeter compiler arena. Sync with squad members, configure your compiler weapon IDEs, and defeat the system firewall.
-          </p>
 
-          {/* MAIN LAUNCH ACTION */}
-          <div className="mt-4 w-full max-w-sm">
+          {/* Aggressive Title */}
+          <div>
+            <h1 className="hero-title-text font-black uppercase">
+              DROP IN. <br />
+              <span className="hero-highlight-cyan">CODE HARD.</span> <br />
+              <span className="hero-highlight-yellow">SURVIVE.</span>
+            </h1>
+            <p className="font-mono text-sm sm:text-base text-gray-300 max-w-xl leading-relaxed mt-4">
+              The ultimate real-time multiplayer algorithmic battle royale. Parachute into competitive compiler arenas, solve DSA challenges under zone pressure, and execute tactical debuffs to claim the Chicken Dinner!
+            </p>
+          </div>
+
+          {/* Dual Action Gamer Buttons */}
+          <div className="flex flex-wrap items-center gap-4 w-full sm:w-auto pt-2">
             <button
               onClick={handleEnterLobby}
-              className="w-full py-4.5 bg-gold hover:bg-gold-hover text-black font-military font-black text-2xl tracking-widest clip-angular-btn start-match-glow transition-all duration-300 flex flex-col items-center justify-center border-none cursor-pointer select-none relative"
+              className="btn-tactical-yellow px-8 py-4 text-lg clip-angular-btn flex items-center gap-3 w-full sm:w-auto justify-center"
             >
-              <div className="btn-inner-border"></div>
-              <div className="absolute top-1 left-4 w-4 h-[1px] bg-black/45"></div>
-              <div className="absolute bottom-1 right-4 w-4 h-[1px] bg-black/45"></div>
-              <span className="relative z-10">ENTER BATTLE LOBBY</span>
+              <Crosshair size={22} className="text-black" />
+              <span>QUICK MATCH</span>
+            </button>
+
+            <button
+              onClick={() => {
+                playBeep(750, 0.1, 'sine');
+                if (!isLoggedIn) setShowAuthModal(true);
+                else navigate('/room-lobby');
+              }}
+              className="btn-tactical-cyan px-7 py-4 text-base clip-angular-btn flex items-center gap-2.5 w-full sm:w-auto justify-center"
+            >
+              <Users size={18} />
+              <span>CREATE SQUAD ROOM</span>
             </button>
           </div>
-        </section>
 
-        {/* FEATURE HIGHLIGHT GRID */}
-        <section className="w-full grid grid-cols-1 md:grid-cols-3 gap-5 mt-6">
-          
-          {/* Card 1 */}
-          <div className="feature-card bg-black/40 border border-steel-border/50 p-5 clip-steel-sm hover:border-gold/30 transition-all duration-300 flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-              <span className="font-military text-[10px] text-gold tracking-widest">TACTICAL INTEL</span>
-              <Cpu size={14} className="text-gold" />
+          {/* Key Quick Stats Bar */}
+          <div className="grid grid-cols-3 gap-6 pt-6 border-t border-white/10 w-full max-w-xl">
+            <div>
+              <div className="font-military text-2xl text-white font-bold">100 CODERS</div>
+              <div className="font-mono text-[10px] text-gray-400 uppercase">Royale Lobby Size</div>
             </div>
             <div>
-              <h3 className="font-military text-lg text-white font-bold leading-tight">3D HOLOGRAM AVATAR</h3>
-              <p className="text-[10px] text-gray-400 font-mono leading-relaxed mt-2 h-auto md:h-14">
-                Procedurally rendered 3D hologram player matching the iconic BGMI White Mummy outfit, spiky Level 3 helmet, and Glacier M416 skin.
-              </p>
+              <div className="font-military text-2xl text-[#00ffcc] font-bold">3.2 MIN</div>
+              <div className="font-mono text-[10px] text-gray-400 uppercase">Avg Zone Shrink</div>
+            </div>
+            <div>
+              <div className="font-military text-2xl text-[#facc15] font-bold">2,500 BP</div>
+              <div className="font-mono text-[10px] text-gray-400 uppercase">Winner Reward</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column: Interactive Tactical HUD Radar Widget */}
+        <div className="lg:col-span-5 w-full">
+          <div className="hero-radar-widget p-6 clip-steel-card rounded-lg flex flex-col gap-5">
+            {/* Top Telemetry Bar */}
+            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-2.5 h-2.5 bg-[#00ffcc] rounded-full animate-ping"></div>
+                <span className="font-mono text-xs text-[#00ffcc] font-bold tracking-widest uppercase">
+                  RADAR TELEMETRY // ONLINE
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 font-mono text-xs text-gray-400">
+                <Wifi size={13} className="text-green-400" />
+                <span>12ms PING</span>
+              </div>
+            </div>
+
+            {/* Middle Sweeping Radar & Status */}
+            <div className="flex items-center justify-around py-4">
+              <div className="radar-sweep-circle">
+                <div className="radar-spin"></div>
+                <Crosshair size={32} className="text-[#00ffcc]/60 animate-pulse" />
+              </div>
+              <div className="flex flex-col gap-2 font-mono text-xs">
+                <div className="flex items-center gap-2 text-gray-300">
+                  <Server size={14} className="text-[#facc15]" />
+                  <span>REGION: ASIA-SOUTH (MUMBAI)</span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-300">
+                  <ShieldAlert size={14} className="text-[#00ffcc]" />
+                  <span>ANTI-CHEAT: VAC ACTIVE</span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-300">
+                  <Cpu size={14} className="text-purple-400" />
+                  <span>IDE CORE: MONACO V4</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom Status Banner */}
+            <div className="bg-black/50 p-3 border border-white/10 rounded font-mono text-xs flex justify-between items-center text-gray-300">
+              <span>MATCHMAKING QUEUE: <strong className="text-[#00ffcc]">INSTANT</strong></span>
+              <span className="px-2 py-0.5 bg-green-500/20 text-green-400 border border-green-500/40 rounded text-[10px]">READY</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* --------------------------------------------------------------------------
+          3. GAME MODES SHOWCASE GRID
+          -------------------------------------------------------------------------- */}
+      <section id="arenas-section" className="relative z-10 max-w-7xl mx-auto px-6 py-16 w-full">
+        <div className="text-center max-w-2xl mx-auto mb-12">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#00ffcc]/10 border border-[#00ffcc]/30 text-[#00ffcc] font-military text-xs tracking-widest clip-badge-sm mb-3">
+            <Swords size={13} />
+            <span>DEPLOYMENT ZONES</span>
+          </div>
+          <h2 className="font-military text-4xl text-white font-bold tracking-wider uppercase">
+            TACTICAL <span className="text-[#00ffcc]">GAME MODES</span>
+          </h2>
+          <p className="font-mono text-xs sm:text-sm text-gray-400 mt-2">
+            Select your deployment zone. From 1v1 rapid speed-duels to full 100-coder battle royales.
+          </p>
+        </div>
+
+        {/* Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Mode 1: 1v1 Solo Duel */}
+          <div
+            className={`mode-card clip-steel-card p-5 ${selectedMode === '1v1' ? 'selected' : ''}`}
+            onClick={() => {
+              playBeep(700, 0.08, 'sine');
+              setSelectedMode('1v1');
+            }}
+          >
+            <div className="mode-card-img-wrapper rounded mb-4">
+              <img src={erangelMapImg} alt="Erangel Duel" className="mode-card-img" />
+              <div className="absolute top-3 left-3 bg-black/80 px-2.5 py-1 border border-[#00ffcc]/40 text-[#00ffcc] font-military text-xs font-bold rounded">
+                1V1 SOLO DUEL
+              </div>
+            </div>
+
+            <h3 className="font-military text-2xl text-white font-bold mb-2">ERANGEL SPEED DUEL</h3>
+            <p className="font-mono text-xs text-gray-400 leading-relaxed mb-4">
+              High-intensity 1-on-1 algorithmic duel. First coder to pass all test cases or highest accuracy before zone collapse claims victory.
+            </p>
+
+            <div className="flex flex-wrap gap-2 mb-6">
+              <div className="mode-spec-badge">👤 2 PLAYERS</div>
+              <div className="mode-spec-badge">⏱️ 5 MINS</div>
+              <div className="mode-spec-badge text-[#facc15]">💰 100 BP</div>
+            </div>
+
+            <button className="w-full btn-tactical-cyan py-3 text-sm clip-angular-btn">
+              SELECT 1V1 DUEL
+            </button>
+          </div>
+
+          {/* Mode 2: 4v4 Squad Deathmatch */}
+          <div
+            className={`mode-card clip-steel-card p-5 ${selectedMode === 'squad' ? 'selected' : ''}`}
+            onClick={() => {
+              playBeep(700, 0.08, 'sine');
+              setSelectedMode('squad');
+            }}
+          >
+            <div className="mode-card-img-wrapper rounded mb-4">
+              <img src={sanhokMapImg} alt="Sanhok Squad" className="mode-card-img" />
+              <div className="absolute top-3 left-3 bg-black/80 px-2.5 py-1 border border-[#facc15]/40 text-[#facc15] font-military text-xs font-bold rounded">
+                4V4 SQUAD MATCH
+              </div>
+            </div>
+
+            <h3 className="font-military text-2xl text-white font-bold mb-2">SANHOK BOOTCAMP</h3>
+            <p className="font-mono text-xs text-gray-400 leading-relaxed mb-4">
+              Coordinate code modules with 3 squadmates in real-time. Share compiler state, block enemy tactical debuffs, and out-code rival squads.
+            </p>
+
+            <div className="flex flex-wrap gap-2 mb-6">
+              <div className="mode-spec-badge">👥 4V4 TEAMS</div>
+              <div className="mode-spec-badge">⏱️ 15 MINS</div>
+              <div className="mode-spec-badge text-[#facc15]">💰 400 BP</div>
+            </div>
+
+            <button className="w-full btn-tactical-cyan py-3 text-sm clip-angular-btn">
+              SELECT 4V4 SQUAD
+            </button>
+          </div>
+
+          {/* Mode 3: 100-Coder Royale */}
+          <div
+            className={`mode-card clip-steel-card p-5 ${selectedMode === 'royale' ? 'selected' : ''}`}
+            onClick={() => {
+              playBeep(700, 0.08, 'sine');
+              setSelectedMode('royale');
+            }}
+          >
+            <div className="mode-card-img-wrapper rounded mb-4">
+              <img src={erangelMapImg} alt="100 Coder Royale" className="mode-card-img" />
+              <div className="absolute top-3 left-3 bg-black/80 px-2.5 py-1 border border-[#ff4757]/40 text-[#ff4757] font-military text-xs font-bold rounded">
+                🔥 BATTLE ROYALE
+              </div>
+            </div>
+
+            <h3 className="font-military text-2xl text-white font-bold mb-2">100-CODER ROYALE</h3>
+            <p className="font-mono text-xs text-gray-400 leading-relaxed mb-4">
+              Drop into the massive 100-player compiler matrix. Safe playzone shrinks dynamically every 3 minutes. Last surviving programmer wins!
+            </p>
+
+            <div className="flex flex-wrap gap-2 mb-6">
+              <div className="mode-spec-badge">🔥 100 PLAYERS</div>
+              <div className="mode-spec-badge">⏱️ 30 MINS</div>
+              <div className="mode-spec-badge text-[#facc15]">🏆 2,500 BP + CONQUEROR</div>
+            </div>
+
+            <button className="w-full btn-tactical-yellow py-3 text-sm clip-angular-btn text-black font-bold">
+              DEPLOY 100-ROYALE
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* --------------------------------------------------------------------------
+          4. TACTICAL GAMEPLAY FEATURES (Air Drops & Debuffs)
+          -------------------------------------------------------------------------- */}
+      <section className="relative z-10 max-w-7xl mx-auto px-6 py-16 w-full">
+        <div className="gameplay-feature-box p-8 clip-steel-card rounded-xl grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+          {/* Left Column: Air Drop Crate Graphic & Mechanics */}
+          <div className="lg:col-span-5 flex flex-col items-center text-center">
+            <img src={airDropCrateImg} alt="Air Drop Crate" className="w-64 h-64 object-contain air-drop-glow-img mb-4" />
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#ff4757]/10 border border-[#ff4757]/40 text-[#ff4757] font-military text-xs tracking-widest clip-badge-sm mb-2">
+              <Box size={14} />
+              <span>TACTICAL AIR DROP CRATE</span>
+            </div>
+            <h3 className="font-military text-2xl text-white font-bold">SUPPLY DROPS & BONUS CODE</h3>
+            <p className="font-mono text-xs text-gray-400 max-w-sm mt-2 leading-relaxed">
+              Every 5 minutes, high-value Air Drops land in the arena. Solve bonus optimization problems for 2x score multipliers and tactical perks!
+            </p>
+          </div>
+
+          {/* Right Column: Debuffs & Mechanics Breakdown */}
+          <div className="lg:col-span-7 flex flex-col gap-6">
+            <div>
+              <span className="font-mono text-xs text-[#00ffcc] tracking-widest uppercase block mb-1">
+                COMBAT MECHANICS // IN-GAME DEBUFFS
+              </span>
+              <h3 className="font-military text-3xl text-white font-bold uppercase">
+                SHRINKING PLAYZONE & POWER-UPS
+              </h3>
+            </div>
+
+            {/* Debuff Tabs */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div
+                className={`debuff-chip p-3 rounded clip-badge-sm text-center ${activeDebuffTab === 'smoke' ? 'active' : ''}`}
+                onClick={() => setActiveDebuffTab('smoke')}
+              >
+                <div className="font-military text-sm text-white font-bold">SMOKE SCREEN</div>
+                <div className="font-mono text-[10px] text-gray-400">Editor Blur</div>
+              </div>
+              <div
+                className={`debuff-chip p-3 rounded clip-badge-sm text-center ${activeDebuffTab === 'flash' ? 'active' : ''}`}
+                onClick={() => setActiveDebuffTab('flash')}
+              >
+                <div className="font-military text-sm text-white font-bold">FLASHBANG</div>
+                <div className="font-mono text-[10px] text-gray-400">Terminal Flash</div>
+              </div>
+              <div
+                className={`debuff-chip p-3 rounded clip-badge-sm text-center ${activeDebuffTab === 'emp' ? 'active' : ''}`}
+                onClick={() => setActiveDebuffTab('emp')}
+              >
+                <div className="font-military text-sm text-white font-bold">EMP PULSE</div>
+                <div className="font-mono text-[10px] text-gray-400">Disable Autocomplete</div>
+              </div>
+              <div
+                className={`debuff-chip p-3 rounded clip-badge-sm text-center ${activeDebuffTab === 'radar' ? 'active' : ''}`}
+                onClick={() => setActiveDebuffTab('radar')}
+              >
+                <div className="font-military text-sm text-white font-bold">CODE RADAR</div>
+                <div className="font-mono text-[10px] text-gray-400">Spy Enemy Logs</div>
+              </div>
+            </div>
+
+            {/* Dynamic Active Tab Content */}
+            <div className="bg-black/60 p-5 border border-white/10 rounded font-mono text-xs leading-relaxed text-gray-300">
+              {activeDebuffTab === 'smoke' && (
+                <p>
+                  💨 <strong className="text-[#facc15]">SMOKE SCREEN:</strong> Obfuscates your enemy's editor syntax highlighting for 30 seconds. Forces opponent to read raw unformatted text while their playzone timer ticks down!
+                </p>
+              )}
+              {activeDebuffTab === 'flash' && (
+                <p>
+                  💥 <strong className="text-[#ff4757]">FLASHBANG:</strong> Triggered upon code compilation. Flashes a blinding white light across the opponent's screen for 3 seconds, interrupting their focus.
+                </p>
+              )}
+              {activeDebuffTab === 'emp' && (
+                <p>
+                  ⚡ <strong className="text-[#00ffcc]">EMP PULSE:</strong> Disables Intellisense, auto-formatting, and code completion suggestions for rival team members during key algorithmic challenges.
+                </p>
+              )}
+              {activeDebuffTab === 'radar' && (
+                <p>
+                  👁️ <strong className="text-purple-400">CODE RADAR:</strong> Grants 15 seconds of thermal insight into rival team test case failures, revealing edge cases they are currently stuck on.
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* --------------------------------------------------------------------------
+          5. TOP RANKS / HALL OF FAME (LEADERBOARD)
+          -------------------------------------------------------------------------- */}
+      <section id="leaderboard-section" className="relative z-10 max-w-7xl mx-auto px-6 py-16 w-full">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#facc15]/10 border border-[#facc15]/30 text-[#facc15] font-military text-xs tracking-widest clip-badge-sm mb-3">
+              <Trophy size={13} />
+              <span>CONQUERORS HALL OF FAME</span>
+            </div>
+            <h2 className="font-military text-4xl text-white font-bold tracking-wider uppercase">
+              TOP RANKS <span className="text-[#facc15]">&amp; STANDINGS</span>
+            </h2>
+          </div>
+
+          {/* Search & Filters */}
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="relative">
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+              <input
+                type="text"
+                placeholder="Search coder or lang..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 pr-4 py-2 bg-black/60 border border-white/15 focus:border-[#00ffcc] text-xs font-mono text-white rounded outline-none w-48 sm:w-64"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Table Container */}
+        <div className="overflow-x-auto">
+          <table className="leaderboard-table">
+            <thead>
+              <tr>
+                <th>RANK</th>
+                <th>PLAYER HANDLE</th>
+                <th>TIER</th>
+                <th>WIN RATE</th>
+                <th>SOLVE RATIO</th>
+                <th>BP POINTS</th>
+                <th>MAIN TECH</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredLeaderboard.map((player) => (
+                <tr key={player.rank} className="leaderboard-row">
+                  <td>
+                    {player.rank === 1 ? (
+                      <div className="rank-badge-top1">1</div>
+                    ) : player.rank === 2 ? (
+                      <div className="rank-badge-top2">2</div>
+                    ) : player.rank === 3 ? (
+                      <div className="rank-badge-top3">3</div>
+                    ) : (
+                      <span className="font-military text-sm text-gray-400 pl-2">#{player.rank}</span>
+                    )}
+                  </td>
+                  <td>
+                    <div className="flex items-center gap-3">
+                      <span className="text-xl">{player.avatar}</span>
+                      <span className="font-bold text-white tracking-wide">{player.handle}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span
+                      className={`rank-tier-pill ${
+                        player.tier === 'CONQUEROR'
+                          ? 'tier-conqueror'
+                          : player.tier === 'ACE MASTER'
+                          ? 'tier-ace'
+                          : player.tier === 'CROWN I'
+                          ? 'tier-crown'
+                          : 'tier-diamond'
+                      }`}
+                    >
+                      {player.tier}
+                    </span>
+                  </td>
+                  <td className="font-mono text-sm text-green-400 font-bold">{player.winRate}</td>
+                  <td className="font-mono text-sm text-gray-300">{player.kdRatio}</td>
+                  <td className="font-mono text-sm text-[#facc15] font-bold">{player.bp}</td>
+                  <td>
+                    <span className="px-2 py-1 bg-white/5 border border-white/10 text-gray-300 font-mono text-xs rounded">
+                      {player.lang}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {/* --------------------------------------------------------------------------
+          6. FINAL CTA SECTION & FOOTER
+          -------------------------------------------------------------------------- */}
+      <section className="relative z-10 max-w-7xl mx-auto px-6 py-12 w-full">
+        <div className="cta-banner-bg p-10 clip-steel-card rounded-2xl flex flex-col items-center text-center gap-6">
+          <div className="w-16 h-16 bg-[#facc15]/10 border border-[#facc15] rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(250,204,21,0.3)]">
+            <Trophy size={32} className="text-[#facc15]" />
+          </div>
+
+          <h2 className="font-military text-4xl sm:text-5xl text-white font-bold tracking-wider uppercase max-w-2xl">
+            CLAIM YOUR FIRST <span className="text-[#facc15]">CHICKEN DINNER</span>
+          </h2>
+
+          <p className="font-mono text-sm text-gray-300 max-w-xl leading-relaxed">
+            Join 1,420+ competitive coders currently battling in real-time. Drop into the compiler matrix and test your algorithms under pressure.
+          </p>
+
+          <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
+            <button
+              onClick={() => handleAuthAction('github')}
+              className="social-login-btn clip-angular-btn"
+            >
+              <span>LOGIN WITH GITHUB</span>
+            </button>
+            <button
+              onClick={() => handleAuthAction('google')}
+              className="social-login-btn clip-angular-btn"
+            >
+              <span>LOGIN WITH GOOGLE</span>
+            </button>
+            <button
+              onClick={handleEnterLobby}
+              className="btn-tactical-yellow px-8 py-3.5 text-base clip-angular-btn"
+            >
+              LAUNCH BATTLE LOBBY
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Tactical Footer */}
+      <footer className="landing-footer relative z-10 text-gray-500 font-mono text-xs">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 border-b border-white/10 pb-8">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-[#00ffcc]/10 border border-[#00ffcc] rounded flex items-center justify-center">
+              <Swords size={16} className="text-[#00ffcc]" />
+            </div>
+            <div>
+              <span className="font-military text-lg text-white font-bold tracking-widest block leading-none">
+                CODEBATTLE ROYALE
+              </span>
+              <span className="text-[10px] text-gray-400">V4.2.0 // COMPETITIVE COMPILER ENGINE</span>
             </div>
           </div>
 
-          {/* Card 2 */}
-          <div className="feature-card bg-black/40 border border-steel-border/50 p-5 clip-steel-sm hover:border-gold/30 transition-all duration-300 flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-              <span className="font-military text-[10px] text-gold tracking-widest">OPERATIONS</span>
-              <Swords size={14} className="text-gold" />
+          {/* System Status Indicators */}
+          <div className="flex flex-wrap items-center gap-6 text-[11px]">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-ping"></div>
+              <span>SERVERS: <strong className="text-green-400">OPERATIONAL</strong></span>
             </div>
-            <div>
-              <h3 className="font-military text-lg text-white font-bold leading-tight">COLLABORATIVE ARENA</h3>
-              <p className="text-[10px] text-gray-400 font-mono leading-relaxed mt-2 h-auto md:h-14">
-                Real-time collaborative duels. Monitor cursor grids, test case runs, and track squad mates HP compiler logs.
-              </p>
+            <div className="flex items-center gap-2">
+              <Shield size={13} className="text-[#00ffcc]" />
+              <span>VAC ANTI-CHEAT: <strong className="text-[#00ffcc]">ACTIVE</strong></span>
             </div>
-          </div>
-
-          {/* Card 3 */}
-          <div className="feature-card bg-black/40 border border-steel-border/50 p-5 clip-steel-sm hover:border-gold/30 transition-all duration-300 flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-              <span className="font-military text-[10px] text-gold tracking-widest">SYSTEM SCHEMES</span>
-              <Server size={14} className="text-gold" />
-            </div>
-            <div>
-              <h3 className="font-military text-lg text-white font-bold leading-tight">DYNAMIC MAP THEMES</h3>
-              <p className="text-[10px] text-gray-400 font-mono leading-relaxed mt-2 h-auto md:h-14">
-                Switch environments dynamically, pulling custom theme properties for Erangel Forest, Miramar Desert, Vikendi Blizzard, or Cyberpunk Neon.
-              </p>
+            <div className="flex items-center gap-2">
+              <Wifi size={13} className="text-[#facc15]" />
+              <span>GLOBAL LATENCY: <strong className="text-[#facc15]">12ms</strong></span>
             </div>
           </div>
+        </div>
 
-        </section>
-      </main>
-
-      {/* SYSTEM BAR FOOTER */}
-      <footer className="relative z-10 px-8 py-3 border-t border-steel-border/30 bg-black/50 text-[9px] font-mono text-gray-600 flex justify-between uppercase">
-        <span>SECURITY VERIFICATION: STABLE // ANTI-CHEAT LOADED</span>
-        <span>VERSION 4.2.12-SECURE // CODESPACE LOBBY CORE</span>
+        <div className="max-w-7xl mx-auto pt-6 flex flex-col sm:flex-row items-center justify-between text-[11px] text-gray-600 gap-4">
+          <span>&copy; 2026 CODEBATTLE ROYALE. ALL RIGHTS RESERVED.</span>
+          <div className="flex items-center gap-6">
+            <span className="hover:text-gray-400 cursor-pointer" onClick={() => setShowRulesModal(true)}>
+              TERMS OF COMBAT
+            </span>
+            <span className="hover:text-gray-400 cursor-pointer" onClick={() => setShowRulesModal(true)}>
+              ANTI-CHEAT POLICY
+            </span>
+            <span className="hover:text-gray-400 cursor-pointer" onClick={() => setShowRoyalePassModal(true)}>
+              ROYALE PASS REWARDS
+            </span>
+          </div>
+        </div>
       </footer>
 
-      {/* SYSTEM AUTH SYNCING OVERLAY */}
+      {/* --------------------------------------------------------------------------
+          7. MODALS (Royale Pass, Rules, Auth Selector, Sync Overlay)
+          -------------------------------------------------------------------------- */}
+      
+      {/* Royale Pass Modal */}
+      {showRoyalePassModal && (
+        <div className="modal-overlay" onClick={() => setShowRoyalePassModal(false)}>
+          <div className="modal-container p-6 clip-steel-card rounded-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-6">
+              <div className="flex items-center gap-2">
+                <Sparkles size={20} className="text-[#facc15]" />
+                <h3 className="font-military text-2xl text-white font-bold tracking-wider">
+                  SEASON 14 ROYALE PASS
+                </h3>
+              </div>
+              <button
+                onClick={() => setShowRoyalePassModal(false)}
+                className="text-gray-400 hover:text-white text-xl font-bold cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-4 font-mono text-xs">
+              <div className="bg-black/50 p-4 border border-[#facc15]/30 rounded flex justify-between items-center">
+                <div>
+                  <div className="font-military text-lg text-[#facc15] font-bold">TIER 1 REWARD</div>
+                  <div className="text-gray-300">White Mummy White Code Editor Theme</div>
+                </div>
+                <span className="px-3 py-1 bg-[#facc15]/20 text-[#facc15] border border-[#facc15] font-bold rounded">
+                  UNLOCKED
+                </span>
+              </div>
+
+              <div className="bg-black/50 p-4 border border-white/10 rounded flex justify-between items-center">
+                <div>
+                  <div className="font-military text-lg text-white font-bold">TIER 50 REWARD</div>
+                  <div className="text-gray-300">Glacier M416 Syntax Highlighter Skin</div>
+                </div>
+                <span className="px-3 py-1 bg-white/10 text-gray-400 border border-white/10 rounded">
+                  LVL 50 REQ
+                </span>
+              </div>
+
+              <div className="bg-black/50 p-4 border border-white/10 rounded flex justify-between items-center">
+                <div>
+                  <div className="font-military text-lg text-[#00ffcc] font-bold">TIER 100 REWARD</div>
+                  <div className="text-gray-300">Golden Conqueror Keycaps &amp; Sound Pack</div>
+                </div>
+                <span className="px-3 py-1 bg-white/10 text-gray-400 border border-white/10 rounded">
+                  LVL 100 REQ
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={() => setShowRoyalePassModal(false)}
+                className="btn-tactical-yellow px-6 py-2.5 text-sm clip-angular-btn"
+              >
+                CLOSE PREVIEW
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Rules Modal */}
+      {showRulesModal && (
+        <div className="modal-overlay" onClick={() => setShowRulesModal(false)}>
+          <div className="modal-container p-6 clip-steel-card rounded-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-6">
+              <div className="flex items-center gap-2">
+                <ShieldAlert size={20} className="text-[#00ffcc]" />
+                <h3 className="font-military text-2xl text-white font-bold tracking-wider">
+                  RULES OF COMBAT
+                </h3>
+              </div>
+              <button
+                onClick={() => setShowRulesModal(false)}
+                className="text-gray-400 hover:text-white text-xl font-bold cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-4 font-mono text-xs text-gray-300 leading-relaxed">
+              <div className="p-3 bg-black/40 border border-white/10 rounded">
+                <strong className="text-[#00ffcc] block mb-1">1. SHRINKING PLAYZONE:</strong>
+                Submitting incorrect test cases immediately shrinks your team buffer zone by -15%. Zone collapse tick damage reduces maximum code submission time.
+              </div>
+              <div className="p-3 bg-black/40 border border-white/10 rounded">
+                <strong className="text-[#facc15] block mb-1">2. AIR DROPS:</strong>
+                Bonus supply crates spawn mid-match with bonus DSA optimization tasks. Solving them grants instant score multipliers and shield perks.
+              </div>
+              <div className="p-3 bg-black/40 border border-white/10 rounded">
+                <strong className="text-[#ff4757] block mb-1">3. ANTI-CHEAT ENGINE:</strong>
+                AI-driven solution plagiarism and syntax copy-paste detectors are active. Automated script bots result in immediate match forfeit and rank reset.
+              </div>
+            </div>
+
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={() => setShowRulesModal(false)}
+                className="btn-tactical-cyan px-6 py-2.5 text-sm clip-angular-btn"
+              >
+                UNDERSTOOD
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Quick Auth Modal */}
+      {showAuthModal && (
+        <div className="modal-overlay" onClick={() => setShowAuthModal(false)}>
+          <div className="modal-container p-6 clip-steel-card rounded-xl text-center max-w-md" onClick={(e) => e.stopPropagation()}>
+            <h3 className="font-military text-2xl text-white font-bold tracking-wider mb-2">
+              AUTHENTICATE CODER PROFILE
+            </h3>
+            <p className="font-mono text-xs text-gray-400 mb-6">
+              Sign in with 1-click to access multiplayer arenas and save your BP rank stats.
+            </p>
+
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={() => handleAuthAction('github')}
+                className="social-login-btn clip-angular-btn w-full"
+              >
+                <span>CONTINUE WITH GITHUB</span>
+              </button>
+
+              <button
+                onClick={() => handleAuthAction('google')}
+                className="social-login-btn clip-angular-btn w-full"
+              >
+                <span>CONTINUE WITH GOOGLE</span>
+              </button>
+            </div>
+
+            <button
+              onClick={() => setShowAuthModal(false)}
+              className="mt-4 font-mono text-xs text-gray-500 hover:text-gray-300 cursor-pointer"
+            >
+              Cancel &amp; Return
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Tactical Lobby Synchronization Overlay */}
       {isEntering && (
         <div className="sync-modal-overlay">
-          <div className="sync-modal-container bg-iron-gray border-2 border-gold shadow-[0_0_30px_rgba(250,204,21,0.25)] p-8 text-center max-w-md w-full relative">
-            <div className="absolute top-0 right-10 w-8 h-[3px] bg-gold"></div>
+          <div className="sync-modal-container bg-[#12141c] border-2 border-[#facc15] shadow-[0_0_30px_rgba(250,204,21,0.25)] p-8 text-center max-w-md w-full relative">
+            <div className="absolute top-0 right-10 w-8 h-[3px] bg-[#facc15]"></div>
             
             <div className="flex flex-col items-center justify-center gap-5">
-              <RefreshCw className="animate-spin text-gold w-12 h-12 mb-2" />
+              <RefreshCw className="animate-spin text-[#facc15] w-12 h-12 mb-2" />
               
               <div>
                 <h3 className="font-military text-2xl text-white tracking-widest mb-1">CONNECTING TO LOBBY</h3>
-                <span className="font-mono text-[9px] text-cyan-400 tracking-[0.2em] font-bold">SECURE CHANNEL PORT_5005</span>
+                <span className="font-mono text-[9px] text-[#00ffcc] tracking-[0.2em] font-bold">SECURE CHANNEL PORT_5005</span>
               </div>
 
               {/* Rolling logs console */}
-              <div className="sync-terminal-logs font-mono text-[10px] text-gray-500 text-left bg-black/60 p-4 border border-gray-900 w-full h-32 flex flex-col justify-start gap-1 overflow-hidden select-none rounded">
-                <p className="text-gold font-bold">&gt; AUTHENTICATING USER PROFILE GHOST_CODER...</p>
+              <div className="sync-terminal-logs font-mono text-[10px] text-gray-400 text-left bg-black/70 p-4 border border-gray-900 w-full h-32 flex flex-col justify-start gap-1 overflow-hidden select-none rounded">
+                <p className="text-[#facc15] font-bold">&gt; AUTHENTICATING USER PROFILE GHOST_CODER...</p>
                 {syncStep >= 1 && <p className="text-gray-400">&gt; Securing compiler sockets... DONE</p>}
                 {syncStep >= 2 && <p className="text-gray-400">&gt; Allocating virtual matchmaking stack... DONE</p>}
                 {syncStep >= 3 && <p className="text-green-400 font-bold">&gt; ENTRANCE PERMITTED. LAUNCHING LOBBY...</p>}
               </div>
 
-              <div className="font-military text-[11px] text-gold/70 tracking-widest">
+              <div className="font-military text-[11px] text-[#facc15]/70 tracking-widest">
                 DO NOT INTERRUPT LOBBY INITIALIZATION
               </div>
             </div>

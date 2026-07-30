@@ -1,145 +1,160 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
 import { 
   Terminal, Code2, Play, Pause, Disc, Volume2, ShieldAlert, Award, 
-  ArrowLeft, RefreshCw, Send, Shield, Zap, Flame, Cpu, Eye, Radio, Check
+  ArrowLeft, RefreshCw, Send, Shield, Zap, Flame, Cpu, Eye, Radio, Check,
+  Search, Link, Copy, UserCheck, ExternalLink, HelpCircle, Users
 } from 'lucide-react';
+import { io } from 'socket.io-client';
 import { themeService } from '../../services/themeService';
 import { audioService } from '../../services/audioService';
+import { useAuth } from '../../context/AuthContext';
+import BattleChat from '../../components/BattleChat/BattleChat';
 import './Arena.css';
 
 export default function Arena() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { user } = useAuth();
   const activeTheme = themeService.getCurrentTheme();
 
-  // 1. Language selector & templates
+  // Socket.io connection instance
+  const [socket, setSocket] = useState(null);
+  const [matchId, setMatchId] = useState('');
+  const [copiedLink, setCopiedLink] = useState(false);
+  const [matchStarted, setMatchStarted] = useState(false);
+
+  // 1. Question-First Selection State
+  const [availableProblems, setAvailableProblems] = useState([]);
+  const [selectedProblem, setSelectedProblem] = useState(null);
+  const [showQuestionModal, setShowQuestionModal] = useState(false);
+  
+  // 2. GitHub Lookup & Target Preview State
+  const [showInviteDrawer, setShowInviteDrawer] = useState(false);
+  const [githubInput, setGithubInput] = useState('');
+  const [isSearchingGithub, setIsSearchingGithub] = useState(false);
+  const [githubTarget, setGithubTarget] = useState(null);
+  const [githubError, setGithubError] = useState('');
+
+  // Language selector & templates
   const [selectedLanguage, setSelectedLanguage] = useState('javascript');
   
   const languageTemplates = {
-    javascript: `// Mission: Secure Perimeter Firewall Grid (1v1 Duel)
-// Write an algorithm that finds the shortest secure path avoiding DETECTOR nodes.
-function bypassFirewall(grid, startX, startY) {
-  const queue = [[startX, startY, []]];
-  const visited = new Set();
-  
-  while (queue.length > 0) {
-    const [x, y, path] = queue.shift();
-    const key = \`\${x},\${y}\`;
-    
-    if (grid[y] && grid[y][x] === 'DETECTOR') continue;
-    
-    if (x === grid[0].length - 1 && y === grid.length - 1) {
-      return [...path, [x, y]]; // Secure path compiled!
-    }
-    
-    if (!visited.has(key)) {
-      visited.add(key);
-      queue.push([x + 1, y, [...path, [x, y]]]);
-      queue.push([x, y + 1, [...path, [x, y]]]);
-    }
-  }
-  return null;
-}`,
-    python: `# Mission: Secure Perimeter Firewall Grid (1v1 Duel)
-# Write an algorithm that finds the shortest secure path avoiding DETECTOR nodes.
-def bypass_firewall(grid, start_x, start_y):
-    queue = [(start_x, start_y, [])]
-    visited = set()
-    
-    while queue:
-        x, y, path = queue.pop(0)
-        key = f"{x},{y}"
-        
-        if 0 <= y < len(grid) and 0 <= x < len(grid[0]) and grid[y][x] == 'DETECTOR':
-            continue
-            
-        if x == len(grid[0]) - 1 and y == len(grid) - 1:
-            return path + [(x, y)]
-            
-        if key not in visited:
-            visited.add(key)
-            queue.append((x + 1, y, path + [(x, y)]))
-            queue.append((x, y + 1, path + [(x, y)]))
-    return None`,
-    cpp: `// Mission: Secure Perimeter Firewall Grid (1v1 Duel)
-#include <iostream>
-#include <vector>
-#include <queue>
-using namespace std;
-
-vector<pair<int, int>> bypassFirewall(vector<vector<string>>& grid) {
-    // Implement BFS pathfinding algorithm
-    return {};
-}`,
-    java: `// Mission: Secure Perimeter Firewall Grid (1v1 Duel)
-import java.util.*;
-
-public class Solution {
-    public static List<int[]> bypassFirewall(String[][] grid) {
-        // Implement BFS pathfinding algorithm
-        return new ArrayList<>();
-    }
-}`
+    javascript: `// Mission: Secure Perimeter Firewall Grid (1v1 Duel)\nfunction bypassFirewall(grid, startX, startY) {\n  // Write your algorithm logic here\n}`,
+    python: `# Mission: Secure Perimeter Firewall Grid (1v1 Duel)\ndef bypass_firewall(grid, start_x, start_y):\n    pass`,
+    cpp: `// Mission: Secure Perimeter Firewall Grid (1v1 Duel)\n#include <iostream>\nusing namespace std;\n\nint solution() {\n  return 0;\n}`
   };
 
   const [code, setCode] = useState(languageTemplates.javascript);
 
-  // Switch template when language changes
-  const handleLanguageChange = (lang) => {
-    setSelectedLanguage(lang);
-    setCode(languageTemplates[lang] || languageTemplates.javascript);
-  };
-
-  // 2. Combat Health Mechanics (100 HP initial)
+  // Combat Health Mechanics
   const [userHp, setUserHp] = useState(100);
   const [opponentHp, setOpponentHp] = useState(100);
-  const [userTestsPassed, setUserTestsPassed] = useState(7);
-  const [opponentTestsPassed, setOpponentTestsPassed] = useState(6);
-  const [hasHelmet, setHasHelmet] = useState(false); // Level 3 Helmet Shield
-  const [isDamageFlashing, setIsDamageFlashing] = useState(false); // Red damage overlay
+  const [opponentProfile, setOpponentProfile] = useState({
+    username: 'AWAITING TARGET...',
+    avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=Target'
+  });
+  const [userTestsPassed, setUserTestsPassed] = useState(0);
+  const [opponentTestsPassed, setOpponentTestsPassed] = useState(0);
+  const [hasHelmet, setHasHelmet] = useState(false);
+  const [isDamageFlashing, setIsDamageFlashing] = useState(false);
 
-  // 3. Air Drop Event Modal State (every 3 mins)
-  const [airDropActive, setAirDropActive] = useState(false);
-  const [airDropTimeLeft, setAirDropTimeLeft] = useState(30);
-  const [selectedAirdropOption, setSelectedAirdropOption] = useState(null);
-  const [isSmoked, setIsSmoked] = useState(false); // Smoke Grenade powerup
-  const [currentAirdropQ, setCurrentAirdropQ] = useState(0);
-
-  const airdropQuestions = [
-    {
-      q: "What is the worst-case time complexity of QuickSort?",
-      options: ["O(N log N)", "O(N)", "O(N²)", "O(1)"],
-      correct: 2
-    },
-    {
-      q: "Which data structure operates on a LIFO (Last-In-First-Out) model?",
-      options: ["Queue", "Stack", "Binary Tree", "Linked List"],
-      correct: 1
-    },
-    {
-      q: "Which CSS property disables element pointer clicks?",
-      options: ["cursor: none", "user-select: none", "pointer-events: none", "display: block"],
-      correct: 2
-    }
-  ];
-
-  // 4. Opponent Real-Time Typing & HUD State
-  const [opponentCursor, setOpponentCursor] = useState({ line: 14, col: 8 });
-  const [isOpponentTyping, setIsOpponentTyping] = useState(true);
-
-  // 5. Terminal / Kill Feed Logs
+  // Terminal & Match Control
   const [terminalLogs, setTerminalLogs] = useState([
-    { type: 'info', text: '[SYSTEM] COMBAT COMPILER ARENA ONLINE (v2.4.12)' },
-    { type: 'info', text: '[MATCH] DUEL INITIALIZED: GHOST_CODER VS NEON_VIPER' },
-    { type: 'success', text: '[GHOST_CODER] Headshot on Test Case 1!' },
-    { type: 'success', text: '[GHOST_CODER] Headshot on Test Case 2!' },
-    { type: 'warning', text: '[SYSTEM] Air Drop deployment countdown active...' }
+    { type: 'info', text: '[SYSTEM] COMBAT COMPILER ARENA ONLINE (v4.2.0)' },
+    { type: 'warning', text: '[STEP 1] Select or customize a coding problem to unlock tactical invitations.' }
   ]);
 
   const [isRunningTests, setIsRunningTests] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [matchTimeLeft, setMatchTimeLeft] = useState(899);
+
+  // Fetch Problems list from backend on mount
+  useEffect(() => {
+    fetch('http://localhost:3001/api/problems/all')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.problems && data.problems.length > 0) {
+          setAvailableProblems(data.problems);
+          const defaultProb = data.problems[0];
+          setSelectedProblem(defaultProb);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  // Initialize Socket.io Connection & Match URL handler
+  useEffect(() => {
+    const newSocket = io('http://localhost:3001/battle', {
+      transports: ['websocket', 'polling'],
+      withCredentials: true
+    });
+    setSocket(newSocket);
+
+    const queryParams = new URLSearchParams(location.search);
+    const urlMatchId = queryParams.get('matchId');
+
+    const currentUserPayload = {
+      username: user?.username || 'GHOST_CODER',
+      avatar: user?.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${user?.username || 'Ghost'}`
+    };
+
+    if (urlMatchId) {
+      setMatchId(urlMatchId);
+      newSocket.emit('arena:join_room', {
+        matchId: urlMatchId,
+        guestUser: currentUserPayload
+      });
+    } else {
+      const generatedId = `MATCH_${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
+      setMatchId(generatedId);
+      newSocket.emit('arena:create_challenge', {
+        matchId: generatedId,
+        hostUser: currentUserPayload
+      });
+    }
+
+    // Socket Event: Opponent joined/connected handler
+    const handleOpponentJoined = (data) => {
+      let guestName = 'TARGET_ACQUIRED';
+      let guestAvatar = `https://api.dicebear.com/7.x/bottts/svg?seed=Target`;
+
+      if (data.guestUser) {
+        guestName = data.guestUser.username || guestName;
+        guestAvatar = data.guestUser.avatar || guestAvatar;
+      } else if (data.players && data.players.length > 1) {
+        guestName = data.players[1].username || guestName;
+        guestAvatar = data.players[1].avatar || guestAvatar;
+      }
+
+      setOpponentProfile({
+        username: guestName,
+        avatar: guestAvatar
+      });
+
+      setMatchStarted(true);
+
+      setTerminalLogs((prev) => [
+        ...prev,
+        { type: 'success', text: data.message || `[SYSTEM] @${guestName} connected to the tactical perimeter.` },
+        { type: 'info', text: '[MATCH STATUS] 1v1 Duel active! Timer countdown engaged.' }
+      ]);
+
+      try {
+        audioService.playSniper();
+      } catch (e) {}
+    };
+
+    newSocket.on('arena:opponent_joined', handleOpponentJoined);
+    newSocket.on('arena:opponent_connected', handleOpponentJoined);
+
+    return () => {
+      newSocket.off('arena:opponent_joined', handleOpponentJoined);
+      newSocket.off('arena:opponent_connected', handleOpponentJoined);
+      newSocket.disconnect();
+    };
+  }, [location.search, user]);
 
   // Countdown Match Timer
   useEffect(() => {
@@ -148,65 +163,66 @@ public class Solution {
     return () => clearInterval(timer);
   }, [matchTimeLeft]);
 
-  // Air Drop 3-Minute Interval Loop
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (!airDropActive) {
-        setSelectedAirdropOption(null);
-        setCurrentAirdropQ(Math.floor(Math.random() * airdropQuestions.length));
-        setAirDropTimeLeft(30);
-        setAirDropActive(true);
+  // Handle GitHub Profile Search
+  const handleGithubSearch = async (e) => {
+    e.preventDefault();
+    if (!githubInput.trim()) return;
+
+    setIsSearchingGithub(true);
+    setGithubError('');
+    setGithubTarget(null);
+
+    try {
+      const response = await fetch(
+        `http://localhost:3001/api/users/github-preview?identifier=${encodeURIComponent(githubInput.trim())}`
+      );
+      const data = await response.json();
+      setIsSearchingGithub(false);
+
+      if (data.success && data.profile) {
+        setGithubTarget(data.profile);
+      } else {
+        setGithubError(data.message || 'GitHub profile not found');
       }
-    }, 180000); // 3 minutes
-    return () => clearInterval(interval);
-  }, [airDropActive]);
-
-  // Air Drop Countdown Timer
-  useEffect(() => {
-    if (!airDropActive) return;
-    if (airDropTimeLeft <= 0) {
-      setAirDropActive(false);
-      return;
+    } catch (err) {
+      setIsSearchingGithub(false);
+      setGithubError('Failed to fetch GitHub profile');
     }
-    const timer = setInterval(() => setAirDropTimeLeft((prev) => prev - 1), 1000);
-    return () => clearInterval(timer);
-  }, [airDropActive, airDropTimeLeft]);
+  };
 
-  // Low HP Heartbeat Audio loop
-  useEffect(() => {
-    if (userHp > 0 && userHp <= 25) {
-      audioService.startHeartbeat();
-    } else {
-      audioService.stopHeartbeat();
+  // Generate & Copy Match Challenge Link
+  const handleCopyMatchLink = () => {
+    const inviteUrl = `${window.location.origin}/arena?matchId=${matchId}&host=${encodeURIComponent(user?.username || 'HOST')}`;
+    navigator.clipboard.writeText(inviteUrl);
+    setCopiedLink(true);
+
+    if (socket && matchId) {
+      socket.emit('arena:create_challenge', {
+        matchId,
+        problem: selectedProblem,
+        hostUser: { username: user?.username || 'HOST_OPERATOR', avatar: user?.avatar }
+      });
     }
-    return () => audioService.stopHeartbeat();
-  }, [userHp]);
 
-  // Opponent Live Typing Simulator
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const line = Math.floor(Math.random() * 20) + 1;
-      const col = Math.floor(Math.random() * 30) + 1;
-      setOpponentCursor({ line, col });
-      setIsOpponentTyping(Math.random() > 0.3);
+    setTerminalLogs((prev) => [
+      ...prev,
+      { type: 'info', text: `[INVITE LINK] Challenge URL copied: ${inviteUrl}` }
+    ]);
 
-      // Opponent score updates
-      if (Math.random() > 0.85 && opponentTestsPassed < 10) {
-        setOpponentTestsPassed((prev) => prev + 1);
-        setTerminalLogs((prevLogs) => [
-          ...prevLogs,
-          { type: 'warning', text: `[NEON_VIPER] Headshot on Test Case ${opponentTestsPassed + 1}!` }
-        ]);
-      }
-    }, 2800);
-    return () => clearInterval(interval);
-  }, [opponentTestsPassed]);
+    setTimeout(() => setCopiedLink(false), 3000);
+  };
 
-  // Format time remaining
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  // Confirm Question Selection
+  const handleConfirmQuestion = (problemObj) => {
+    setSelectedProblem(problemObj);
+    if (problemObj.driverCode && problemObj.driverCode[selectedLanguage]) {
+      setCode(problemObj.driverCode[selectedLanguage]);
+    }
+    setShowQuestionModal(false);
+    setTerminalLogs((prev) => [
+      ...prev,
+      { type: 'success', text: `[QUESTION LOCKED] Active problem set to "${problemObj.title}". Invite action unlocked!` }
+    ]);
   };
 
   // Run Test Cases Action
@@ -217,29 +233,26 @@ public class Solution {
 
     setTerminalLogs((prev) => [
       ...prev,
-      { type: 'info', text: '[GHOST_CODER] Reloading syntax buffers...' }
+      { type: 'info', text: `[${user?.username || 'CODER'}] Compiling syntax buffers against test cases...` }
     ]);
 
     setTimeout(() => {
-      // Randomly simulate pass or fail to demonstrate HP damage mechanics
       const isFailedAttempt = Math.random() > 0.65;
 
       if (isFailedAttempt) {
         if (hasHelmet) {
-          setHasHelmet(false); // Helmet shields penalty!
+          setHasHelmet(false);
           setTerminalLogs((prev) => [
             ...prev,
-            { type: 'warning', text: '[ARMOR] Level 3 Helmet shielded GHOST_CODER from HP recoil penalty!' }
+            { type: 'warning', text: '[ARMOR] Level 3 Helmet shielded operator from HP recoil penalty!' }
           ]);
         } else {
-          // Trigger Red Damage Flash Overlay & -20 HP loss
           setIsDamageFlashing(true);
           setTimeout(() => setIsDamageFlashing(false), 800);
           setUserHp((prev) => Math.max(0, prev - 20));
-          
           setTerminalLogs((prev) => [
             ...prev,
-            { type: 'danger', text: '[NEON_VIPER] Counter-attacked! [GHOST_CODER] suffered Recoil damage (-20 HP)!' }
+            { type: 'danger', text: '[OPPONENT] Counter-attacked! Recoil penalty (-20 HP)!' }
           ]);
         }
       } else {
@@ -247,7 +260,7 @@ public class Solution {
         setUserTestsPassed((prev) => Math.min(10, prev + 1));
         setTerminalLogs((prev) => [
           ...prev,
-          { type: 'success', text: `[GHOST_CODER] Headshot on Test Case ${userTestsPassed + 1}! (+10 PTS)` }
+          { type: 'success', text: `[${user?.username || 'CODER'}] Headshot on Test Case ${userTestsPassed + 1}! (+10 PTS)` }
         ]);
       }
 
@@ -255,19 +268,15 @@ public class Solution {
     }, 1400);
   };
 
-  // Submit Match Action
-  const handleSubmitMatch = () => {
-    setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
-      navigate('/result');
-    }, 2000);
+  // Format time remaining
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
   return (
     <div className={`arena-container font-sans select-none relative ${isDamageFlashing ? 'animate-damage-flash' : ''}`}>
-      
-      {/* Background Grid & Scanlines */}
       <div className="arena-grid-matrix" />
       <div className="scanlines-overlay" />
 
@@ -289,26 +298,38 @@ public class Solution {
           
           <div className="h-4 w-[2px] bg-gray-800" />
 
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 bg-red-600 rounded-full animate-ping" />
-            <span className="font-military text-sm text-red-500 tracking-wider">BGMI DUEL ARENA #A501</span>
-          </div>
+          {/* Question Selector Trigger */}
+          <button
+            onClick={() => setShowQuestionModal(true)}
+            className="flex items-center gap-2 px-3 py-1 bg-[#facc15]/10 border border-[#facc15]/40 text-[#facc15] font-military text-xs font-bold rounded clip-steel-sm hover:bg-[#facc15]/20 cursor-pointer"
+          >
+            <HelpCircle size={14} />
+            <span>{selectedProblem ? `QUESTION: ${selectedProblem.title}` : 'SELECT MATCH QUESTION'}</span>
+          </button>
         </div>
 
-        {/* Language Selector */}
-        <div className="flex items-center gap-3 bg-black/40 border border-[#2d3142] px-3 py-1 clip-steel-sm">
-          <Code2 size={14} className="text-[#00ffcc]" />
-          <span className="text-[10px] font-mono text-gray-400 uppercase">LANGUAGE:</span>
-          <select
-            value={selectedLanguage}
-            onChange={(e) => handleLanguageChange(e.target.value)}
-            className="bg-transparent text-xs font-mono text-white font-bold border-none focus:outline-none cursor-pointer"
+        {/* Action Buttons: Invite Opponent & Link Copy */}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setShowInviteDrawer(true)}
+            disabled={!selectedProblem}
+            className={`flex items-center gap-2 px-4 py-1.5 font-military text-xs font-bold tracking-wider rounded clip-angular-btn transition-all cursor-pointer ${
+              selectedProblem
+                ? 'bg-[#00ffcc] hover:bg-[#00cca3] text-black shadow-[0_0_15px_rgba(0,255,204,0.3)]'
+                : 'bg-gray-800 text-gray-500 cursor-not-allowed'
+            }`}
           >
-            <option value="javascript" className="bg-[#121620]">JavaScript (Node.js)</option>
-            <option value="python" className="bg-[#121620]">Python (v3.11)</option>
-            <option value="cpp" className="bg-[#121620]">C++ (GCC 12)</option>
-            <option value="java" className="bg-[#121620]">Java (OpenJDK 17)</option>
-          </select>
+            <Users size={14} />
+            <span>INVITE OPPONENT</span>
+          </button>
+
+          <button
+            onClick={handleCopyMatchLink}
+            className="flex items-center gap-2 px-3 py-1.5 bg-black/50 border border-white/20 hover:border-white text-white font-military text-xs rounded transition-all cursor-pointer"
+          >
+            {copiedLink ? <Check size={14} className="text-[#00ffcc]" /> : <Copy size={14} />}
+            <span>{copiedLink ? 'LINK COPIED!' : 'COPY MATCH LINK'}</span>
+          </button>
         </div>
 
         {/* Match Timer */}
@@ -327,7 +348,6 @@ public class Solution {
         <section className="lg:col-span-7 flex flex-col min-h-0 relative">
           <div className="steel-panel border-2 border-steel-border flex-1 flex flex-col clip-steel-widget min-h-0 overflow-hidden">
             
-            {/* Editor Header Bar */}
             <div className="flex items-center justify-between bg-black/60 border-b border-steel-border px-4 py-2">
               <div className="flex items-center gap-2">
                 <div className="flex gap-1.5">
@@ -338,29 +358,18 @@ public class Solution {
                 <div className="h-4 w-[1px] bg-gray-800 mx-2" />
                 <div className="flex items-center gap-1.5 px-3 py-1 bg-panel-bg border-t-2 border-t-gold text-xs font-mono text-white">
                   <Code2 size={12} className="text-gold" />
-                  <span>solution.{selectedLanguage === 'python' ? 'py' : selectedLanguage === 'cpp' ? 'cpp' : selectedLanguage === 'java' ? 'java' : 'js'}</span>
+                  <span>solution.{selectedLanguage === 'python' ? 'py' : selectedLanguage === 'cpp' ? 'cpp' : 'js'}</span>
                 </div>
               </div>
 
               <div className="text-[10px] font-mono text-gray-500 flex items-center gap-3">
-                <span className="flex items-center gap-1 text-[#00ffcc]">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#00ffcc] animate-pulse" />
-                  MONACO ENGINE (VS-DARK)
+                <span className="text-[#00ffcc] font-bold">
+                  {selectedProblem ? selectedProblem.title : 'NO QUESTION SELECTED'}
                 </span>
               </div>
             </div>
 
-            {/* Monaco Editor Container */}
             <div className="flex-1 relative w-full h-full min-h-[380px]">
-              
-              {/* Smoke Grenade Blind Overlay */}
-              {isSmoked && (
-                <div className="absolute inset-0 bg-slate-900/85 backdrop-blur-md z-40 flex flex-col items-center justify-center pointer-events-none transition-all duration-300">
-                  <span className="font-military text-xl text-[#00ffcc] tracking-widest block mb-2 animate-pulse">SMOKE GRENADE ACTIVE</span>
-                  <span className="text-[9px] font-mono text-gray-400 uppercase">Opponent blinded your editor logs for 12s</span>
-                </div>
-              )}
-
               <Editor
                 height="100%"
                 language={selectedLanguage}
@@ -374,50 +383,32 @@ public class Solution {
                   scrollBeyondLastLine: false,
                   automaticLayout: true,
                   lineNumbers: 'on',
-                  padding: { top: 12, bottom: 12 },
-                  cursorBlinking: 'smooth',
-                  renderLineHighlight: 'all'
+                  padding: { top: 12, bottom: 12 }
                 }}
               />
             </div>
-
-            {/* Editor Footer Bar */}
-            <div className="bg-black/60 border-t border-steel-border px-4 py-1.5 text-[10px] font-mono text-gray-500 flex justify-between">
-              <div className="flex gap-4">
-                <span>Ln 14, Col 22</span>
-                <span>UTF-8</span>
-                <span className="text-gray-400">STATUS: {selectedLanguage.toUpperCase()} READY</span>
-              </div>
-              <div className="text-[#00ffcc] font-bold flex items-center gap-1">
-                <Zap size={10} />
-                COMPILER DEPLOYMENT ONLINE
-              </div>
-            </div>
-
           </div>
         </section>
 
         {/* ================= RIGHT SIDE: OPPONENT HUD & TERMINAL KILL FEED (5 COLS) ================= */}
         <section className="lg:col-span-5 flex flex-col gap-4 min-h-0 overflow-y-auto custom-scrollbar">
           
-          {/* OPPONENT STATS & COMBAT HEALTH WIDGET */}
           <div className="bg-iron-gray border border-steel-border p-4 clip-steel-widget flex flex-col gap-4 relative">
-            <div className="absolute top-0 right-6 w-10 h-[2px] bg-red-500" />
-            
             <div className="flex items-center justify-between border-b border-steel-border/60 pb-2">
               <div className="flex items-center gap-2">
                 <Shield className="text-red-500 w-4.5 h-4.5" />
-                <h3 className="font-military text-sm text-white tracking-widest">COMBAT HEALTH & OPPONENT HUD</h3>
+                <h3 className="font-military text-sm text-white tracking-widest">COMBAT HEALTH &amp; OPPONENT HUD</h3>
               </div>
-              <span className="text-[9px] font-mono text-green-400 animate-pulse">1V1 LIVE DUEL</span>
+              <span className="text-[9px] font-mono text-green-400 animate-pulse">
+                {matchStarted ? '1V1 LIVE DUEL' : 'AWAITING MATCH ROOM'}
+              </span>
             </div>
 
-            {/* PLAYER 1 (YOU) HP BAR */}
+            {/* PLAYER 1 (YOU) */}
             <div className="p-3 bg-black/40 border border-slate-800 clip-steel-sm">
               <div className="flex justify-between items-center text-xs font-military mb-1.5">
                 <span className="text-white font-bold flex items-center gap-1.5">
-                  GHOST_CODER (YOU)
-                  {hasHelmet && <Shield size={12} className="text-[#00ffcc] fill-[#00ffcc]/20 animate-pulse" />}
+                  {user?.username || 'GHOST_CODER'} (YOU)
                 </span>
                 <span className="text-gold font-mono text-[11px] font-bold">
                   {userHp} HP | {userTestsPassed}/10 TESTS
@@ -433,25 +424,21 @@ public class Solution {
               </div>
             </div>
 
-            {/* PLAYER 2 (OPPONENT) HP BAR & LIVE TYPING INDICATOR */}
+            {/* PLAYER 2 (OPPONENT / TARGET) */}
             <div className="p-3 bg-black/40 border border-slate-800 clip-steel-sm">
               <div className="flex justify-between items-center text-xs font-military mb-1.5">
-                <span className="text-gray-300 font-bold flex items-center gap-1.5">
-                  NEON_VIPER (OPPONENT)
-                  {isOpponentTyping && (
-                    <span className="text-[9px] font-mono text-[#00ffcc] flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#00ffcc] animate-ping" />
-                      TYPING...
-                    </span>
-                  )}
-                </span>
+                <div className="flex items-center gap-2">
+                  <img src={opponentProfile.avatar} alt="Opponent Avatar" className="w-5 h-5 rounded-full border border-[#00ffcc]" />
+                  <span className={`font-bold ${opponentProfile.username === 'AWAITING TARGET...' ? 'text-gray-500 animate-pulse' : 'text-gray-300'}`}>
+                    {opponentProfile.username}
+                  </span>
+                </div>
                 <span className="text-red-400 font-mono text-[11px] font-bold">
                   {opponentHp} HP | {opponentTestsPassed}/10 TESTS
                 </span>
               </div>
 
-              {/* Opponent HP bar */}
-              <div className="w-full h-3 bg-black border border-slate-800 rounded-sm overflow-hidden flex mb-2">
+              <div className="w-full h-3 bg-black border border-slate-800 rounded-sm overflow-hidden flex">
                 <div 
                   className={`h-full transition-all duration-500 ${
                     opponentHp >= 70 ? 'bg-green-500' : opponentHp >= 40 ? 'bg-yellow-500' : 'bg-red-500'
@@ -459,17 +446,10 @@ public class Solution {
                   style={{ width: `${opponentHp}%` }}
                 />
               </div>
-
-              {/* Opponent Live Cursor Buffer */}
-              <div className="flex justify-between items-center text-[9px] font-mono text-gray-500 border-t border-slate-900 pt-1.5">
-                <span>CURSOR POSITION: LN {opponentCursor.line}, COL {opponentCursor.col}</span>
-                <span className="text-gray-400">LATENCY: 24ms</span>
-              </div>
             </div>
-
           </div>
 
-          {/* COMPILER TERMINAL / TACTICAL KILL FEED */}
+          {/* KILL FEED */}
           <div className="bg-iron-gray border border-steel-border p-4 flex-1 min-h-[220px] flex flex-col clip-steel-widget">
             <div className="flex items-center justify-between border-b border-steel-border/60 pb-2 mb-3">
               <div className="flex items-center gap-2">
@@ -482,152 +462,132 @@ public class Solution {
                 disabled={isRunningTests}
                 className="px-3 py-1 bg-[#00ffcc] hover:bg-[#00cca3] text-black font-military text-xs font-bold tracking-widest clip-steel-sm transition-colors flex items-center gap-1.5 border-none cursor-pointer"
               >
-                {isRunningTests ? (
-                  <RefreshCw size={12} className="animate-spin" />
-                ) : (
-                  <Play size={12} fill="black" />
-                )}
+                {isRunningTests ? <RefreshCw size={12} className="animate-spin" /> : <Play size={12} fill="black" />}
                 <span>RUN TESTS</span>
               </button>
             </div>
 
-            {/* Kill feed log list */}
             <div className="flex-1 bg-black/50 border border-slate-900 p-3 overflow-y-auto custom-scrollbar font-mono text-[10px] leading-relaxed text-gray-300">
               {terminalLogs.map((log, index) => (
-                <div 
-                  key={index} 
-                  className={`mb-1.5 ${
-                    log.type === 'success' ? 'text-[#00ffcc] font-bold' :
-                    log.type === 'danger' ? 'text-red-400 font-bold' :
-                    log.type === 'warning' ? 'text-gold' :
-                    'text-gray-400'
-                  }`}
-                >
+                <div key={index} className={`mb-1.5 ${log.type === 'success' ? 'text-[#00ffcc] font-bold' : log.type === 'danger' ? 'text-red-400 font-bold' : log.type === 'warning' ? 'text-gold' : 'text-gray-400'}`}>
                   {log.text}
                 </div>
               ))}
-              {isRunningTests && (
-                <div className="text-[#00ffcc] animate-pulse font-mono">Compiling syntax buffers & running test cases...</div>
-              )}
             </div>
           </div>
-
         </section>
-
       </main>
 
-      {/* ================= BOTTOM HUD: SUBMIT MATCH BUTTON ================= */}
-      <footer className="relative z-10 bg-iron-gray border-t border-steel-border px-6 py-3 flex items-center justify-between">
-        <div className="text-[10px] font-mono text-gray-500">
-          MATCHMAKING ID: #A501-DUEL | SAFE ZONE STABLE
-        </div>
+      {/* ================= MODALS & DRAWERS ================= */}
 
-        <button
-          onClick={handleSubmitMatch}
-          disabled={isSubmitting}
-          className="py-3 px-8 bg-gold hover:bg-gold-hover text-black font-military font-black text-lg tracking-wider clip-angular-btn start-match-glow flex items-center justify-center gap-2 cursor-pointer transition-all duration-300 border-none"
-        >
-          {isSubmitting ? (
-            <>
-              <RefreshCw className="animate-spin w-5 h-5" />
-              <span>SUBMITTING MATCH...</span>
-            </>
-          ) : (
-            <>
-              <Send size={16} fill="black" />
-              <span>SUBMIT MATCH</span>
-            </>
-          )}
-        </button>
-      </footer>
-
-      {/* Air Drop Mini-Event Modal */}
-      {airDropActive && (
-        <div className="absolute inset-0 bg-black/85 backdrop-blur-sm z-50 flex flex-col items-center justify-center p-6">
-          <div className="max-w-md w-full bg-[#0b0e14] border-2 border-[#00ffcc] p-6 text-center clip-steel-widget shadow-[0_0_30px_rgba(0,255,204,0.25)] relative">
-            <div className="absolute top-0 right-10 w-8 h-[2px] bg-[#00ffcc]" />
-            
-            <div className="flex items-center gap-2 justify-center border-b border-[#252e3d] pb-3 mb-4">
-              <span className="w-2.5 h-2.5 bg-[#00ffcc] rounded-full animate-ping" />
-              <h2 className="font-military text-xl text-[#00ffcc] tracking-widest font-black">AIR DROP HAS LANDED</h2>
+      {/* 1. QUESTION SELECTION MODAL */}
+      {showQuestionModal && (
+        <div className="absolute inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-6" onClick={() => setShowQuestionModal(false)}>
+          <div className="max-w-xl w-full bg-[#121520] border-2 border-[#facc15] p-6 clip-steel-card shadow-[0_0_40px_rgba(250,204,21,0.25)] relative" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-4">
+              <h3 className="font-military text-2xl text-white font-bold tracking-wider">
+                STEP 1: SELECT MATCH QUESTION
+              </h3>
+              <button onClick={() => setShowQuestionModal(false)} className="text-gray-400 hover:text-white font-bold">✕</button>
             </div>
 
-            <div className="text-[10px] font-mono text-gray-500 mb-4 flex justify-between">
-              <span>QUICK 30-SECOND LOGIC PROMPT</span>
-              <span className="text-red-500 font-bold">TIME REMAINING: {airDropTimeLeft}s</span>
-            </div>
-
-            {selectedAirdropOption === null ? (
-              <div className="text-left flex flex-col gap-4">
-                <p className="text-white font-mono text-xs leading-relaxed bg-black/40 border border-slate-900 p-3 rounded">
-                  {airdropQuestions[currentAirdropQ].q}
-                </p>
-                
-                <div className="flex flex-col gap-2">
-                  {airdropQuestions[currentAirdropQ].options.map((opt, i) => (
-                    <button
-                      key={i}
-                      onClick={() => {
-                        if (i === airdropQuestions[currentAirdropQ].correct) {
-                          setSelectedAirdropOption('correct');
-                        } else {
-                          setSelectedAirdropOption('incorrect');
-                        }
-                      }}
-                      className="p-3 bg-[#121620] hover:bg-[#1b202e] border border-[#252e3d] text-left text-xs font-mono text-gray-300 hover:text-white rounded transition-colors cursor-pointer"
-                    >
-                      {i + 1}. {opt}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ) : selectedAirdropOption === 'correct' ? (
-              <div className="flex flex-col gap-4 text-center">
-                <div className="w-12 h-12 bg-[#00ffcc]/10 border border-[#00ffcc] text-[#00ffcc] rounded-full flex items-center justify-center mx-auto mb-1">
-                  <Shield size={24} />
-                </div>
-                <h3 className="font-military text-lg text-white tracking-wider">AIR DROP PAYLOAD UNLOCKED!</h3>
-                <p className="text-[11px] font-mono text-gray-500 px-2 uppercase">Select your tactical power-up below:</p>
-                
-                <div className="flex flex-col gap-2">
-                  <button
-                    onClick={() => {
-                      setIsSmoked(true);
-                      setTimeout(() => setIsSmoked(false), 12000);
-                      setAirDropActive(false);
-                      setTerminalLogs((prev) => [
-                        ...prev,
-                        { type: 'success', text: '[SYSTEM] Smoke Grenade deployed! Opponent terminal blinded for 12s.' }
-                      ]);
-                    }}
-                    className="py-2.5 bg-yellow-500 hover:bg-yellow-400 text-black font-military text-xs tracking-wider rounded cursor-pointer border-none font-bold"
-                  >
-                    SMOKE GRENADE (BLIND OPPONENT TERMINAL FOR 12s)
-                  </button>
-                  <button
-                    onClick={() => {
-                      setHasHelmet(true);
-                      setAirDropActive(false);
-                      setTerminalLogs((prev) => [
-                        ...prev,
-                        { type: 'success', text: '[SYSTEM] Level 3 Helmet equipped! Next HP recoil penalty shielded.' }
-                      ]);
-                    }}
-                    className="py-2.5 bg-[#00ffcc] hover:bg-[#00cca3] text-black font-military text-xs tracking-wider rounded cursor-pointer border-none font-bold"
-                  >
-                    LEVEL 3 HELMET (SHIELD NEXT HP PENALTY)
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-col gap-4 text-center py-4">
-                <p className="text-red-500 font-military text-lg font-black tracking-widest">ACCESS DENIED!</p>
-                <p className="text-xs font-mono text-gray-400">Incorrect key verification sequence. Drop self-destructed.</p>
-                <button
-                  onClick={() => setAirDropActive(false)}
-                  className="mt-2 py-2 px-6 bg-slate-800 hover:bg-slate-700 text-white font-military text-xs tracking-wider rounded cursor-pointer border-none"
+            <div className="flex flex-col gap-3 max-h-72 overflow-y-auto pr-2 custom-scrollbar mb-4">
+              {availableProblems.map((prob) => (
+                <div
+                  key={prob._id || prob.title}
+                  onClick={() => handleConfirmQuestion(prob)}
+                  className={`p-3.5 bg-black/50 border clip-steel-sm cursor-pointer transition-all flex items-center justify-between ${
+                    selectedProblem?.title === prob.title ? 'border-[#00ffcc] bg-[#00ffcc]/10' : 'border-white/10 hover:border-white/30'
+                  }`}
                 >
-                  DISMISS
+                  <div>
+                    <h4 className="font-military text-base text-white font-bold">{prob.title}</h4>
+                    <span className="font-mono text-[10px] text-gray-400">{prob.difficulty} | {prob.tags ? prob.tags.join(', ') : 'DSA'}</span>
+                  </div>
+                  <button className="btn-tactical-cyan px-4 py-1.5 text-xs clip-angular-btn">
+                    SELECT
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex justify-end">
+              <button onClick={() => setShowQuestionModal(false)} className="btn-tactical-yellow px-6 py-2 text-xs clip-angular-btn">
+                DONE
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 2. GITHUB TARGET LOOKUP DRAWER */}
+      {showInviteDrawer && (
+        <div className="absolute inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-6" onClick={() => setShowInviteDrawer(false)}>
+          <div className="max-w-md w-full bg-[#121520] border-2 border-[#00ffcc] p-6 clip-steel-card shadow-[0_0_40px_rgba(0,255,204,0.3)] relative" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-4">
+              <div className="flex items-center gap-2">
+                <UserCheck size={20} className="text-[#00ffcc]" />
+                <h3 className="font-military text-xl text-white font-bold tracking-wider">
+                  INVITE GITHUB OPPONENT
+                </h3>
+              </div>
+              <button onClick={() => setShowInviteDrawer(false)} className="text-gray-400 hover:text-white font-bold">✕</button>
+            </div>
+
+            <form onSubmit={handleGithubSearch} className="flex flex-col gap-3 mb-6">
+              <label className="font-mono text-xs text-gray-400 uppercase block">ENTER GITHUB USERNAME OR PROFILE URL:</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={githubInput}
+                  onChange={(e) => setGithubInput(e.target.value)}
+                  placeholder="e.g. octocat or https://github.com/octocat"
+                  className="flex-1 bg-black/60 border border-white/15 focus:border-[#00ffcc] text-xs font-mono text-white p-3 rounded outline-none"
+                />
+                <button type="submit" disabled={isSearchingGithub} className="btn-tactical-cyan px-4 py-2 text-xs clip-angular-btn">
+                  {isSearchingGithub ? <RefreshCw size={14} className="animate-spin" /> : <Search size={14} />}
+                </button>
+              </div>
+              {githubError && <span className="font-mono text-xs text-red-400">{githubError}</span>}
+            </form>
+
+            {githubTarget && (
+              <div className="bg-black/60 border border-[#00ffcc]/40 p-4 clip-steel-sm flex flex-col gap-4 text-left">
+                <div className="flex items-center gap-2 border-b border-[#00ffcc]/30 pb-2">
+                  <span className="w-2 h-2 bg-[#00ffcc] rounded-full animate-ping" />
+                  <span className="font-military text-xs text-[#00ffcc] font-bold tracking-widest uppercase">
+                    TARGET ACQUIRED // PROFILE VERIFIED
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <img src={githubTarget.avatarUrl} alt="Target Avatar" className="w-16 h-16 rounded-full border-2 border-[#00ffcc] object-cover" />
+                  <div>
+                    <h4 className="font-military text-xl text-white font-bold">{githubTarget.name}</h4>
+                    <a href={githubTarget.githubUrl} target="_blank" rel="noreferrer" className="font-mono text-xs text-[#00ffcc] hover:underline flex items-center gap-1">
+                      @{githubTarget.username} <ExternalLink size={12} />
+                    </a>
+                    <p className="font-mono text-[10px] text-gray-400 mt-1 line-clamp-2">{githubTarget.bio}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-[10px] font-mono text-gray-300 bg-white/5 p-2 rounded">
+                  <div>PUBLIC REPOS: <strong className="text-white">{githubTarget.publicRepos}</strong></div>
+                  <div>FOLLOWERS: <strong className="text-white">{githubTarget.followers}</strong></div>
+                </div>
+
+                <button
+                  onClick={() => {
+                    setOpponentProfile({
+                      username: githubTarget.username,
+                      avatar: githubTarget.avatarUrl
+                    });
+                    setShowInviteDrawer(false);
+                    handleCopyMatchLink();
+                  }}
+                  className="w-full btn-tactical-yellow py-3 text-xs clip-angular-btn text-black font-bold"
+                >
+                  SEND TACTICAL INVITE &amp; LOCK MATCH
                 </button>
               </div>
             )}
@@ -635,6 +595,18 @@ public class Solution {
         </div>
       )}
 
+      {/* 3. REAL-TIME BATTLE CHAT & QUICK RADIO DRAWER */}
+      <BattleChat
+        socket={socket}
+        matchId={matchId}
+        currentUser={user}
+        onNewKillfeedLog={(logText) => {
+          setTerminalLogs((prev) => [
+            ...prev,
+            { type: 'info', text: logText }
+          ]);
+        }}
+      />
     </div>
   );
 }

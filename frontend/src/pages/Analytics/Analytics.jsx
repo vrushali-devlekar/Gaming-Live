@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Shield, Award, Calendar, Clock, Target, Cpu, HardDrive, Swords, BookOpen, ChevronRight, Zap } from 'lucide-react';
 import { themeService } from '../../services/themeService';
+import { useAuth } from '../../context/AuthContext';
 import './Analytics.css';
 
 export default function Analytics() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('overview'); // 'overview', 'weaponry', 'operations'
   const activeTheme = themeService.getCurrentTheme();
 
@@ -55,7 +57,7 @@ export default function Analytics() {
       level: 8,
       maxLevel: 10,
       accuracy: 82,
-      speed: 85, // WPM
+      speed: 85,
       control: 90
     },
     {
@@ -116,7 +118,7 @@ export default function Analytics() {
               <span className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse"></span>
               <span className="font-mono text-[9px] text-gold tracking-[0.25em]">INTEL PROFILE PORTAL</span>
             </div>
-            <h1 className="font-military text-2xl tracking-wider text-white">PLAYER STATS & ANALYTICS</h1>
+            <h1 className="font-military text-2xl tracking-wider text-white">PLAYER STATS &amp; ANALYTICS</h1>
           </div>
         </div>
 
@@ -148,10 +150,12 @@ export default function Analytics() {
                       <path d="M42 38 L58 38 L56 42 L44 42 Z" fill="var(--theme-accent-color)" filter="drop-shadow(0 0 3px var(--theme-accent-color))" />
                     </svg>
                   </div>
-                  <span className="level-badge-lg font-military">LVL 45</span>
+                  <span className="level-badge-lg font-military">LVL {user?.stats?.level || 45}</span>
                 </div>
 
-                <h2 className="font-military text-2xl text-white tracking-wider mb-0.5">GHOST_CODER</h2>
+                <h2 className="font-military text-2xl text-white tracking-wider mb-0.5">
+                  {user?.username || "GHOST_CODER"}
+                </h2>
                 <span className="text-[10px] font-mono text-gray-500 block mb-2">CLAN: ALPHA_CODERS</span>
                 
                 <span 
@@ -174,9 +178,13 @@ export default function Analytics() {
                     </svg>
                   </div>
                   <div>
-                    <span className="block font-military text-md text-gold leading-none tracking-wide">CONQUEROR</span>
+                    <span className="block font-military text-md text-gold leading-none tracking-wide">
+                      {user?.rank || "CONQUEROR"}
+                    </span>
                     <span className="block font-mono text-[10px] text-gray-500 mt-1">LOBBY RATING</span>
-                    <span className="block font-mono text-xs text-white font-bold mt-0.5">4,850 POINTS</span>
+                    <span className="block font-mono text-xs text-white font-bold mt-0.5">
+                      {(user?.stats?.bp || 12850).toLocaleString()} POINTS
+                    </span>
                   </div>
                 </div>
 
@@ -227,7 +235,7 @@ export default function Analytics() {
               onClick={() => handleTabChange('weaponry')}
               className={`tab-btn font-military text-sm px-6 py-2 transition-all ${
                 activeTab === 'weaponry' 
-                  ? 'active-tab text-gold border-b-2 border-gold' 
+                  ? 'active-tab text-[#00ffcc] border-b-2 border-[#00ffcc]' 
                   : 'text-gray-400 hover:text-white'
               }`}
             >
@@ -253,33 +261,43 @@ export default function Analytics() {
               <div className="lg:col-span-6 grid grid-cols-2 md:grid-cols-3 gap-4">
                 <div className="stat-box bg-black/40 border border-steel-border/50 p-4 clip-steel-sm">
                   <span className="text-gray-500 font-mono text-[9px] block uppercase">Matches Played</span>
-                  <span className="font-military text-3xl text-white block mt-1 tracking-wider">248</span>
-                  <span className="text-[8px] font-mono text-gray-600 block mt-1">SEASON: SS12</span>
+                  <span className="font-military text-3xl text-white block mt-1 tracking-wider">
+                    {user?.stats?.matchesPlayed || 48}
+                  </span>
+                  <span className="text-[8px] font-mono text-gray-600 block mt-1">SEASON: SS14</span>
                 </div>
                 <div className="stat-box bg-black/40 border border-steel-border/50 p-4 clip-steel-sm">
                   <span className="text-gray-500 font-mono text-[9px] block uppercase">Breached (Wins)</span>
-                  <span className="font-military text-3xl text-gold block mt-1 tracking-wider">84</span>
-                  <span className="text-[8px] font-mono text-green-500 block mt-1">WIN RATIO: 33.8%</span>
+                  <span className="font-military text-3xl text-gold block mt-1 tracking-wider">
+                    {user?.stats?.wins || 36}
+                  </span>
+                  <span className="text-[8px] font-mono text-green-500 block mt-1">WIN RATIO: 75.0%</span>
                 </div>
                 <div className="stat-box bg-black/40 border border-steel-border/50 p-4 clip-steel-sm">
-                  <span className="text-gray-500 font-mono text-[9px] block uppercase">K/D Ratio</span>
-                  <span className="font-military text-3xl text-white block mt-1 tracking-wider">4.73</span>
-                  <span className="text-[8px] font-mono text-cyan-400 block mt-1">AVG BYPASS/MATCH</span>
+                  <span className="text-gray-500 font-mono text-[9px] block uppercase">Win Streak</span>
+                  <span className="font-military text-3xl text-white block mt-1 tracking-wider">
+                    {user?.winStreak || 7}🔥
+                  </span>
+                  <span className="text-[8px] font-mono text-cyan-400 block mt-1">ACTIVE STREAK</span>
                 </div>
                 <div className="stat-box bg-black/40 border border-steel-border/50 p-4 clip-steel-sm">
-                  <span className="text-gray-500 font-mono text-[9px] block uppercase">Top 10 Finishes</span>
-                  <span className="font-military text-3xl text-white block mt-1 tracking-wider">192</span>
-                  <span className="text-[8px] font-mono text-gray-600 block mt-1">RATIO: 77.4%</span>
+                  <span className="text-gray-500 font-mono text-[9px] block uppercase">Total Solves</span>
+                  <span className="font-military text-3xl text-white block mt-1 tracking-wider">
+                    {user?.stats?.totalSolves || 142}
+                  </span>
+                  <span className="text-[8px] font-mono text-gray-600 block mt-1">DSA PROBLEMS</span>
                 </div>
                 <div className="stat-box bg-black/40 border border-steel-border/50 p-4 clip-steel-sm">
                   <span className="text-gray-500 font-mono text-[9px] block uppercase">Syntax Accuracy</span>
-                  <span className="font-military text-3xl text-white block mt-1 tracking-wider">82%</span>
-                  <span className="text-[8px] font-mono text-green-500 block mt-1">100% SUCCESS RATINGS</span>
+                  <span className="font-military text-3xl text-white block mt-1 tracking-wider">94%</span>
+                  <span className="text-[8px] font-mono text-green-500 block mt-1">PASS RATINGS</span>
                 </div>
                 <div className="stat-box bg-black/40 border border-steel-border/50 p-4 clip-steel-sm">
                   <span className="text-gray-500 font-mono text-[9px] block uppercase">Total BP Codes</span>
-                  <span className="font-military text-3xl text-white block mt-1 tracking-wider">124.5K</span>
-                  <span className="text-[8px] font-mono text-gold block mt-1">AVAILABLE BP POINTS</span>
+                  <span className="font-military text-3xl text-white block mt-1 tracking-wider">
+                    {(user?.stats?.bp || 12850).toLocaleString()}
+                  </span>
+                  <span className="text-[8px] font-mono text-gold block mt-1">AVAILABLE BP</span>
                 </div>
 
                 {/* Additional detailed metrics */}
@@ -314,33 +332,22 @@ export default function Analytics() {
               <div className="lg:col-span-4 bg-iron-gray border border-steel-border/50 p-5 clip-steel-sm flex flex-col justify-between items-center text-center">
                 <div className="w-full flex items-center justify-between border-b border-steel-border/50 pb-2 mb-3">
                   <span className="font-military text-xs text-white tracking-widest block">TACTICAL RADAR</span>
-                  <span className="text-[8px] font-mono text-gray-500">SS12 STAT INDEX</span>
+                  <span className="text-[8px] font-mono text-gray-500">SS14 STAT INDEX</span>
                 </div>
 
                 {/* SVG Radar Chart Representation */}
                 <div className="relative w-44 h-44 flex items-center justify-center my-2">
                   <svg className="w-full h-full" viewBox="0 0 200 200">
-                    {/* Ring grids */}
                     <circle cx="100" cy="100" r="80" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
                     <circle cx="100" cy="100" r="60" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
                     <circle cx="100" cy="100" r="40" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
                     <circle cx="100" cy="100" r="20" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
                     
-                    {/* Axis lines */}
                     <line x1="100" y1="20" x2="100" y2="180" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
                     <line x1="20" y1="100" x2="180" y2="100" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
                     <line x1="43" y1="43" x2="157" y2="157" stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
                     <line x1="43" y1="157" x2="157" y2="43" stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
                     
-                    {/* Data Polygon filled */}
-                    {/* Vertices: 
-                        1. Top (100, 40): Efficiency = 85% -> y = 100 - (80 * 0.85) = 32
-                        2. Right (180, 100): K/D = 90% -> x = 100 + (80 * 0.9) = 172
-                        3. Bottom (100, 180): Survival = 70% -> y = 100 + (80 * 0.7) = 156
-                        4. Left (20, 100): Tactics = 92% -> x = 100 - (80 * 0.92) = 26
-                        5. Top-Left / Diagonal helper vertices representation. Let's make it a 5-point radar polygon:
-                           We will draw a custom polygon matching BGMI's beautiful style:
-                    */}
                     <polygon 
                       points="100,35 158,82 142,140 62,142 45,78" 
                       fill="var(--color-gold-glow)" 
@@ -349,7 +356,6 @@ export default function Analytics() {
                       className="radar-poly-pulse" 
                     />
                     
-                    {/* Interactive points */}
                     <circle cx="100" cy="35" r="3" fill="var(--theme-accent-color)" />
                     <circle cx="158" cy="82" r="3" fill="var(--theme-accent-color)" />
                     <circle cx="142" cy="140" r="3" fill="var(--theme-accent-color)" />
@@ -357,7 +363,6 @@ export default function Analytics() {
                     <circle cx="45" cy="78" r="3" fill="var(--theme-accent-color)" />
                   </svg>
 
-                  {/* Labels around the chart */}
                   <span className="absolute top-0 left-1/2 -translate-x-1/2 font-military text-[9px] text-white">EFFICIENCY</span>
                   <span className="absolute top-1/2 right-0 -translate-y-1/2 font-military text-[9px] text-[#FACC15]">BREACH (KD)</span>
                   <span className="absolute bottom-0 right-8 font-military text-[9px] text-white">SURVIVAL</span>
@@ -367,7 +372,7 @@ export default function Analytics() {
 
                 <div className="font-mono text-[9px] text-gray-500 mt-2 leading-relaxed text-left border-t border-steel-border/50 pt-2 w-full">
                   <span className="text-[#FACC15] font-bold block mb-1">TACTICAL INSIGHT:</span>
-                  Ghost Coder has exceptional Breach K/D and Collaboration scores. Excels in rapid multi-extension code compiler operations.
+                  Operator {user?.username || "GHOST_CODER"} has exceptional Breach K/D and Collaboration scores. Excels in rapid multi-extension code compiler operations.
                 </div>
               </div>
 
@@ -400,7 +405,6 @@ export default function Analytics() {
                       {weapon.desc}
                     </p>
 
-                    {/* Progress Level bar */}
                     <div className="mb-3">
                       <div className="flex justify-between items-center text-[9px] font-mono text-gray-500 mb-1">
                         <span>IDE PROGRESS MASTER LEVEL</span>
@@ -414,7 +418,6 @@ export default function Analytics() {
                       </div>
                     </div>
 
-                    {/* Stats details */}
                     <div className="grid grid-cols-3 gap-2 text-[9px] font-mono text-gray-400 border-t border-steel-border/30 pt-3">
                       <div className="bg-black/35 p-1 text-center rounded">
                         <span className="text-gray-600 block uppercase">Accuracy</span>
@@ -439,7 +442,6 @@ export default function Analytics() {
           {activeTab === 'operations' && (
             <div className="flex flex-col gap-4 overflow-y-auto max-h-[calc(100vh-230px)] pr-2 custom-scrollbar flex-1">
               
-              {/* Header Titles */}
               <div className="bg-[#0f1016] border border-steel-border/60 p-3 clip-industrial-card flex items-center justify-between text-[10px] font-military text-gray-400 tracking-wider">
                 <span className="w-16">RESULT</span>
                 <span className="flex-1 px-4">DECENT ARENA / MODE</span>
@@ -449,14 +451,12 @@ export default function Analytics() {
                 <span className="w-20 text-right hidden md:block">OPER. DATE</span>
               </div>
 
-              {/* Logs Rows */}
               <div className="flex flex-col gap-2.5">
                 {operations.map((oper) => (
                   <div 
                     key={oper.id}
                     className="p-3 bg-black/45 border border-steel-border/30 clip-steel-sm flex items-center justify-between text-xs font-mono text-gray-300 hover:border-gray-700 transition-colors"
                   >
-                    {/* Victory/Defeat Badge */}
                     <div className="w-16 flex items-center gap-1">
                       <span 
                         className={`font-military text-[10px] px-2 py-0.5 rounded font-black tracking-widest shadow ${
@@ -474,28 +474,23 @@ export default function Analytics() {
                       )}
                     </div>
 
-                    {/* Arena details */}
                     <div className="flex-1 px-4">
                       <span className="text-white font-military font-bold block leading-none">{oper.map}</span>
                       <span className="text-[9px] text-gray-600 block mt-1">{oper.mode}</span>
                     </div>
 
-                    {/* BP Credits */}
                     <div className="w-20 text-center text-gold font-bold hidden md:block">
                       {oper.bp}
                     </div>
 
-                    {/* Rating Points change */}
                     <div className={`w-20 text-center font-bold ${oper.pts.startsWith('+') ? 'text-green-400' : 'text-red-400'}`}>
                       {oper.pts}
                     </div>
 
-                    {/* Match Time Duration */}
                     <div className="w-20 text-center text-gray-500 hidden md:block">
                       {oper.time}
                     </div>
 
-                    {/* Operation Date */}
                     <div className="w-20 text-right text-gray-600 text-[10px] hidden md:block">
                       {oper.date}
                     </div>

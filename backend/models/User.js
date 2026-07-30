@@ -21,13 +21,34 @@ const userSchema = new mongoose.Schema(
     },
     authProvider: {
       type: String,
-      enum: ['google', 'github'],
-      required: true
+      enum: ['google', 'github', 'local', 'demo'],
+      default: 'demo'
     },
     providerId: {
       type: String,
-      required: true,
-      unique: true
+      default: null,
+      sparse: true
+    },
+    isProfileSetup: {
+      type: Boolean,
+      default: false
+    },
+    rank: {
+      type: String,
+      enum: ['CONQUEROR', 'ACE MASTER', 'CROWN I', 'DIAMOND II', 'GOLD I'],
+      default: 'GOLD I'
+    },
+    winStreak: {
+      type: Number,
+      default: 0
+    },
+    unlockedSkins: {
+      type: [String],
+      default: ['White Mummy Outfit', 'Standard IDE']
+    },
+    selectedSkin: {
+      type: String,
+      default: 'White Mummy Outfit'
     },
     stats: {
       level: {
@@ -44,7 +65,19 @@ const userSchema = new mongoose.Schema(
       },
       roomCredits: {
         type: Number,
-        default: 1
+        default: 5
+      },
+      matchesPlayed: {
+        type: Number,
+        default: 0
+      },
+      wins: {
+        type: Number,
+        default: 0
+      },
+      totalSolves: {
+        type: Number,
+        default: 0
       }
     }
   },
