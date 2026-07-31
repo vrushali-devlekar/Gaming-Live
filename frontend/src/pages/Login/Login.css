@@ -1,16 +1,17 @@
 /* Login Page Cyberpunk Styling */
 .login-page {
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--font-gamer);
 }
 
 .login-grid-bg {
   position: absolute;
   inset: 0;
   background-image: 
-    linear-gradient(to right, rgba(0, 255, 204, 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(0, 255, 204, 0.04) 1px, transparent 1px);
-  background-size: 24px 24px;
+    linear-gradient(to right, rgba(0, 255, 204, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 255, 204, 0.02) 1px, transparent 1px);
+  background-size: 32px 32px;
   pointer-events: none;
+  z-index: 1;
 }
 
 .login-scanlines {
@@ -22,4 +23,84 @@
   );
   background-size: 100% 4px;
   pointer-events: none;
+  z-index: 2;
+  opacity: 0.35;
+}
+
+/* Glowing Split-Border Card Wrapper */
+.auth-card-wrapper {
+  width: 100%;
+  max-width: 620px; /* proper width */
+  min-height: 520px; /* proper height for square shape */
+  padding: 2px; /* Border thickness */
+  background: linear-gradient(135deg, #00ffcc 0%, #00ffcc 45%, #facc15 55%, #facc15 100%);
+  clip-path: polygon(
+    0 24px,
+    24px 0,
+    calc(100% - 40px) 0,
+    100% 40px,
+    100% calc(100% - 24px),
+    calc(100% - 24px) 100%,
+    40px 100%,
+    0 calc(100% - 40px)
+  );
+  filter: drop-shadow(0 0 25px rgba(0, 255, 204, 0.15)) drop-shadow(0 0 25px rgba(250, 204, 21, 0.12));
+  display: flex;
+}
+
+.auth-card-content {
+  background: #090b10;
+  padding: 48px 56px; /* spacious padding */
+  width: 100%;
+  min-height: inherit;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  clip-path: inherit; /* Align content shape with wrapper */
+  position: relative;
+}
+
+/* Github OAuth Button */
+.auth-btn-github {
+  background: rgba(0, 255, 204, 0.02) !important;
+  border: 1px solid rgba(0, 255, 204, 0.3) !important;
+  border-radius: 6px;
+  color: #fff;
+  font-family: var(--font-military);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.auth-btn-github:hover {
+  background: rgba(0, 255, 204, 0.08) !important;
+  border-color: #00ffcc !important;
+  box-shadow: 0 0 20px rgba(0, 255, 204, 0.15);
+  transform: translateY(-1px);
+}
+
+/* Google OAuth Button */
+.auth-btn-google {
+  background: rgba(250, 204, 21, 0.02) !important;
+  border: 1px solid rgba(250, 204, 21, 0.3) !important;
+  border-radius: 6px;
+  color: #fff;
+  font-family: var(--font-military);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.auth-btn-google:hover {
+  background: rgba(250, 204, 21, 0.08) !important;
+  border-color: #facc15 !important;
+  box-shadow: 0 0 20px rgba(250, 204, 21, 0.15);
+  transform: translateY(-1px);
+}
+
+/* Diagnostic Fade-in Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease forwards;
 }

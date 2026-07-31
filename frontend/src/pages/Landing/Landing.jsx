@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 import { 
   Terminal, 
   Swords, 
@@ -24,7 +28,8 @@ import {
   ArrowRight,
   Shield,
   HelpCircle,
-  Award
+  Award,
+  ChevronRight
 } from 'lucide-react';
 import { themeService } from '../../services/themeService';
 import { useAuth } from '../../context/AuthContext';
@@ -54,6 +59,82 @@ export default function Landing() {
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   const activeTheme = themeService.getCurrentTheme();
+
+  // GSAP Entrance and Scroll Animations
+  useEffect(() => {
+    // 1. Navbar entrance animation
+    gsap.fromTo('.landing-navbar', 
+      { y: -80, opacity: 0 }, 
+      { y: 0, opacity: 1, duration: 1, ease: 'power4.out', delay: 0.2 }
+    );
+
+    // 2. Hero Left Column Entrance Animations
+    const tl = gsap.timeline({ delay: 0.4 });
+    
+    tl.fromTo('.hero-live-pill',
+      { scale: 0.8, opacity: 0 },
+      { scale: 1, opacity: 1, duration: 0.6, ease: 'back.out(1.7)' }
+    )
+    .fromTo('.hero-title-text',
+      { y: 50, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out' },
+      '-=0.3'
+    )
+    .fromTo('.hero-title-text + p',
+      { y: 30, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out' },
+      '-=0.5'
+    )
+    .fromTo('.btn-tactical-yellow, .btn-tactical-cyan',
+      { y: 20, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.6, ease: 'power2.out', stagger: 0.15 },
+      '-=0.5'
+    )
+    .fromTo('.grid-cols-3.border-t > div',
+      { y: 20, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.6, ease: 'power2.out', stagger: 0.1 },
+      '-=0.4'
+    );
+
+    // 3. Hero Right Column (HUD Widget) entrance animation
+    gsap.fromTo('.hero-radar-widget',
+      { x: 100, opacity: 0, rotate: 2 },
+      { x: 0, opacity: 1, rotate: 0, duration: 1.2, ease: 'power4.out', delay: 0.8 }
+    );
+
+    // 4. Scroll Trigger animations for Deployment Zones Cards
+    gsap.fromTo('.mode-card',
+      { y: 60, opacity: 0 },
+      {
+        y: 0,
+        opacity: 1,
+        duration: 0.8,
+        stagger: 0.2,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: '#arenas-section',
+          start: 'top 80%',
+          toggleActions: 'play none none none'
+        }
+      }
+    );
+
+    // 5. Scroll Trigger for Air Drop Gameplay section
+    gsap.fromTo('.gameplay-feature-box',
+      { scale: 0.95, opacity: 0 },
+      {
+        scale: 1,
+        opacity: 1,
+        duration: 1,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: '.gameplay-feature-box',
+          start: 'top 85%',
+          toggleActions: 'play none none none'
+        }
+      }
+    );
+  }, []);
 
   // Tactical Gaming Audio Synthesizer Beep
   const playBeep = (freq = 800, duration = 0.08, type = 'sine') => {
@@ -831,36 +912,93 @@ export default function Landing() {
       {/* Quick Auth Modal */}
       {showAuthModal && (
         <div className="modal-overlay" onClick={() => setShowAuthModal(false)}>
-          <div className="modal-container p-6 clip-steel-card rounded-xl text-center max-w-md" onClick={(e) => e.stopPropagation()}>
-            <h3 className="font-military text-2xl text-white font-bold tracking-wider mb-2">
-              AUTHENTICATE CODER PROFILE
-            </h3>
-            <p className="font-mono text-xs text-gray-400 mb-6">
-              Sign in with 1-click to access multiplayer arenas and save your BP rank stats.
-            </p>
-
-            <div className="flex flex-col gap-3">
+          <div className="auth-card-wrapper max-w-[620px] shadow-[0_0_50px_rgba(0,255,204,0.15)] relative" onClick={(e) => e.stopPropagation()}>
+            <div className="auth-card-content flex flex-col items-center text-center">
+              
+              {/* Close button inside modal content */}
               <button
-                onClick={() => handleAuthAction('github')}
-                className="social-login-btn clip-angular-btn w-full"
+                onClick={() => setShowAuthModal(false)}
+                className="absolute top-4 right-4 text-gray-500 hover:text-white font-bold text-sm bg-transparent border-none cursor-pointer"
               >
-                <span>CONTINUE WITH GITHUB</span>
+                ✕
               </button>
 
-              <button
-                onClick={() => handleAuthAction('google')}
-                className="social-login-btn clip-angular-btn w-full"
-              >
-                <span>CONTINUE WITH GOOGLE</span>
-              </button>
+              {/* Security Shield badge */}
+              <div className="flex flex-col items-center gap-2 mb-4">
+                <div className="w-12 h-12 rounded-full bg-[#00ffcc]/5 border border-[#00ffcc]/30 text-[#00ffcc] flex items-center justify-center shadow-[0_0_15px_rgba(0,255,204,0.1)]">
+                  <Shield size={22} />
+                </div>
+                <span className="text-[10px] font-mono text-[#00ffcc] tracking-[0.2em] uppercase font-bold flex items-center gap-1">
+                  <Lock size={10} /> SECURE ACCESS
+                </span>
+              </div>
+
+              {/* Title */}
+              <h2 className="font-military text-2xl text-white tracking-widest uppercase font-black leading-none mb-1">
+                AUTHENTICATE
+              </h2>
+              <h2 className="font-military text-2xl text-[#00ffcc] tracking-widest uppercase font-black leading-none mb-4">
+                CODER PROFILE
+              </h2>
+              
+              <p className="font-mono text-[11px] text-gray-400 leading-relaxed mb-6">
+                Sign in with 1-click to access multiplayer arenas and save your BP rank stats.
+              </p>
+
+              {/* OAUTH BUTTONS */}
+              <div className="w-full flex flex-col gap-3.5 mb-6">
+                
+                {/* GITHUB OAUTH */}
+                <button
+                  onClick={() => handleAuthAction('github')}
+                  className="auth-btn-github w-full py-3.5 px-5 flex items-center justify-between transition-all cursor-pointer bg-transparent"
+                >
+                  <div className="flex items-center gap-3">
+                    <svg className="w-4.5 h-4.5 fill-white" viewBox="0 0 24 24">
+                      <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                    </svg>
+                    <span className="font-military text-xs text-white font-bold tracking-wider">
+                      CONTINUE WITH <span className="text-[#00ffcc]">GITHUB</span>
+                    </span>
+                  </div>
+                  <ChevronRight size={16} className="text-[#00ffcc]" />
+                </button>
+
+                {/* GOOGLE OAUTH */}
+                <button
+                  onClick={() => handleAuthAction('google')}
+                  className="auth-btn-google w-full py-3.5 px-5 flex items-center justify-between transition-all cursor-pointer bg-transparent"
+                >
+                  <div className="flex items-center gap-3">
+                    <svg className="w-4.5 h-4.5 fill-[#facc15]" viewBox="0 0 24 24">
+                      <path d="M12.24 10.285V13.4h6.86c-.277 1.56-1.602 4.585-6.86 4.585-4.54 0-8.24-3.765-8.24-8.4s3.7-8.4 8.24-8.4c2.58 0 4.307 1.095 5.298 2.045l2.465-2.37C18.251 1.21 15.497 0 12.24 0 5.58 0 0 5.37 0 12s5.58 12 12.24 12c6.96 0 11.57-4.89 11.57-11.79 0-.795-.085-1.4-.185-1.925H12.24z"/>
+                    </svg>
+                    <span className="font-military text-xs text-white font-bold tracking-wider">
+                      CONTINUE WITH <span className="text-[#facc15]">GOOGLE</span>
+                    </span>
+                  </div>
+                  <ChevronRight size={16} className="text-[#facc15]" />
+                </button>
+
+              </div>
+
+              {/* Card Footer Divider */}
+              <div className="w-full flex items-center gap-2 mb-4 text-[8px] font-mono text-gray-600 uppercase tracking-widest">
+                <div className="flex-1 h-[1px] bg-gray-800" />
+                <span className="flex items-center gap-1">
+                  <Lock size={8} /> SECURE LOGIN
+                </span>
+                <div className="flex-1 h-[1px] bg-gray-800" />
+              </div>
+
+              {/* Footer Links */}
+              <div className="flex items-center gap-3 text-[8px] font-mono text-gray-500 tracking-wider">
+                <span className="hover:text-gray-300 cursor-pointer">TERMS OF SERVICE</span>
+                <span>•</span>
+                <span className="hover:text-gray-300 cursor-pointer">PRIVACY POLICY</span>
+              </div>
+
             </div>
-
-            <button
-              onClick={() => setShowAuthModal(false)}
-              className="mt-4 font-mono text-xs text-gray-500 hover:text-gray-300 cursor-pointer"
-            >
-              Cancel &amp; Return
-            </button>
           </div>
         </div>
       )}

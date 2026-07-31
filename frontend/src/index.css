@@ -50,7 +50,7 @@
     background-color: var(--color-dark-bg);
     color: #e2e8f0;
     font-family: 'Outfit', sans-serif;
-    overflow-x: hidden;
+    overflow-x: clip;
   }
   
   /* Scrollbar styles */
@@ -264,4 +264,28 @@
 
 .animate-spin-slow {
   animation: spin-slow 8s infinite linear;
+}
+
+/* ==========================================================================
+   Lenis Smooth Scrolling Styles
+   ========================================================================== */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
 }
