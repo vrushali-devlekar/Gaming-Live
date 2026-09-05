@@ -1,15 +1,25 @@
-/* Match Settlement Settle page styling */
+/* ==========================================================================
+   POST-MATCH EXTRACTION SCREEN // RESULT STYLESHEET
+   ========================================================================== */
 
-.result-settlement-card {
-  width: 100%;
+.result-extraction-viewport {
+  width: 100vw;
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
+  background-color: var(--bg-obsidian);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  font-family: var(--font-gamer);
+  position: relative;
 }
 
-.result-settlement-card .three-character-viewport {
-  height: 280px !important;
-}
-
-@media (max-width: 1024px) {
-  .result-settlement-card {
-    flex-direction: column;
-  }
+.result-card-container {
+  background: var(--bg-graphite-glass);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--hazard-amber);
+  box-shadow: 0 0 50px rgba(245, 158, 11, 0.25);
 }

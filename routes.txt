@@ -1,0 +1,63 @@
+================================================================================
+                      CODEBATTLE // APPLICATION ROUTE REGISTRY
+================================================================================
+
+[FRONTEND CLIENT ROUTES] - React Router v6 (frontend/src/routes/AppRoutes.jsx)
+--------------------------------------------------------------------------------
+1.  GET  /             -> Landing Entryway Page (src/pages/Landing/Landing.jsx)
+2.  GET  /login        -> User Authentication & OAuth Page (src/pages/Login/Login.jsx)
+3.  GET  /lobby        -> Executive Esports Command Deck (src/pages/Dashboard/Dashboard.jsx) [PROTECTED]
+4.  GET  /rooms        -> Custom Match Room Lobby (src/pages/RoomLobby/RoomLobby.jsx) [PROTECTED]
+5.  GET  /stream       -> Live Gaming Stream Broadcast (src/pages/Stream/Stream.jsx)
+6.  GET  /theme        -> Tactical Sector & Theme Selector (src/pages/ThemeSelector/ThemeSelector.jsx)
+7.  GET  /analytics    -> Player Telemetry & Performance (src/pages/Analytics/Analytics.jsx)
+8.  GET  /arena        -> Collaborative 1v1 Code Battle Arena (src/pages/Arena/Arena.jsx) [PROTECTED]
+9.  GET  /inventory    -> Player Locker Room & Shop (src/pages/Inventory/Inventory.jsx) [PROTECTED]
+10. GET  /result       -> Match Settlement & Victory Screen (src/pages/Result/Result.jsx) [PROTECTED]
+11. GET  /clan         -> Tactical Clan Operations (src/pages/Clan/Clan.jsx) [PROTECTED]
+12. GET  *             -> Wildcard Catch-All Redirect (Navigates to /)
+
+
+[BACKEND REST API ENDPOINTS] - Express.js (backend/server.js & backend/routes/*)
+--------------------------------------------------------------------------------
+Base API URL: http://localhost:3001
+
+--- System & Health ---
+1.  GET  /                                -> Server Health Status Check
+
+--- Authentication Routes (backend/routes/authRoutes.js) ---
+2.  GET  /api/auth/google                 -> Initiate Google OAuth 2.0 Login
+3.  GET  /api/auth/google/callback        -> Google OAuth Callback & JWT Cookie Handshake
+4.  GET  /api/auth/github                 -> Initiate GitHub OAuth Login
+5.  GET  /api/auth/github/callback        -> GitHub OAuth Callback & JWT Cookie Handshake
+6.  GET  /api/auth/me                     -> Fetch Authenticated User Profile [JWT PROTECTED]
+7.  POST /api/auth/logout                 -> Terminate Session & Clear Auth Cookie
+
+--- User Profile & Analytics Routes (backend/routes/userRoutes.js) ---
+8.  GET  /api/user/profile                -> Fetch User Profile, MMR, Stats, & Equipped Items
+9.  GET  /api/user/analytics              -> Fetch Performance Analytics & Match History
+10. GET  /api/user/check-username/:username -> Real-Time Callsign Availability Check
+11. PUT  /api/user/set-username           -> Setup / Update Callsign Handle
+12. GET  /api/user/github-preview         -> Live Public GitHub Profile Preview Fetch
+
+--- Leaderboard & Rankings Routes (backend/routes/leaderboardRoutes.js) ---
+13. GET  /api/leaderboard/top-squads      -> Fetch Top Division Players & Global Rankings
+
+--- Coding Problem Dataset Routes (backend/routes/problemRoutes.js) ---
+14. GET  /api/problems/random             -> Fetch Random / Filtered Unsolved Problem
+15. GET  /api/problems/all                -> List All Coding Problems in System
+16. GET  /api/problems/:id                -> Fetch Single Problem Details & Testcases
+
+--- Shop & Inventory Routes (backend/routes/inventoryRoutes.js) ---
+17. GET  /api/inventory/shop              -> List Shop Items & Available Skins
+18. POST /api/inventory/buy               -> Purchase Item & Unlock Skin with Battle Points
+
+
+[REAL-TIME WEBSOCKET ENDPOINTS]
+--------------------------------------------------------------------------------
+1.  WS   /socket.io (Socket.io)           -> Real-Time Matchmaking, Match Queue, & Global Chat
+2.  WS   /ws (Native WebSocket)           -> Real-Time Collaborative Code & Cursor Sync Room
+
+================================================================================
+                                END OF REGISTRY
+================================================================================

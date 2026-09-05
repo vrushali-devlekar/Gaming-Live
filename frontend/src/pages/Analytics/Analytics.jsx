@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  ArrowLeft, Shield, Award, Calendar, Clock, Target, Cpu, HardDrive, 
-  Swords, BookOpen, ChevronRight, Zap, ExternalLink, Star, GitFork, Code2
+  ArrowLeft, UserPlus, ExternalLink, Copy, Check, X, 
+  Swords, CheckCircle2, XCircle, Code2, Star, GitFork
 } from 'lucide-react';
 import { themeService } from '../../services/themeService';
+import { audioService } from '../../services/audioService';
 import { useAuth } from '../../context/AuthContext';
 import './Analytics.css';
 
@@ -19,33 +20,21 @@ const GithubIcon = ({ size = 14, className = "" }) => (
 export default function Analytics() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState('overview'); // 'overview', 'github', 'weaponry', 'operations'
-  const activeTheme = themeService.getCurrentTheme();
-
-  // Dynamic Backend Analytics State
-  const [liveAnalytics, setLiveAnalytics] = useState(null);
+  const [activeTab, setActiveTab] = useState('history'); // 'history' or 'github'
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
+  const [inviteTarget, setInviteTarget] = useState('');
+  const [inviteSent, setInviteSent] = useState(false);
 
   // GitHub Profile & Repos State
   const [githubProfile, setGithubProfile] = useState(null);
   const [githubRepos, setGithubRepos] = useState([]);
   const [isLoadingGithub, setIsLoadingGithub] = useState(true);
 
-  // Fetch dynamic Analytics stats from MongoDB backend
-  useEffect(() => {
-    fetch('http://localhost:3001/api/user/analytics')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success && data.stats) {
-          setLiveAnalytics(data);
-        }
-      })
-      .catch((err) => console.warn('Analytics API fetch warning:', err));
-  }, []);
+  // Determine target GitHub handle (@vrushali as per specifications)
+  const targetGithubHandle = user?.githubUsername || user?.username || 'vrushali';
 
-  // Determine target GitHub handle
-  const targetGithubHandle = user?.githubUsername || user?.username || 'vrushali-devlekar';
-
-  // Fetch GitHub User Profile & Top 6 Public Repositories
+  // Fetch GitHub Data with Graceful Fallbacks
   useEffect(() => {
     let isMounted = true;
     setIsLoadingGithub(true);
@@ -79,29 +68,31 @@ export default function Analytics() {
     };
   }, [targetGithubHandle]);
 
-  // Audio tone trigger
-  const playBeep = (freq = 800, duration = 0.08, type = 'sine') => {
+  const handleCopyRoomLink = () => {
     try {
-      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const oscillator = audioCtx.createOscillator();
-      const gainNode = audioCtx.createGain();
-      oscillator.type = type;
-      oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
-      gainNode.gain.setValueAtTime(0.04, audioCtx.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
-      oscillator.connect(gainNode);
-      gainNode.connect(audioCtx.destination);
-      oscillator.start();
-      oscillator.stop(audioCtx.currentTime + duration);
+      audioService.playBeep(900, 0.04, 'sine');
     } catch (e) {}
+    const link = `https://codebattle.io/room/ROOM-8921`;
+    navigator.clipboard.writeText(link);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2500);
   };
 
-  const handleTabChange = (tab) => {
-    playBeep(700, 0.06, 'sine');
-    setActiveTab(tab);
+  const handleSendDispatch = (e) => {
+    e.preventDefault();
+    if (!inviteTarget.trim()) return;
+    try {
+      audioService.playBeep(950, 0.06, 'triangle');
+    } catch (e) {}
+    setInviteSent(true);
+    setTimeout(() => {
+      setInviteSent(false);
+      setInviteTarget('');
+      setIsInviteModalOpen(false);
+    }, 1800);
   };
 
-  // Language Dot Color Helper
+  // Language Dot Helper
   const getLangDotClass = (lang) => {
     if (!lang) return 'lang-dot-js';
     const l = lang.toLowerCase();
@@ -113,427 +104,392 @@ export default function Analytics() {
     return 'lang-dot-js';
   };
 
-  // Dynamic Recent Operations data
-  const operations = liveAnalytics?.operations || [
-    { id: 1, result: 'VICTORY', mvp: true, map: 'CYBERPUNK NEON', mode: 'DUEL 1V1', bp: '+280', pts: '+42', time: '14:24', date: '2026-07-28' },
-    { id: 2, result: 'VICTORY', mvp: false, map: 'ERANGEL MILITARY', mode: 'SQUAD 4V4', bp: '+180', pts: '+28', time: '12:15', date: '2026-07-26' },
-    { id: 3, result: 'DEFEAT', mvp: false, map: 'MIRAMAR OUTLAW', mode: 'DUEL 1V1', bp: '+45', pts: '-15', time: '15:00', date: '2026-07-25' },
-    { id: 4, result: 'VICTORY', mvp: true, map: 'VIKENDI BLIZZARD', mode: 'DUEL 1V1', bp: '+310', pts: '+48', time: '10:42', date: '2026-07-23' },
-    { id: 5, result: 'VICTORY', mvp: false, map: 'SANHOK JUNGLE', mode: 'SQUAD 4V4', bp: '+220', pts: '+32', time: '11:05', date: '2026-07-20' }
-  ];
-
-  // IDE Weapons data
-  const ideWeapons = [
+  // Chronological Recent Match History Data
+  const matchHistoryList = [
     {
-      name: 'VS CODE (M416)',
-      type: 'Assault Code Editor',
-      desc: 'Highly modular, reliable, and versatile. The standard-issue compiler for high-octane 1v1 duels. Offers robust multi-extension fire rates.',
-      usage: '185 MATCHES',
-      level: 8,
-      maxLevel: 10,
-      accuracy: 82,
-      speed: 85,
-      control: 90
+      id: 'M-8921',
+      result: 'VICTORY',
+      problem: 'Two Sum Perimeter',
+      sector: 'Sector 04',
+      opponent: { name: 'NEO_GHOST', avatar: 'NG' },
+      executionTime: '0.03ms',
+      testsPassed: '10/10',
+      mmrDelta: '+35 MMR',
+      date: '2026-09-05 17:42'
     },
     {
-      name: 'VIM (AWM)',
-      type: 'Sniper Editor (Heavy)',
-      desc: 'Keyboard-only precision execution. Capable of bypassing massive security subroutines in a single key sequence. Demands extreme mouse-free discipline.',
-      usage: '32 MATCHES',
-      level: 5,
-      maxLevel: 10,
-      accuracy: 96,
-      speed: 45,
-      control: 50
+      id: 'M-8919',
+      result: 'VICTORY',
+      problem: 'LRU Cache Grid',
+      sector: 'Sector 02',
+      opponent: { name: 'VEX_HUNTER', avatar: 'VH' },
+      executionTime: '0.05ms',
+      testsPassed: '12/12',
+      mmrDelta: '+42 MMR',
+      date: '2026-09-05 16:15'
     },
     {
-      name: 'SUBLIME TEXT (Micro UZI)',
-      type: 'Submachine Editor (Light)',
-      desc: 'Ultra-lightweight scripting shell. Deploys instantly for fast hotfixes and quick perimeter patchups where compile speed outweighs syntax complexity.',
-      usage: '20 MATCHES',
-      level: 4,
-      maxLevel: 10,
-      accuracy: 62,
-      speed: 110,
-      control: 95
+      id: 'M-8914',
+      result: 'DEFEAT',
+      problem: 'Graph Traversal Matrix',
+      sector: 'Sector 05',
+      opponent: { name: 'CYBER_REAPER', avatar: 'CR' },
+      executionTime: '0.12ms',
+      testsPassed: '7/10',
+      mmrDelta: '-15 MMR',
+      date: '2026-09-04 21:08'
     },
     {
-      name: 'NEOVIM (Groza)',
-      type: 'Airdrop Assault Terminal',
-      desc: 'Advanced command-line environment configured with custom Lua matrices. Delivers peak execution speeds for top-tier squad leaders.',
-      usage: '11 MATCHES',
-      level: 3,
-      maxLevel: 10,
-      accuracy: 88,
-      speed: 75,
-      control: 70
+      id: 'M-8908',
+      result: 'VICTORY',
+      problem: 'Binary Tree Perimeter',
+      sector: 'Sector 01',
+      opponent: { name: 'BYTE_MUMMY', avatar: 'BM' },
+      executionTime: '0.02ms',
+      testsPassed: '8/8',
+      mmrDelta: '+28 MMR',
+      date: '2026-09-04 19:30'
+    },
+    {
+      id: 'M-8901',
+      result: 'VICTORY',
+      problem: 'Dynamic Programming Matrix',
+      sector: 'Sector 03',
+      opponent: { name: 'KODER_SAGE', avatar: 'KS' },
+      executionTime: '0.04ms',
+      testsPassed: '15/15',
+      mmrDelta: '+38 MMR',
+      date: '2026-09-03 14:22'
     }
   ];
 
-  // Live merged stats
-  const activeUser = liveAnalytics?.profile || user;
-  const statsMatchesPlayed = liveAnalytics?.stats?.matchesPlayed || activeUser?.stats?.matchesPlayed || 48;
-  const statsWins = liveAnalytics?.stats?.wins || activeUser?.stats?.wins || 36;
-  const statsWinStreak = liveAnalytics?.stats?.winStreak || activeUser?.winStreak || 7;
-  const statsTotalSolves = activeUser?.stats?.totalSolves || 142;
-  const statsBp = liveAnalytics?.stats?.bp || activeUser?.stats?.bp || 12850;
-  const statsLevel = liveAnalytics?.stats?.level || activeUser?.stats?.level || 14;
-  const statsRank = liveAnalytics?.stats?.rank || activeUser?.rank || 'CONQUEROR';
-  const winRatio = Math.round((statsWins / Math.max(1, statsMatchesPlayed)) * 1000) / 10;
+  // Fallback Repositories if GitHub API is offline
+  const fallbackRepos = [
+    {
+      id: 101,
+      name: 'codebattle-engine',
+      description: 'Ultra-low latency WebSockets compiler & code execution sandbox engine.',
+      language: 'JavaScript',
+      stargazers_count: 34,
+      forks_count: 8,
+      html_url: `https://github.com/${targetGithubHandle}`
+    },
+    {
+      id: 102,
+      name: 'tactical-compiler-ui',
+      description: 'AAA gaming inspired dark-mode design system built for esports platforms.',
+      language: 'TypeScript',
+      stargazers_count: 48,
+      forks_count: 12,
+      html_url: `https://github.com/${targetGithubHandle}`
+    },
+    {
+      id: 103,
+      name: 'dsa-arena-benchmarks',
+      description: 'High-performance Data Structures & Algorithms execution profiling suite.',
+      language: 'C++',
+      stargazers_count: 19,
+      forks_count: 4,
+      html_url: `https://github.com/${targetGithubHandle}`
+    },
+    {
+      id: 104,
+      name: 'webgl-shader-effects',
+      description: 'Holographic matrix shader background pipelines for React dashboards.',
+      language: 'JavaScript',
+      stargazers_count: 27,
+      forks_count: 6,
+      html_url: `https://github.com/${targetGithubHandle}`
+    }
+  ];
+
+  const displayRepos = githubRepos.length > 0 ? githubRepos : fallbackRepos;
+  const avatarUrl = githubProfile?.avatar_url || user?.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=vrushali`;
+  const displayHandle = githubProfile?.login || targetGithubHandle;
+  const displayCallsign = user?.username?.toUpperCase() || "VRUSHALI";
+  const userLevel = user?.stats?.level || 14;
 
   return (
-    <div className="analytics-page">
-      <div className="analytics-grid-bg"></div>
-      <div className="analytics-scanlines"></div>
+    <div className="analytics-dossier-viewport">
+      <div className="dossier-grid-overlay"></div>
+      <div className="dossier-scanline-layer"></div>
 
-      {/* HEADER BAR */}
-      <header className="analytics-header relative z-10 flex items-center justify-between border-b border-steel-border px-6 py-4 bg-panel-bg">
-        <div className="flex items-center gap-4">
+      {/* ================= 1. TOP NAVIGATION BAR ================= */}
+      <header className="dossier-top-bar">
+        <div className="top-bar-left">
           <button 
             onClick={() => {
-              playBeep(500, 0.1, 'sine');
+              try { audioService.playBeep(500, 0.08, 'sine'); } catch (e) {}
               navigate('/lobby');
             }}
-            className="back-btn flex items-center justify-center text-gray-400 hover:text-white border border-steel-border hover:border-gold-glow p-2 rounded transition-all clip-industrial-card cursor-pointer"
+            className="return-lobby-btn clip-tactical-btn"
           >
-            <ArrowLeft size={16} />
+            <ArrowLeft size={15} />
+            <span>RETURN TO COMMAND DECK</span>
           </button>
-          
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse"></span>
-              <span className="font-mono text-[9px] text-gold tracking-[0.25em]">INTEL PROFILE PORTAL</span>
-            </div>
-            <h1 className="font-military text-2xl tracking-wider text-white">PLAYER STATS &amp; GITHUB ARSENAL</h1>
+
+          <div className="top-title-group">
+            <span className="top-status-indicator">
+              <span className="beacon-pulse"></span>
+              SECURE TELEMETRY LINK ACTIVE
+            </span>
+            <h1 className="top-main-title">
+              OPERATOR DOSSIER <span className="title-slash">//</span> COMBAT TELEMETRY & RECORDS
+            </h1>
           </div>
         </div>
 
-        <div className="text-[10px] font-mono text-gray-500 bg-black/30 px-3 py-1 border border-gray-900">
-          SECURE PROTOCOL ID: 5124021489
+        <div className="top-bar-right">
+          <button 
+            onClick={() => {
+              try { audioService.playBeep(850, 0.05, 'sine'); } catch (e) {}
+              setIsInviteModalOpen(true);
+            }}
+            className="invite-action-top-btn clip-tactical-badge"
+          >
+            <UserPlus size={14} />
+            <span>INVITE FRIEND</span>
+          </button>
         </div>
       </header>
 
-      {/* MAIN CONTAINER */}
-      <main className="analytics-main relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 p-6 flex-1 items-stretch min-h-0">
+      {/* ================= MAIN TWO-COLUMN WORKSPACE ================= */}
+      <main className="dossier-main-layout">
         
-        {/* ================= LEFT SIDEBAR (3 COLS): PROFILE ID CARD ================= */}
-        <section className="lg:col-span-3 flex flex-col gap-4">
-          <div className="bg-iron-gray border border-steel-border p-5 h-full flex flex-col justify-between clip-industrial-card relative">
-            <div className="absolute top-0 right-8 w-12 h-[2px] bg-[#00ffcc]"></div>
-            
-            <div className="flex flex-col gap-5">
-              {/* Profile Card Summary */}
-              <div className="flex flex-col items-center text-center pb-5 border-b border-steel-border/50">
-                
-                {/* Real GitHub Avatar Image in Glowing Neon Ring */}
-                <div className="avatar-container-lg mb-3">
-                  <div className="avatar-frame-glow">
-                    <img 
-                      src={githubProfile?.avatar_url || activeUser?.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${activeUser?.username || 'Ghost'}`} 
-                      alt="GitHub Profile Avatar" 
-                      className="w-full h-full rounded-full object-cover border border-[#00ffcc]"
-                    />
-                  </div>
-                  <span className="level-badge-lg font-military">LVL {statsLevel}</span>
-                </div>
-
-                <h2 className="font-military text-2xl text-white tracking-wider mb-0.5">
-                  {activeUser?.username || githubProfile?.name || "GHOST_CODER"}
-                </h2>
-
-                <a 
-                  href={githubProfile?.html_url || `https://github.com/${targetGithubHandle}`}
-                  target="_blank" 
-                  rel="noreferrer"
-                  className="text-xs font-mono text-[#00ffcc] hover:underline flex items-center gap-1 mb-3"
-                >
-                  <GithubIcon size={12} />
-                  <span>@{githubProfile?.login || targetGithubHandle}</span>
-                </a>
-
-                {/* Direct GitHub Profile Link Button */}
-                <a 
-                  href={githubProfile?.html_url || `https://github.com/${targetGithubHandle}`}
-                  target="_blank" 
-                  rel="noreferrer"
-                  className="w-full py-2 bg-black/60 hover:bg-[#00ffcc]/20 text-[#00ffcc] border border-[#00ffcc]/50 font-military text-xs tracking-wider rounded clip-industrial-card transition-all flex items-center justify-center gap-2 mb-2"
-                >
-                  <GithubIcon size={14} />
-                  <span>VIEW GITHUB PROFILE</span>
-                  <ExternalLink size={12} />
-                </a>
-
-                <span 
-                  className="font-military text-xs px-3 py-1 bg-[#00ffcc]/10 text-[#00ffcc] border border-[#00ffcc]/40 rounded clip-industrial-card tracking-wider mt-1"
-                >
-                  PERIMETER BREACHER
-                </span>
+        {/* ================= 2. LEFT COLUMN: OPERATOR PROFILE & INVITE HUB ================= */}
+        <aside className="dossier-profile-card glass-dossier-panel clip-tactical-card">
+          <div className="profile-hero-section">
+            {/* Real Avatar in Illuminated Titanium Frame */}
+            <div className="titanium-avatar-frame">
+              <div className="titanium-ring-glow">
+                <img 
+                  src={avatarUrl} 
+                  alt="Operator Avatar" 
+                  className="avatar-img"
+                />
               </div>
-
-              {/* Conqueror Tier Info */}
-              <div className="bg-black/40 p-4 border border-steel-border/50 rounded clip-steel-sm">
-                <div className="flex items-center gap-3">
-                  <div className="flex-shrink-0">
-                    <svg className="w-12 h-12 filter drop-shadow-[0_0_6px_rgba(250,204,21,0.5)]" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M50 5 L85 25 L85 75 L50 95 L15 75 L15 25 Z" fill="#151722" stroke="#FACC15" strokeWidth="4" />
-                      <path d="M50 15 L75 30 L75 70 L50 85 L25 70 L25 30 Z" fill="#FACC15" opacity="0.25" />
-                      <polygon points="50,22 58,40 78,40 62,52 68,72 50,60 32,72 38,52 22,40 42,40" fill="#FACC15" />
-                    </svg>
-                  </div>
-                  <div>
-                    <span className="block font-military text-md text-gold leading-none tracking-wide">
-                      {statsRank}
-                    </span>
-                    <span className="block font-mono text-[10px] text-gray-500 mt-1">LOBBY RATING</span>
-                    <span className="block font-mono text-xs text-white font-bold mt-0.5">
-                      {statsBp.toLocaleString()} POINTS
-                    </span>
-                  </div>
-                </div>
-
-                <div className="mt-3.5 pt-3.5 border-t border-gray-900/60 grid grid-cols-2 gap-2 text-[10px] font-mono text-gray-400">
-                  <div>
-                    <span className="text-gray-600 block">PUBLIC REPOS</span>
-                    <span className="text-[#00ffcc] font-bold">{githubProfile?.public_repos || 18}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-600 block">FOLLOWERS</span>
-                    <span className="text-white font-bold">{githubProfile?.followers || 42}</span>
-                  </div>
-                </div>
-              </div>
+              <span className="level-badge clip-tactical-badge">LVL {userLevel}</span>
             </div>
 
-            {/* Tactical stats footer preview */}
-            <div className="mt-6 pt-4 border-t border-steel-border/50 text-[9px] font-mono text-gray-500 leading-relaxed uppercase">
-              <div className="flex justify-between mb-1">
-                <span>SEASON STABILITY</span>
-                <span className="text-green-500 font-bold">94.2% SECURED</span>
-              </div>
-              <div className="w-full h-1 bg-black border border-gray-900 rounded-sm overflow-hidden flex">
-                <div className="h-full bg-green-500" style={{ width: '94.2%' }}></div>
-              </div>
-              <span className="text-right block mt-0.5">ANTI-CHEAT VERIFIED // OK</span>
-            </div>
+            {/* Callsign & GitHub Handle */}
+            <h2 className="operator-callsign-text">
+              COMMANDER <span className="accent-amber">//</span> {displayCallsign}
+            </h2>
 
+            <a 
+              href={githubProfile?.html_url || `https://github.com/${displayHandle}`}
+              target="_blank"
+              rel="noreferrer"
+              className="github-inspect-link"
+            >
+              <GithubIcon size={13} />
+              <span>@{displayHandle}</span>
+              <ExternalLink size={11} />
+            </a>
           </div>
-        </section>
 
-        {/* ================= RIGHT DETAILS PANEL (9 COLS) ================= */}
-        <section className="lg:col-span-9 flex flex-col gap-5">
+          {/* Clean Stat Strip */}
+          <div className="clean-stat-strip clip-tactical-card">
+            <div className="stat-pill">
+              <span className="stat-label">PUBLIC REPOS</span>
+              <span className="stat-value cyan">{githubProfile?.public_repos || 18}</span>
+            </div>
+
+            <div className="stat-pill">
+              <span className="stat-label">FOLLOWERS</span>
+              <span className="stat-value white">{githubProfile?.followers || 42}</span>
+            </div>
+
+            <div className="stat-pill">
+              <span className="stat-label">SEASON WIN RATE</span>
+              <span className="stat-value amber">78.5%</span>
+            </div>
+          </div>
+
+          {/* Rank Badge Indicator */}
+          <div className="rank-tier-box clip-tactical-card">
+            <div className="rank-icon-wrapper">
+              <svg className="w-9 h-9 filter drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M50 5 L85 25 L85 75 L50 95 L15 75 L15 25 Z" fill="#080B11" stroke="#F59E0B" strokeWidth="5" />
+                <polygon points="50,22 58,40 78,40 62,52 68,72 50,60 32,72 38,52 22,40 42,40" fill="#F59E0B" />
+              </svg>
+            </div>
+            <div className="rank-details">
+              <span className="rank-tier-title">CONQUEROR TIER</span>
+              <span className="rank-rating-sub">3,850 SEASON MMR</span>
+            </div>
+          </div>
+
+          {/* Primary Action Button */}
+          <button 
+            onClick={() => {
+              try { audioService.playBeep(900, 0.05, 'sine'); } catch (e) {}
+              setIsInviteModalOpen(true);
+            }}
+            className="dispatch-invite-btn cta-hazard-amber clip-tactical-btn"
+          >
+            <UserPlus size={16} />
+            <span>DISPATCH MATCH INVITE</span>
+          </button>
+        </aside>
+
+        {/* ================= 3. MAIN VIEWPORT TABS & CONTENT ================= */}
+        <section className="dossier-main-viewport">
           
-          {/* TAB SYSTEM */}
-          <div className="tab-list-container border-b border-steel-border/60 pb-1 flex-shrink-0">
+          {/* Tab Navigation System */}
+          <div className="viewport-tab-header">
             <button 
-              onClick={() => handleTabChange('overview')}
-              className={`tab-btn font-military text-sm px-6 py-2 transition-all ${
-                activeTab === 'overview' 
-                  ? 'active-tab text-gold border-b-2 border-gold' 
-                  : 'text-gray-400 hover:text-white'
-              }`}
+              onClick={() => {
+                try { audioService.playBeep(700, 0.04, 'sine'); } catch (e) {}
+                setActiveTab('history');
+              }}
+              className={`viewport-tab-btn clip-tactical-badge ${activeTab === 'history' ? 'active amber' : ''}`}
             >
-              COMBAT STATS OVERVIEW
+              <Swords size={14} />
+              <span>COMBAT MATCH HISTORY</span>
             </button>
 
             <button 
-              onClick={() => handleTabChange('github')}
-              className={`tab-btn font-military text-sm px-6 py-2 transition-all ${
-                activeTab === 'github' 
-                  ? 'active-tab text-[#00ffcc] border-b-2 border-[#00ffcc]' 
-                  : 'text-gray-400 hover:text-white'
-              }`}
+              onClick={() => {
+                try { audioService.playBeep(700, 0.04, 'sine'); } catch (e) {}
+                setActiveTab('github');
+              }}
+              className={`viewport-tab-btn clip-tactical-badge ${activeTab === 'github' ? 'active cyan' : ''}`}
             >
-              GITHUB REPOSITORIES (TACTICAL ARSENAL)
-            </button>
-
-            <button 
-              onClick={() => handleTabChange('weaponry')}
-              className={`tab-btn font-military text-sm px-6 py-2 transition-all ${
-                activeTab === 'weaponry' 
-                  ? 'active-tab text-[#00ffcc] border-b-2 border-[#00ffcc]' 
-                  : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              COMPILER MASTERY (WEAPONS)
-            </button>
-
-            <button 
-              onClick={() => handleTabChange('operations')}
-              className={`tab-btn font-military text-sm px-6 py-2 transition-all ${
-                activeTab === 'operations' 
-                  ? 'active-tab text-gold border-b-2 border-gold' 
-                  : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              RECENT LOG OPERATIONS
+              <GithubIcon size={14} />
+              <span>GITHUB ARSENAL (REPOSITORIES)</span>
             </button>
           </div>
 
-          {/* TAB 1: STATS OVERVIEW */}
-          {activeTab === 'overview' && (
-            <div className="grid grid-cols-1 lg:grid-cols-10 gap-6 overflow-y-auto max-h-[calc(100vh-230px)] pr-2 custom-scrollbar flex-1 items-stretch">
+          {/* TAB 1: COMBAT MATCH HISTORY */}
+          {activeTab === 'history' && (
+            <div className="dossier-tab-content scrollable-viewport custom-scrollbar">
               
-              <div className="lg:col-span-6 grid grid-cols-2 md:grid-cols-3 gap-4">
-                <div className="stat-box bg-black/40 border border-steel-border/50 p-4 clip-steel-sm">
-                  <span className="text-gray-500 font-mono text-[9px] block uppercase">Matches Played</span>
-                  <span className="font-military text-3xl text-white block mt-1 tracking-wider">
-                    {statsMatchesPlayed}
-                  </span>
-                  <span className="text-[8px] font-mono text-gray-600 block mt-1">SEASON: SS14</span>
+              {/* Summary telemetry header pill */}
+              <div className="telemetry-summary-strip glass-dossier-panel clip-tactical-card">
+                <div className="summary-col">
+                  <span className="summary-lbl">TOTAL DUELS</span>
+                  <span className="summary-val">48 MATCHES</span>
                 </div>
-                <div className="stat-box bg-black/40 border border-steel-border/50 p-4 clip-steel-sm">
-                  <span className="text-gray-500 font-mono text-[9px] block uppercase">Breached (Wins)</span>
-                  <span className="font-military text-3xl text-gold block mt-1 tracking-wider">
-                    {statsWins}
-                  </span>
-                  <span className="text-[8px] font-mono text-green-500 block mt-1">WIN RATIO: {winRatio}%</span>
+                <div className="summary-col border-left">
+                  <span className="summary-lbl">DEFEATED TARGETS</span>
+                  <span className="summary-val amber">36 WINS</span>
                 </div>
-                <div className="stat-box bg-black/40 border border-steel-border/50 p-4 clip-steel-sm">
-                  <span className="text-gray-500 font-mono text-[9px] block uppercase">Win Streak</span>
-                  <span className="font-military text-3xl text-white block mt-1 tracking-wider">
-                    {statsWinStreak}🔥
-                  </span>
-                  <span className="text-[8px] font-mono text-cyan-400 block mt-1">ACTIVE STREAK</span>
+                <div className="summary-col border-left">
+                  <span className="summary-lbl">AVG COMPILER LATENCY</span>
+                  <span className="summary-val cyan">0.04ms</span>
                 </div>
-                <div className="stat-box bg-black/40 border border-steel-border/50 p-4 clip-steel-sm">
-                  <span className="text-gray-500 font-mono text-[9px] block uppercase">Total Solves</span>
-                  <span className="font-military text-3xl text-white block mt-1 tracking-wider">
-                    {statsTotalSolves}
-                  </span>
-                  <span className="text-[8px] font-mono text-gray-600 block mt-1">DSA PROBLEMS</span>
-                </div>
-                <div className="stat-box bg-black/40 border border-steel-border/50 p-4 clip-steel-sm">
-                  <span className="text-gray-500 font-mono text-[9px] block uppercase">Syntax Accuracy</span>
-                  <span className="font-military text-3xl text-white block mt-1 tracking-wider">94%</span>
-                  <span className="text-[8px] font-mono text-green-500 block mt-1">PASS RATINGS</span>
-                </div>
-                <div className="stat-box bg-black/40 border border-steel-border/50 p-4 clip-steel-sm">
-                  <span className="text-gray-500 font-mono text-[9px] block uppercase">Total BP Codes</span>
-                  <span className="font-military text-3xl text-white block mt-1 tracking-wider">
-                    {statsBp.toLocaleString()}
-                  </span>
-                  <span className="text-[8px] font-mono text-gold block mt-1">AVAILABLE BP</span>
-                </div>
-
-                <div className="col-span-full bg-iron-gray border border-steel-border/50 p-4 clip-steel-sm flex flex-col gap-3">
-                  <h3 className="font-military text-xs text-white tracking-widest flex items-center gap-1.5 border-b border-steel-border/50 pb-2">
-                    <Swords size={12} className="text-gold" />
-                    DETAILED COMBAT RECORD
-                  </h3>
-                  
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-[10px] font-mono text-gray-400">
-                    <div className="bg-black/35 p-2 rounded">
-                      <span className="text-gray-600 block">AVG TESTS RUN</span>
-                      <span className="text-white font-bold">14.2 / Match</span>
-                    </div>
-                    <div className="bg-black/35 p-2 rounded">
-                      <span className="text-gray-600 block">BREACH RATIO</span>
-                      <span className="text-[#FACC15] font-bold">78.5% (High)</span>
-                    </div>
-                    <div className="bg-black/35 p-2 rounded">
-                      <span className="text-gray-600 block">TOTAL EXP EARNED</span>
-                      <span className="text-white font-bold">142,400 XP</span>
-                    </div>
-                    <div className="bg-black/35 p-2 rounded">
-                      <span className="text-gray-600 block">LONGEST BREACH</span>
-                      <span className="text-white font-bold">28m 14s</span>
-                    </div>
-                  </div>
+                <div className="summary-col border-left">
+                  <span className="summary-lbl">SECURITY BREACH SCORE</span>
+                  <span className="summary-val green">100% VERIFIED</span>
                 </div>
               </div>
 
-              {/* Radar Chart */}
-              <div className="lg:col-span-4 bg-iron-gray border border-steel-border/50 p-5 clip-steel-sm flex flex-col justify-between items-center text-center">
-                <div className="w-full flex items-center justify-between border-b border-steel-border/50 pb-2 mb-3">
-                  <span className="font-military text-xs text-white tracking-widest block">TACTICAL RADAR</span>
-                  <span className="text-[8px] font-mono text-gray-500">SS14 STAT INDEX</span>
-                </div>
+              {/* Match History List */}
+              <div className="match-history-list">
+                {matchHistoryList.map((match) => {
+                  const isWin = match.result === 'VICTORY';
+                  return (
+                    <div 
+                      key={match.id}
+                      className={`match-entry-card glass-dossier-panel clip-tactical-card ${isWin ? 'victory-border' : 'defeat-border'}`}
+                    >
+                      {/* Result Banner */}
+                      <div className={`result-banner ${isWin ? 'victory' : 'defeat'}`}>
+                        {isWin ? <CheckCircle2 size={14} /> : <XCircle size={14} />}
+                        <span>{match.result}</span>
+                      </div>
 
-                <div className="relative w-44 h-44 flex items-center justify-center my-2">
-                  <svg className="w-full h-full" viewBox="0 0 200 200">
-                    <circle cx="100" cy="100" r="80" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
-                    <circle cx="100" cy="100" r="60" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
-                    <circle cx="100" cy="100" r="40" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
-                    
-                    <line x1="100" y1="20" x2="100" y2="180" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
-                    <line x1="20" y1="100" x2="180" y2="100" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
-                    
-                    <polygon 
-                      points="100,35 158,82 142,140 62,142 45,78" 
-                      fill="var(--color-gold-glow)" 
-                      stroke="var(--theme-accent-color)" 
-                      strokeWidth="2.5" 
-                      className="radar-poly-pulse" 
-                    />
-                    
-                    <circle cx="100" cy="35" r="3" fill="var(--theme-accent-color)" />
-                    <circle cx="158" cy="82" r="3" fill="var(--theme-accent-color)" />
-                    <circle cx="142" cy="140" r="3" fill="var(--theme-accent-color)" />
-                    <circle cx="62" cy="142" r="3" fill="var(--theme-accent-color)" />
-                    <circle cx="45" cy="78" r="3" fill="var(--theme-accent-color)" />
-                  </svg>
-                </div>
+                      {/* Problem & Sector Information */}
+                      <div className="match-problem-info">
+                        <h3 className="problem-title">{match.problem}</h3>
+                        <span className="sector-tag">{match.sector} // ID: {match.id}</span>
+                      </div>
 
-                <div className="font-mono text-[9px] text-gray-500 mt-2 leading-relaxed text-left border-t border-steel-border/50 pt-2 w-full">
-                  <span className="text-[#FACC15] font-bold block mb-1">TACTICAL INSIGHT:</span>
-                  Operator {activeUser?.username || "GHOST_CODER"} has exceptional Breach K/D and Collaboration scores.
-                </div>
+                      {/* Opponent Faced */}
+                      <div className="match-opponent-col">
+                        <span className="opponent-lbl">OPPONENT FACED</span>
+                        <div className="opponent-badge">
+                          <div className="opponent-avatar clip-tactical-badge">{match.opponent.avatar}</div>
+                          <span className="opponent-name">@{match.opponent.name}</span>
+                        </div>
+                      </div>
+
+                      {/* Performance Telemetry */}
+                      <div className="match-telemetry-grid">
+                        <div className="telemetry-cell">
+                          <span className="cell-lbl">EXEC TIME</span>
+                          <span className="cell-val cyan">{match.executionTime}</span>
+                        </div>
+
+                        <div className="telemetry-cell">
+                          <span className="cell-lbl">TESTS PASSED</span>
+                          <span className="cell-val white">{match.testsPassed}</span>
+                        </div>
+
+                        <div className="telemetry-cell">
+                          <span className="cell-lbl">MMR DELTA</span>
+                          <span className={`cell-val ${isWin ? 'green' : 'red'}`}>{match.mmrDelta}</span>
+                        </div>
+                      </div>
+
+                    </div>
+                  );
+                })}
               </div>
 
             </div>
           )}
 
-          {/* TAB 2: GITHUB REPOSITORIES (TACTICAL ARSENAL) */}
+          {/* TAB 2: GITHUB ARSENAL (REPOSITORIES) */}
           {activeTab === 'github' && (
-            <div className="flex flex-col gap-4 overflow-y-auto max-h-[calc(100vh-230px)] pr-2 custom-scrollbar flex-1">
-              <div className="flex items-center justify-between border-b border-white/10 pb-2">
-                <span className="font-military text-xs text-[#00ffcc] tracking-widest uppercase flex items-center gap-1.5">
-                  <GithubIcon size={14} />
-                  PUBLIC REPOSITORIES ARSENAL (TOP 6)
+            <div className="dossier-tab-content scrollable-viewport custom-scrollbar">
+              
+              <div className="repo-header-info glass-dossier-panel clip-tactical-card">
+                <span className="repo-header-title">
+                  <GithubIcon size={15} className="text-[#00F5D4]" />
+                  PUBLIC REPOSITORIES ARSENAL // @{displayHandle}
                 </span>
-                <span className="font-mono text-[10px] text-gray-400">
-                  FETCHED FROM @{targetGithubHandle}
+                <span className="repo-header-sub font-mono">
+                  REAL-TIME SYNCHRONIZATION VIA GITHUB REST API
                 </span>
               </div>
 
               {isLoadingGithub ? (
-                <div className="text-center py-12 font-mono text-xs text-[#00ffcc] animate-pulse">
-                  TRANSMITTING GITHUB ARSENAL DATA...
-                </div>
-              ) : githubRepos.length === 0 ? (
-                <div className="text-center py-12 font-mono text-xs text-gray-400">
-                  No public GitHub repositories found for @{targetGithubHandle}.
+                <div className="loading-state-box glass-dossier-panel clip-tactical-card">
+                  <span className="loading-pulse-text">FETCHING ARSENAL TELEMETRY...</span>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {githubRepos.map((repo) => (
+                <div className="repo-grid">
+                  {displayRepos.map((repo) => (
                     <div 
                       key={repo.id}
-                      className="repo-card-industrial p-4 clip-steel-sm flex flex-col justify-between gap-3"
+                      className="repo-card glass-dossier-panel clip-tactical-card"
                     >
-                      <div>
-                        <div className="flex items-center justify-between mb-1">
-                          <h3 className="font-military text-lg text-white font-bold truncate pr-2">
-                            {repo.name}
-                          </h3>
-                          <span className="text-[10px] font-mono text-gray-400 bg-white/5 px-2 py-0.5 rounded flex items-center gap-1">
-                            <span className={`lang-dot ${getLangDotClass(repo.language)}`} />
-                            {repo.language || 'Code'}
-                          </span>
+                      <div className="repo-card-top">
+                        <div className="repo-title-row">
+                          <Code2 size={16} className="text-[#00F5D4]" />
+                          <h3 className="repo-name">{repo.name}</h3>
                         </div>
-
-                        <p className="font-mono text-[10px] text-gray-400 leading-relaxed line-clamp-2 min-h-[28px]">
-                          {repo.description || 'No description provided for this tactical repository.'}
+                        
+                        <p className="repo-desc">
+                          {repo.description || 'Tactical repository for algorithmic combat and compiled matrix operations.'}
                         </p>
                       </div>
 
-                      <div className="flex items-center justify-between border-t border-white/10 pt-3">
-                        <div className="flex items-center gap-3 font-mono text-[10px] text-gray-400">
-                          <span className="flex items-center gap-1 text-[#facc15]">
-                            <Star size={12} fill="#facc15" />
+                      <div className="repo-card-bottom">
+                        <div className="repo-meta-strip">
+                          <span className="repo-lang-tag">
+                            <span className={`lang-dot ${getLangDotClass(repo.language)}`} />
+                            {repo.language || 'Code'}
+                          </span>
+
+                          <span className="repo-stat-tag amber">
+                            <Star size={12} fill="#F59E0B" />
                             {repo.stargazers_count}
                           </span>
-                          <span className="flex items-center gap-1 text-white">
+
+                          <span className="repo-stat-tag white">
                             <GitFork size={12} />
                             {repo.forks_count}
                           </span>
@@ -543,142 +499,89 @@ export default function Analytics() {
                           href={repo.html_url}
                           target="_blank"
                           rel="noreferrer"
-                          className="px-3 py-1 bg-[#00ffcc]/10 hover:bg-[#00ffcc] text-[#00ffcc] hover:text-black font-military text-xs font-bold rounded clip-steel-sm transition-all flex items-center gap-1"
+                          className="inspect-repo-btn clip-tactical-badge"
                         >
                           <span>INSPECT REPO</span>
-                          <ExternalLink size={10} />
+                          <ExternalLink size={11} />
                         </a>
                       </div>
                     </div>
                   ))}
                 </div>
               )}
-            </div>
-          )}
 
-          {/* TAB 3: WEAPON MASTERY (IDEs) */}
-          {activeTab === 'weaponry' && (
-            <div className="flex flex-col gap-4 overflow-y-auto max-h-[calc(100vh-230px)] pr-2 custom-scrollbar flex-1">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {ideWeapons.map((weapon, index) => (
-                  <div 
-                    key={index}
-                    className="bg-black/40 border border-steel-border/50 p-4 clip-steel-sm relative hover:border-[#FACC15]/40 transition-colors duration-200"
-                  >
-                    <div className="absolute top-2 right-2 bg-black/85 text-[9px] font-mono text-gold px-2 py-0.5 border border-gray-900 font-bold uppercase">
-                      {weapon.usage}
-                    </div>
-
-                    <div className="mb-2">
-                      <span className="text-[#FACC15] font-military text-[9px] block tracking-wider leading-none">
-                        {weapon.type}
-                      </span>
-                      <h3 className="font-military text-lg text-white font-bold leading-tight mt-0.5">
-                        {weapon.name}
-                      </h3>
-                    </div>
-
-                    <p className="text-[10px] text-gray-400 font-mono leading-relaxed h-12 overflow-hidden mb-3">
-                      {weapon.desc}
-                    </p>
-
-                    <div className="mb-3">
-                      <div className="flex justify-between items-center text-[9px] font-mono text-gray-500 mb-1">
-                        <span>IDE PROGRESS MASTER LEVEL</span>
-                        <span className="text-white font-bold">LVL {weapon.level} / {weapon.maxLevel}</span>
-                      </div>
-                      <div className="w-full h-1.5 bg-black border border-gray-900 rounded-sm overflow-hidden flex">
-                        <div 
-                          className="h-full bg-gold transition-all duration-300"
-                          style={{ width: `${(weapon.level / weapon.maxLevel) * 100}%` }}
-                        ></div>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-2 text-[9px] font-mono text-gray-400 border-t border-steel-border/30 pt-3">
-                      <div className="bg-black/35 p-1 text-center rounded">
-                        <span className="text-gray-600 block uppercase">Accuracy</span>
-                        <span className="text-white font-bold">{weapon.accuracy}%</span>
-                      </div>
-                      <div className="bg-black/35 p-1 text-center rounded">
-                        <span className="text-gray-600 block uppercase">Speed</span>
-                        <span className="text-white font-bold">{weapon.speed} WPM</span>
-                      </div>
-                      <div className="bg-black/35 p-1 text-center rounded">
-                        <span className="text-gray-600 block uppercase">Control</span>
-                        <span className="text-white font-bold">{weapon.control}%</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* TAB 4: OPERATION LOGS */}
-          {activeTab === 'operations' && (
-            <div className="flex flex-col gap-4 overflow-y-auto max-h-[calc(100vh-230px)] pr-2 custom-scrollbar flex-1">
-              <div className="bg-[#0f1016] border border-steel-border/60 p-3 clip-industrial-card flex items-center justify-between text-[10px] font-military text-gray-400 tracking-wider">
-                <span className="w-16">RESULT</span>
-                <span className="flex-1 px-4">DECENT ARENA / MODE</span>
-                <span className="w-20 text-center hidden md:block">BP CREDITS</span>
-                <span className="w-20 text-center">RATING BP</span>
-                <span className="w-20 text-center hidden md:block">TIME TIME</span>
-                <span className="w-20 text-right hidden md:block">OPER. DATE</span>
-              </div>
-
-              <div className="flex flex-col gap-2.5">
-                {operations.map((oper) => (
-                  <div 
-                    key={oper.id}
-                    className="p-3 bg-black/45 border border-steel-border/30 clip-steel-sm flex items-center justify-between text-xs font-mono text-gray-300 hover:border-gray-700 transition-colors"
-                  >
-                    <div className="w-16 flex items-center gap-1">
-                      <span 
-                        className={`font-military text-[10px] px-2 py-0.5 rounded font-black tracking-widest shadow ${
-                          oper.result === 'VICTORY' 
-                            ? 'bg-gold text-black' 
-                            : 'bg-red-500/10 text-red-500 border border-red-500/30'
-                        }`}
-                      >
-                        {oper.result}
-                      </span>
-                      {oper.mvp && (
-                        <span className="bg-cyan-500 text-black font-military text-[8px] px-1 font-bold rounded">
-                          MVP
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="flex-1 px-4">
-                      <span className="text-white font-military font-bold block leading-none">{oper.map}</span>
-                      <span className="text-[9px] text-gray-600 block mt-1">{oper.mode}</span>
-                    </div>
-
-                    <div className="w-20 text-center text-gold font-bold hidden md:block">
-                      {oper.bp}
-                    </div>
-
-                    <div className={`w-20 text-center font-bold ${oper.pts.startsWith('+') ? 'text-green-400' : 'text-red-400'}`}>
-                      {oper.pts}
-                    </div>
-
-                    <div className="w-20 text-center text-gray-500 hidden md:block">
-                      {oper.time}
-                    </div>
-
-                    <div className="w-20 text-right text-gray-600 text-[10px] hidden md:block">
-                      {oper.date}
-                    </div>
-                  </div>
-                ))}
-              </div>
             </div>
           )}
 
         </section>
 
       </main>
+
+      {/* ================= TACTICAL DISPATCH MODAL ================= */}
+      {isInviteModalOpen && (
+        <div className="modal-backdrop-overlay">
+          <div className="tactical-modal-card glass-dossier-panel clip-tactical-card">
+            
+            <div className="modal-header-row">
+              <div className="modal-title-group">
+                <UserPlus size={16} className="text-[#F59E0B]" />
+                <span className="modal-title-text">TACTICAL DISPATCH // MATCH INVITE</span>
+              </div>
+
+              <button 
+                onClick={() => setIsInviteModalOpen(false)}
+                className="modal-close-btn"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="modal-body-content">
+              {/* Direct Room Link Copy */}
+              <div className="dispatch-input-group">
+                <label className="input-label">DIRECT DUEL ROOM LINK</label>
+                <div className="input-copy-wrapper">
+                  <input 
+                    type="text" 
+                    readOnly 
+                    value="https://codebattle.io/room/ROOM-8921" 
+                    className="tactical-read-input"
+                  />
+                  <button 
+                    onClick={handleCopyRoomLink}
+                    className="copy-btn clip-tactical-badge"
+                  >
+                    {isCopied ? <Check size={14} className="text-green-400" /> : <Copy size={14} />}
+                    <span>{isCopied ? 'COPIED' : 'COPY LINK'}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Direct Handle Invite Dispatch */}
+              <form onSubmit={handleSendDispatch} className="dispatch-input-group">
+                <label className="input-label">DISPATCH TO GITHUB HANDLE / CALLSIGN</label>
+                <div className="input-copy-wrapper">
+                  <input 
+                    type="text"
+                    placeholder="e.g. @vrushali or NEO_GHOST"
+                    value={inviteTarget}
+                    onChange={(e) => setInviteTarget(e.target.value)}
+                    className="tactical-text-input"
+                  />
+                  <button 
+                    type="submit"
+                    className="dispatch-submit-btn cta-hazard-amber clip-tactical-badge"
+                  >
+                    <span>{inviteSent ? 'DISPATCHED!' : 'SEND DISPATCH'}</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

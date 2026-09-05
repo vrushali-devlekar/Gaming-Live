@@ -1,29 +1,31 @@
-/* Inventory / Locker Room Page styling */
+/* ==========================================================================
+   PLAYER TACTICAL LOCKER // INVENTORY STYLESHEET
+   ========================================================================== */
+
+.inventory-locker-viewport {
+  width: 100vw;
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
+  background-color: var(--bg-obsidian);
+  display: flex;
+  flex-direction: column;
+  color: #FFFFFF;
+  font-family: var(--font-gamer);
+  position: relative;
+}
 
 .inventory-main-grid {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 20px;
+  padding: 20px 28px;
   flex: 1;
-  width: 100%;
+  min-height: 0;
+  max-height: calc(100vh - 65px);
+  overflow: hidden;
 }
 
-@media (min-width: 1024px) {
-  .inventory-main-grid {
-    height: calc(100vh - 150px);
-    align-items: stretch;
-  }
-}
-
-.inventory-main-grid .three-character-viewport {
-  height: 380px !important;
-}
-
-/* Custom layout behaviors for responsive grids */
-@media (max-width: 1024px) {
-  .inventory-main-grid {
-    grid-template-cols: 1fr;
-  }
-  
-  .inventory-main-grid section {
-    min-height: 0 !important;
-    height: auto !important;
-  }
-}
+.item-tier-legendary { border-color: var(--hazard-amber); color: var(--hazard-amber); }
+.item-tier-rare { border-color: var(--ice-cyan); color: var(--ice-cyan); }
+.item-tier-common { border-color: var(--muted-slate); color: var(--muted-slate); }

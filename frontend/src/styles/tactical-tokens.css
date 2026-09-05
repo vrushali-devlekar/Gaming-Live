@@ -1,0 +1,84 @@
+/* ==========================================================================
+   UNIFIED TACTICAL CYBER-WARFARE DESIGN TOKENS
+   Standardized styling for CodeBattle Esports System
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700;800&family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@500;600;700;800&family=Fira+Code:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg-obsidian: #07090E;
+  --bg-obsidian-pitch: #05070B;
+  --bg-graphite-glass: rgba(14, 18, 27, 0.75);
+  --bg-card-dark: rgba(15, 21, 32, 0.85);
+
+  --hazard-amber: #F59E0B;
+  --hazard-amber-glow: rgba(245, 158, 11, 0.4);
+
+  --ice-cyan: #06B6D4;
+  --ice-cyan-glow: rgba(6, 182, 212, 0.4);
+
+  --crimson-alert: #FF3366;
+  --crimson-glow: rgba(255, 51, 102, 0.45);
+
+  --muted-slate: #64748B;
+  --titanium-border: rgba(255, 255, 255, 0.08);
+  --titanium-border-amber: rgba(245, 158, 11, 0.35);
+  --titanium-border-cyan: rgba(6, 182, 212, 0.35);
+
+  --font-gamer: 'Rajdhani', sans-serif;
+  --font-header: 'Chakra Petch', sans-serif;
+  --font-military: 'Orbitron', sans-serif;
+  --font-code: 'Fira Code', monospace;
+
+  /* Polygon Cuts */
+  --cut-corner-sm: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+  --cut-corner-md: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
+  --cut-corner-btn: polygon(14px 0, 100% 0, calc(100% - 14px) 100%, 0 100%);
+}
+
+/* Global Container Utility */
+.tactical-viewport-100vh {
+  width: 100vw;
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
+  background-color: var(--bg-obsidian);
+  background-image: 
+    radial-gradient(circle at 25% 35%, rgba(6, 182, 212, 0.06) 0%, transparent 55%),
+    radial-gradient(circle at 75% 65%, rgba(245, 158, 11, 0.06) 0%, transparent 55%),
+    linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 36px 36px, 36px 36px;
+  display: flex;
+  flex-direction: column;
+  color: #FFFFFF;
+  font-family: var(--font-gamer);
+  position: relative;
+  user-select: none;
+}
+
+/* Micro Chamfer Utility Classes */
+.clip-tactical-badge {
+  clip-path: var(--cut-corner-sm);
+}
+
+.clip-tactical-card {
+  clip-path: var(--cut-corner-md);
+}
+
+.clip-tactical-btn {
+  clip-path: var(--cut-corner-btn);
+}
+
+/* Glassmorphic Panel Utility */
+.glass-tactical-card {
+  background: var(--bg-graphite-glass);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--titanium-border);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.75);
+  transition: all 0.25s ease;
+}
+
+.glass-tactical-card:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+}

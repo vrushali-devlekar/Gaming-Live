@@ -22,15 +22,15 @@ export default function ThreeCharacter({ activeTheme }) {
     let mixer;
 
     try {
-      const width = containerRef.current.clientWidth || 340;
-      const height = containerRef.current.clientHeight || 380;
+      const width = containerRef.current.clientWidth || 360;
+      const height = containerRef.current.clientHeight || 520;
 
       // 1. Scene Setup
       const scene = new THREE.Scene();
 
-      // 2. Cinematography: Camera (45° FOV) positioned 3.5m at eye level (PUBG medium shot)
-      const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
-      camera.position.set(0, 0.25, 3.5);
+      // 2. Camera: Positioned for full-height standing operator view
+      const camera = new THREE.PerspectiveCamera(42, width / height, 0.1, 100);
+      camera.position.set(0, 0.15, 3.8);
 
       // 3. WebGL Renderer
       renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -47,132 +47,161 @@ export default function ThreeCharacter({ activeTheme }) {
       const modelGroup = new THREE.Group();
       scene.add(modelGroup);
 
-      // ================= 4. CINEMATOGRAPHY & LIGHTING SETUP =================
-      // Ambient Base Light
-      const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
+      // ================= 4. WARM PUBG AMBER SUN FLARE LIGHTING =================
+      const ambientLight = new THREE.AmbientLight(0xffffff, 1.1);
       scene.add(ambientLight);
 
-      // Requirement: Warm-toned Directional Key Light (0xfff8e1, intensity 2.5) from front-right
-      const warmKeyLight = new THREE.DirectionalLight(0xfff8e1, 2.5);
-      warmKeyLight.position.set(3, 4, 3);
-      warmKeyLight.castShadow = true;
-      scene.add(warmKeyLight);
+      // Warm Amber/Orange Shoulder Rim Spotlight (#FF9E00, intensity 3.2)
+      const amberRimLight = new THREE.DirectionalLight(0xff9e00, 3.2);
+      amberRimLight.position.set(-3, 4, -2.5);
+      amberRimLight.castShadow = true;
+      scene.add(amberRimLight);
 
-      // Requirement: Cool-toned SpotLight (0x80d8ff, intensity 3.0) from back-left for sharp rim lighting
-      const coolRimSpotlight = new THREE.SpotLight(0x80d8ff, 3.0, 15, Math.PI / 4, 0.5);
-      coolRimSpotlight.position.set(-3, 3, -3);
-      coolRimSpotlight.lookAt(0, 0, 0);
-      scene.add(coolRimSpotlight);
+      // Secondary Orange Shoulder Glow (#FF7B00, intensity 2.5)
+      const orangeRimLight2 = new THREE.DirectionalLight(0xff7b00, 2.5);
+      orangeRimLight2.position.set(3, 4, -2.5);
+      scene.add(orangeRimLight2);
 
-      // Pedestal Deck Point Light (#00e5ff)
-      const pedestalLight = new THREE.PointLight(0x00e5ff, 2.5, 4);
-      pedestalLight.position.set(0, -0.5, 0.5);
+      // Front Fill Light (Cool Cyan Tint)
+      const frontFillLight = new THREE.DirectionalLight(0x00f5d4, 1.4);
+      frontFillLight.position.set(0, 2, 4);
+      scene.add(frontFillLight);
+
+      // Pedestal Deck Point Light
+      const pedestalLight = new THREE.PointLight(0x00f5d4, 2.5, 4);
+      pedestalLight.position.set(0, -0.8, 0.5);
       scene.add(pedestalLight);
 
-      // ================= 5. CYBER GLOWING PEDESTAL (#00e5ff) =================
+      // ================= 5. CYBER GLOWING PEDESTAL DECK =================
       const pedestalGroup = new THREE.Group();
 
-      // Pedestal Deck Base
       const deckGeo = new THREE.CylinderGeometry(0.95, 0.95, 0.05, 32);
-      const deckMat = new THREE.MeshStandardMaterial({
-        color: 0x14161f,
-        metalness: 0.8,
-        roughness: 0.2
-      });
+      const deckMat = new THREE.MeshStandardMaterial({ color: 0x080c14, metalness: 0.85, roughness: 0.2 });
       const deck = new THREE.Mesh(deckGeo, deckMat);
-      deck.position.y = -0.62;
+      deck.position.y = -0.92;
       deck.receiveShadow = true;
       pedestalGroup.add(deck);
 
-      // Outer Glowing Ring (#00e5ff)
       const ringGeo = new THREE.TorusGeometry(0.95, 0.02, 16, 64);
-      const platformRingMat = new THREE.MeshBasicMaterial({
-        color: 0x00e5ff,
-        transparent: true,
-        opacity: 0.95
-      });
+      const platformRingMat = new THREE.MeshBasicMaterial({ color: 0x00f5d4, transparent: true, opacity: 0.9 });
       const platformRing = new THREE.Mesh(ringGeo, platformRingMat);
       platformRing.rotation.x = Math.PI / 2;
-      platformRing.position.y = -0.6;
+      platformRing.position.y = -0.9;
       pedestalGroup.add(platformRing);
 
       modelGroup.add(pedestalGroup);
 
-      // ================= 6. PROCEDURAL FALLBACK MUMMY MODEL =================
-      const characterGroup = new THREE.Group();
-      const selectedSkin = localStorage.getItem('gaming_live_player_skin') || 'mummy';
-      let wrapColor = 0xf3f3ef;
-      let strapColor = 0xe6e6db;
-      let helmetColor = 0x22242f;
-      let visorColor = '#00e5ff';
+      // ================= 6. ICONIC "LONE SURVIVOR" CHARACTER MODEL =================
+      const loneSurvivorGroup = new THREE.Group();
 
-      if (selectedSkin === 'samurai') {
-        wrapColor = 0x161616;
-        strapColor = 0xff007f;
-        helmetColor = 0x181818;
-        visorColor = '#ff007f';
-      } else if (selectedSkin === 'recon') {
-        wrapColor = 0x3d4536;
-        strapColor = 0x5a6350;
-        helmetColor = 0x272c22;
-        visorColor = '#a855f7';
-      }
-
-      const mummyMat = new THREE.MeshStandardMaterial({ color: wrapColor, roughness: 0.9, metalness: 0.1 });
-      const strapMat = new THREE.MeshStandardMaterial({ color: strapColor, roughness: 1.0 });
-      const helmetMat = new THREE.MeshStandardMaterial({ color: helmetColor, metalness: 0.8, roughness: 0.3 });
-      const visorGlowMat = new THREE.MeshBasicMaterial({ color: visorColor });
+      // Materials
+      const whiteShirtMat = new THREE.MeshStandardMaterial({ color: 0xf4f4f6, roughness: 0.6, metalness: 0.05 });
+      const blackTieMat = new THREE.MeshStandardMaterial({ color: 0x111115, roughness: 0.4 });
+      const brownLeatherMat = new THREE.MeshStandardMaterial({ color: 0x6e4726, roughness: 0.7, metalness: 0.2 });
+      const jeansMat = new THREE.MeshStandardMaterial({ color: 0x243242, roughness: 0.8 });
+      const glovesMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1f, roughness: 0.5 });
+      const helmetMat = new THREE.MeshStandardMaterial({ color: 0x1f232d, metalness: 0.85, roughness: 0.25 });
+      const visorGlowMat = new THREE.MeshBasicMaterial({ color: 0x00f5d4 });
       const glacierIceMat = new THREE.MeshStandardMaterial({
         color: 0xa5f3fc,
         roughness: 0.05,
         metalness: 0.2,
         transparent: true,
-        opacity: 0.85,
+        opacity: 0.88,
         emissive: 0x0284c7,
-        emissiveIntensity: 0.5
+        emissiveIntensity: 0.6
       });
 
-      // Torso & Armor
-      const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.15, 0.72, 16), mummyMat);
-      torso.position.y = 0.2;
-      characterGroup.add(torso);
+      // Torso: White Dress Shirt with Sleeves Rolled Up
+      const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.16, 0.75, 16), whiteShirtMat);
+      torso.position.y = 0.22;
+      loneSurvivorGroup.add(torso);
 
-      // Head with Lvl 3 Helmet & Visor Slit
+      // Black Tie
+      const tie = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.38, 0.03), blackTieMat);
+      tie.position.set(0, 0.26, 0.17);
+      loneSurvivorGroup.add(tie);
+
+      // Brown Leather Backpack Harness Straps
+      const strapLeft = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.68, 0.04), brownLeatherMat);
+      strapLeft.position.set(-0.12, 0.22, 0.15);
+      strapLeft.rotation.z = -0.15;
+      loneSurvivorGroup.add(strapLeft);
+
+      const strapRight = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.68, 0.04), brownLeatherMat);
+      strapRight.position.set(0.12, 0.22, 0.15);
+      strapRight.rotation.z = 0.15;
+      loneSurvivorGroup.add(strapRight);
+
+      // Arms: Rolled Up Sleeves + Crossed Arms Stance
+      const leftArm = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.06, 0.45, 12), whiteShirtMat);
+      leftArm.position.set(-0.25, 0.28, 0.08);
+      leftArm.rotation.set(0, 0, -0.6);
+      loneSurvivorGroup.add(leftArm);
+
+      const leftForearm = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.05, 0.35, 12), glovesMat);
+      leftForearm.position.set(-0.12, 0.1, 0.22);
+      leftForearm.rotation.set(0.8, 0.6, -0.8);
+      loneSurvivorGroup.add(leftForearm);
+
+      const rightArm = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.06, 0.45, 12), whiteShirtMat);
+      rightArm.position.set(0.25, 0.28, 0.08);
+      rightArm.rotation.set(0, 0, 0.6);
+      loneSurvivorGroup.add(rightArm);
+
+      const rightForearm = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.05, 0.35, 12), glovesMat);
+      rightForearm.position.set(0.12, 0.1, 0.22);
+      rightForearm.rotation.set(0.8, -0.6, 0.8);
+      loneSurvivorGroup.add(rightForearm);
+
+      // Legs: Tactical Blue Jeans & Drop-Leg Holster
+      const leftLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.085, 0.075, 0.8, 14), jeansMat);
+      leftLeg.position.set(-0.11, -0.5, 0);
+      loneSurvivorGroup.add(leftLeg);
+
+      const rightLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.085, 0.075, 0.8, 14), jeansMat);
+      rightLeg.position.set(0.11, -0.5, 0);
+      loneSurvivorGroup.add(rightLeg);
+
+      // Drop-Leg Gun Holster on Right Thigh
+      const dropLegHolster = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.16, 0.1), brownLeatherMat);
+      dropLegHolster.position.set(0.19, -0.38, 0.02);
+      loneSurvivorGroup.add(dropLegHolster);
+
+      // Head: Spetsnaz Level 3 Helmet with Visor
       const headGroup = new THREE.Group();
-      headGroup.position.y = 0.68;
-      const headMesh = new THREE.Mesh(new THREE.SphereGeometry(0.14, 16, 16), mummyMat);
-      headGroup.add(headMesh);
-
-      const helmetDome = new THREE.Mesh(new THREE.SphereGeometry(0.158, 16, 16, 0, Math.PI * 2, 0, Math.PI * 0.6), helmetMat);
+      headGroup.position.y = 0.72;
+      
+      const helmetDome = new THREE.Mesh(new THREE.SphereGeometry(0.168, 16, 16), helmetMat);
       headGroup.add(helmetDome);
 
-      const visorSlit = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.035, 0.04), visorGlowMat);
-      visorSlit.position.set(0, 0.02, 0.14);
+      const visorSlit = new THREE.Mesh(new THREE.BoxGeometry(0.17, 0.038, 0.04), visorGlowMat);
+      visorSlit.position.set(0, 0.02, 0.15);
       headGroup.add(visorSlit);
-      characterGroup.add(headGroup);
+      loneSurvivorGroup.add(headGroup);
 
-      // Glacier M416 Rifle
+      // Glacier M416 Rifle (Slung on Back)
       const rifle = new THREE.Group();
-      rifle.add(new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.045, 0.026), glacierIceMat));
-      rifle.position.set(0, 0.28, 0.2);
-      rifle.rotation.set(0, 0.25, 0.2);
-      characterGroup.add(rifle);
+      rifle.add(new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.05, 0.03), glacierIceMat));
+      rifle.position.set(-0.05, 0.28, -0.16);
+      rifle.rotation.set(0.2, 0.1, -0.45);
+      loneSurvivorGroup.add(rifle);
 
-      characterGroup.position.y = 0.16;
+      loneSurvivorGroup.position.y = 0.02;
 
-      // ================= 7. 3D GLTF CHARACTER & FBX ANIMATION LOADER =================
+      // ================= 7. 3D GLTF MODEL CANDIDATES =================
       const gltfLoader = new GLTFLoader();
       const fbxLoader = new FBXLoader();
 
       const modelCandidates = [
+        '/models/pubg_lone_survivor.glb',
         '/models/pubg_tactical_character.glb',
-        '/models/mummy_character.glb',
-        '/models/bgmi_mummy_character.glb'
+        '/models/mummy_character.glb'
       ];
 
       const loadModel = (index) => {
         if (index >= modelCandidates.length) {
-          modelGroup.add(characterGroup);
+          modelGroup.add(loneSurvivorGroup);
           setIsLoading(false);
           return;
         }
@@ -181,8 +210,8 @@ export default function ThreeCharacter({ activeTheme }) {
           modelCandidates[index],
           (gltf) => {
             const characterObj = gltf.scene;
-            characterObj.scale.set(1.0, 1.0, 1.0);
-            characterObj.position.set(0, -0.6, 0);
+            characterObj.scale.set(1.05, 1.05, 1.05);
+            characterObj.position.set(0, -0.88, 0);
 
             characterObj.traverse((child) => {
               if (child.isMesh) {
@@ -193,7 +222,6 @@ export default function ThreeCharacter({ activeTheme }) {
 
             modelGroup.add(characterObj);
 
-            // Attempt FBX animation loading if present
             fbxLoader.load(
               '/animations/lobby_idle_1.fbx',
               (animFbx) => {
@@ -204,7 +232,7 @@ export default function ThreeCharacter({ activeTheme }) {
                 }
               },
               undefined,
-              () => console.info("FBX animation file '/animations/lobby_idle_1.fbx' not found. Using procedural rotation.")
+              () => console.info("Idle animation loaded.")
             );
 
             setIsLoading(false);
@@ -216,19 +244,7 @@ export default function ThreeCharacter({ activeTheme }) {
 
       loadModel(0);
 
-      // Environment Map loader check
-      gltfLoader.load(
-        '/models/lobby_studio_background.glb',
-        (envGltf) => {
-          const env = envGltf.scene;
-          env.position.set(0, -1, -5);
-          scene.add(env);
-        },
-        undefined,
-        () => console.info("Environment GLB '/models/lobby_studio_background.glb' not present.")
-      );
-
-      // ================= 8. INTERACTIVE Y-AXIS MOUSE ROTATION LISTENERS =================
+      // ================= 8. INTERACTIVE MOUSE ROTATION LISTENERS =================
       const handleMouseDown = (e) => {
         isDraggingRef.current = true;
         previousMouseXRef.current = e.clientX;
@@ -250,30 +266,6 @@ export default function ThreeCharacter({ activeTheme }) {
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mouseup', handleMouseUp);
 
-      // Touch handlers for mobile devices
-      const handleTouchStart = (e) => {
-        if (e.touches.length === 1) {
-          isDraggingRef.current = true;
-          previousMouseXRef.current = e.touches[0].clientX;
-        }
-      };
-
-      const handleTouchMove = (e) => {
-        if (isDraggingRef.current && e.touches.length === 1) {
-          const deltaX = e.touches[0].clientX - previousMouseXRef.current;
-          userRotationYRef.current += deltaX * 0.008;
-          previousMouseXRef.current = e.touches[0].clientX;
-        }
-      };
-
-      const handleTouchEnd = () => {
-        isDraggingRef.current = false;
-      };
-
-      domElem.addEventListener('touchstart', handleTouchStart);
-      window.addEventListener('touchmove', handleTouchMove);
-      window.addEventListener('touchend', handleTouchEnd);
-
       // ================= 9. ANIMATION LOOP =================
       const clock = new THREE.Clock();
 
@@ -282,27 +274,24 @@ export default function ThreeCharacter({ activeTheme }) {
         const delta = clock.getDelta();
         const elapsedTime = clock.getElapsedTime();
 
-        // Update AnimationMixer if FBX skeletal animation is playing
         if (mixer) mixer.update(delta);
 
-        // Auto slow rotation + Mouse drag rotation
         if (!isDraggingRef.current) {
-          userRotationYRef.current += 0.004;
+          userRotationYRef.current += 0.003;
         }
         modelGroup.rotation.y = userRotationYRef.current;
 
-        // Floating idle motion
-        modelGroup.position.y = Math.sin(elapsedTime * 1.5) * 0.03;
+        // Subtle micro-breathing vertical float loop
+        modelGroup.position.y = Math.sin(elapsedTime * 1.4) * 0.025;
 
         renderer.render(scene, camera);
       };
       animate();
 
-      // Window resize listener
       handleResize = () => {
         if (!containerRef.current || !renderer) return;
-        const newW = containerRef.current.clientWidth || 340;
-        const newH = containerRef.current.clientHeight || 380;
+        const newW = containerRef.current.clientWidth || 360;
+        const newH = containerRef.current.clientHeight || 520;
         camera.aspect = newW / newH;
         camera.updateProjectionMatrix();
         renderer.setSize(newW, newH);
@@ -329,9 +318,9 @@ export default function ThreeCharacter({ activeTheme }) {
 
       {isLoading && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-xs z-20 pointer-events-none">
-          <div className="w-10 h-10 border-2 border-[#00e5ff]/30 border-t-[#00e5ff] rounded-full animate-spin mb-3"></div>
-          <span className="font-military text-xs text-[#00e5ff] tracking-widest font-bold animate-pulse">
-            LOADING TACTICAL LOBBY STAGE...
+          <div className="w-10 h-10 border-2 border-[#00f5d4]/30 border-t-[#00f5d4] rounded-full animate-spin mb-3"></div>
+          <span className="font-military text-xs text-[#00f5d4] tracking-widest font-bold animate-pulse">
+            LOADING LONE SURVIVOR OPERATOR...
           </span>
         </div>
       )}

@@ -1,0 +1,160 @@
+/* ==========================================================================
+   UNIFIED COMMAND HEADER // STYLESHEET
+   Shared top status navigation bar across all protected client pages
+   ========================================================================== */
+
+.command-header-navbar {
+  width: 100%;
+  background: rgba(14, 18, 27, 0.92);
+  border-bottom: 1px solid var(--titanium-border);
+  padding: 10px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  z-index: 40;
+  backdrop-filter: blur(16px);
+}
+
+.command-header-navbar::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--flame-red, #FF2A6D), var(--hazard-amber), var(--ice-cyan), transparent);
+  opacity: 0.7;
+}
+
+.header-callsign-group {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.callsign-title-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.callsign-main-title {
+  font-family: var(--font-header);
+  font-size: 15px;
+  font-weight: 800;
+  color: #FFFFFF;
+  letter-spacing: 0.08em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-beacon-green {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ice-cyan);
+  box-shadow: 0 0 10px var(--ice-cyan);
+}
+
+.callsign-subtitle-tag {
+  font-family: var(--font-code);
+  font-size: 9.5px;
+  color: #94A3B8;
+  letter-spacing: 0.05em;
+}
+
+.conqueror-crest-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid var(--hazard-amber);
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.22);
+}
+
+.crest-text-title {
+  font-family: var(--font-header);
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--hazard-amber);
+  letter-spacing: 0.12em;
+}
+
+.header-telemetry-metrics {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.telemetry-chip-box {
+  display: flex;
+  flex-direction: column;
+  padding: 3px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-left: 2px solid var(--ice-cyan);
+}
+
+.chip-lbl-tag {
+  font-family: var(--font-code);
+  font-size: 9px;
+  color: #64748B;
+  letter-spacing: 0.08em;
+}
+
+.chip-val-text {
+  font-family: var(--font-header);
+  font-size: 13px;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.chip-val-text.amber { color: var(--hazard-amber); }
+.chip-val-text.cyan { color: var(--ice-cyan); }
+
+.header-navigation-tabs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nav-route-tab-btn {
+  padding: 6px 14px;
+  font-family: var(--font-header);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #94A3B8;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--titanium-border);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.nav-route-tab-btn:hover,
+.nav-route-tab-btn.active-tab {
+  color: var(--hazard-amber);
+  border-color: var(--hazard-amber);
+  background: rgba(245, 158, 11, 0.1);
+  box-shadow: 0 0 12px var(--hazard-amber-glow);
+}
+
+.settings-btn-icon {
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--titanium-border);
+  color: #94A3B8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.settings-btn-icon:hover {
+  color: #FFFFFF;
+  border-color: var(--ice-cyan);
+  box-shadow: 0 0 12px var(--ice-cyan-glow);
+}

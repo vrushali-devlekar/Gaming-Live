@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  Play, Pause, SkipForward, SkipBack, Music, Disc, Trophy, Shield, Flame, 
-  Radio, Volume2, Gamepad2, UserPlus, Check, RefreshCw, Link, Crosshair, Zap, Award
+  Play, Pause, Volume2, VolumeX, Settings, Crosshair, Swords, Activity, 
+  Clock, ShieldCheck, Terminal, ChevronDown, LogOut, BarChart2, UserPlus,
+  Copy, Check, X, Flame
 } from 'lucide-react';
-import GamerHeader from '../../components/GamerHeader/GamerHeader';
 import SettingsModal from '../../components/SettingsModal/SettingsModal';
 import JoinMatchModal from '../../components/JoinMatchModal/JoinMatchModal';
 import { themeService } from '../../services/themeService';
@@ -14,361 +14,536 @@ import './Dashboard.css';
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [activeTheme, setActiveTheme] = useState(themeService.getCurrentTheme());
-  const [isMatching, setIsMatching] = useState(false);
-  const [matchTime, setMatchTime] = useState(0);
   const [isPlayingMusic, setIsPlayingMusic] = useState(true);
-  const [currentTrack, setCurrentTrack] = useState({
-    title: "SYNTHWAVE CYBERPUNK LOBBY",
-    artist: "DJ KO-DER ft. ANTIGRAVITY",
+  const [isMuted, setIsMuted] = useState(false);
+  const [activeBladeItem, setActiveBladeItem] = useState('01');
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+
+  // Invite modal states
+  const [isCopied, setIsCopied] = useState(false);
+  const [inviteTarget, setInviteTarget] = useState('');
+  const [inviteSent, setInviteSent] = useState(false);
+
+  const profileDropdownRef = useRef(null);
+
+  const currentTrack = {
+    title: "TACTICAL WAR-ROOM TELEMETRY // DJ KO-DER",
     duration: "2:45"
-  });
-
-  // Matchmaking timer effect
-  useEffect(() => {
-    let timer;
-    if (isMatching) {
-      timer = setInterval(() => {
-        setMatchTime((prev) => prev + 1);
-      }, 1000);
-    } else {
-      setMatchTime(0);
-    }
-    return () => clearInterval(timer);
-  }, [isMatching]);
-
-  // Handle simulated matchmaking redirect to Arena page after 3 seconds
-  useEffect(() => {
-    if (isMatching && matchTime >= 3) {
-      setIsMatching(false);
-      navigate('/arena');
-    }
-  }, [isMatching, matchTime, navigate]);
-
-  const formatMatchTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleStartMatch = () => {
+  // Close profile dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target)) {
+        setIsProfileDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const handleBladeClick = (index, route = null) => {
     try {
-      audioService.playBeep(800, 0.06, 'sine');
+      audioService.playBeep(900, 0.04, 'sine');
     } catch (e) {}
-    setIsMatching(!isMatching);
+
+    setActiveBladeItem(index);
+    if (route) {
+      navigate(route);
+    }
   };
 
-  // Metallic Badges for Top Squads
-  const ConquerorBadge = () => (
-    <svg className="w-8 h-8 filter drop-shadow-[0_0_6px_rgba(250,204,21,0.6)]" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M50 5 L85 25 L85 75 L50 95 L15 75 L15 25 Z" fill="#1b1c28" stroke="#FACC15" strokeWidth="4" />
-      <path d="M50 15 L75 30 L75 70 L50 85 L25 70 L25 30 Z" fill="#FACC15" opacity="0.25" />
-      <polygon points="50,22 58,40 78,40 62,52 68,72 50,60 32,72 38,52 22,40 42,40" fill="#FACC15" />
+  const handleChallengePlayer = (playerName) => {
+    try {
+      audioService.playBeep(950, 0.06, 'triangle');
+    } catch (e) {}
+    navigate(`/arena?target=${encodeURIComponent(playerName)}`);
+  };
+
+  const handleDisconnectSession = async () => {
+    try {
+      audioService.playBeep(600, 0.08, 'sawtooth');
+    } catch (e) {}
+    setIsProfileDropdownOpen(false);
+    if (logout) {
+      await logout();
+    }
+    navigate('/login');
+  };
+
+  const handleViewIntel = () => {
+    try {
+      audioService.playBeep(850, 0.04, 'sine');
+    } catch (e) {}
+    setIsProfileDropdownOpen(false);
+    navigate('/analytics');
+  };
+
+  const handleCopyRoomLink = () => {
+    try {
+      audioService.playBeep(900, 0.04, 'sine');
+    } catch (e) {}
+    const link = `https://codebattle.io/room/ROOM-8921`;
+    navigator.clipboard.writeText(link);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2500);
+  };
+
+  const handleSendDispatch = (e) => {
+    e.preventDefault();
+    if (!inviteTarget.trim()) return;
+    try {
+      audioService.playBeep(950, 0.06, 'triangle');
+    } catch (e) {}
+    setInviteSent(true);
+    setTimeout(() => {
+      setInviteSent(false);
+      setInviteTarget('');
+      setIsInviteModalOpen(false);
+    }, 1800);
+  };
+
+  // Metallic Conqueror Crest SVG
+  const ConquerorCrest = () => (
+    <svg className="w-4 h-4 filter drop-shadow-[0_0_6px_rgba(245,158,11,0.6)]" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M50 5 L85 25 L85 75 L50 95 L15 75 L15 25 Z" fill="#080B11" stroke="#F59E0B" strokeWidth="6" />
+      <polygon points="50,22 58,40 78,40 62,52 68,72 50,60 32,72 38,52 22,40 42,40" fill="#F59E0B" />
     </svg>
   );
 
-  const AceBadge = () => (
-    <svg className="w-8 h-8 filter drop-shadow-[0_0_6px_rgba(148,163,184,0.6)]" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M50 8 L82 30 L82 70 L50 92 L18 70 L18 30 Z" fill="#1b1c28" stroke="#94A3B8" strokeWidth="4" />
-      <circle cx="50" cy="50" r="22" fill="#E2E8F0" opacity="0.15" />
-      <path d="M50 30 L63 50 L50 70 L37 50 Z" fill="#E2E8F0" />
-      <circle cx="50" cy="50" r="8" fill="#FACC15" />
-    </svg>
-  );
-
-  const CrownBadge = () => (
-    <svg className="w-8 h-8 filter drop-shadow-[0_0_6px_rgba(180,83,9,0.6)]" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M50 10 L80 32 L80 68 L50 90 L20 68 L20 32 Z" fill="#1b1c28" stroke="#B45309" strokeWidth="4" />
-      <path d="M30 65 L35 40 L45 50 L50 35 L55 50 L65 40 L70 65 Z" fill="#CD7F32" stroke="#B45309" strokeWidth="2" strokeLinejoin="round" />
-      <circle cx="50" cy="65" r="4" fill="#B45309" />
-    </svg>
-  );
-
-  // Sample squad data
-  const squadLeaderboard = [
-    { rank: 1, name: "VIPER_SQUAD", points: 8940, players: ["Viper", "Wraith", "Sage", "Jett"], badge: <ConquerorBadge />, style: 'metallic-badge-gold' },
-    { rank: 2, name: "CYBER_GHOSTS", points: 8210, players: [user?.username || "Ghost", "Neo", "Trinity", "Morpheus"], badge: <AceBadge />, style: 'metallic-badge-silver' },
-    { rank: 3, name: "APEX_CODERS", points: 7650, players: ["Apex", "Dev", "Stack", "Heap"], badge: <CrownBadge />, style: 'metallic-badge-bronze' }
+  // Active Challengers Mock Data
+  const challengersList = [
+    { name: "NEO_GHOST", rank: "ACE 5★", mmr: "3,920", winRate: "78%", avatar: "NG" },
+    { name: "VEX_HUNTER", rank: "CONQUEROR", mmr: "4,150", winRate: "84%", avatar: "VH" },
+    { name: "CYBER_REAPER", rank: "ACE", mmr: "3,680", winRate: "71%", avatar: "CR" },
+    { name: "BYTE_MUMMY", rank: "CROWN I", mmr: "3,410", winRate: "65%", avatar: "BM" },
+    { name: "KODER_SAGE", rank: "CONQUEROR", mmr: "4,020", winRate: "82%", avatar: "KS" }
   ];
 
   return (
-    <div className="gaming-dashboard-page">
-      {/* Visual Background Overlays */}
-      <div className="grid-matrix-overlay"></div>
-      <div className="scanlines-overlay"></div>
+    <div className="executive-lobby-viewport">
+      {/* Background Volumetric Glows & Monolithic Structural Slabs */}
+      <div className="monolithic-structural-slab left-slab"></div>
+      <div className="monolithic-structural-slab right-slab"></div>
+      <div className="volumetric-corner-glow glow-red"></div>
+      <div className="volumetric-corner-glow glow-cyan"></div>
 
-      {/* Top Gamer Header */}
-      <div className="relative z-10">
-        <GamerHeader 
-          onOpenSettings={() => setIsSettingsOpen(true)} 
-          username={user?.username || "GHOST_CODER"} 
-          currentXP={2840} 
-          maxXP={5000} 
-        />
-      </div>
-
-      {/* Main Single-Screen 100vh Workspace Grid */}
-      <main className="relative z-10 flex-1 w-full max-w-[1440px] mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-4 gap-6 items-stretch min-h-0 overflow-hidden">
-        
-        {/* ================= LEFT SECTION: TOP SQUADS (GLASSMORPHISM) ================= */}
-        <section className="lg:col-span-1 flex flex-col gap-4 animate-fade-in-up">
-          <div className="glass-panel-industrial p-5 h-full flex flex-col justify-between clip-industrial-card relative">
-            <div className="absolute top-0 right-8 w-12 h-[2px] bg-cyan-400"></div>
-            
-            <div>
-              <div className="flex items-center gap-2 mb-5 border-b border-white/10 pb-3">
-                <Trophy className="text-[#FACC15] w-5 h-5" />
-                <h2 className="font-military text-xl tracking-wider text-white">
-                  TOP CONQUEROR SQUADS
-                </h2>
-              </div>
-
-              {/* Squad List */}
-              <div className="flex flex-col gap-3.5">
-                {squadLeaderboard.map((squad) => (
-                  <div 
-                    key={squad.rank}
-                    className={`p-3 bg-black/50 border hover:border-[#00ffcc]/60 transition-all duration-200 clip-industrial-card flex items-center justify-between ${squad.style}`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="flex-shrink-0">
-                        {squad.badge}
-                      </div>
-
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-military text-[10px] text-gray-500">0{squad.rank}</span>
-                          <span className="font-military text-sm text-white tracking-wide font-bold">{squad.name}</span>
-                        </div>
-                        <p className="text-[10px] text-gray-400 font-mono truncate max-w-[130px]">
-                          {squad.players.join(" • ")}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="text-right">
-                      <span className="block font-mono text-xs text-[#FACC15] font-semibold">{squad.points}</span>
-                      <span className="text-[9px] text-gray-500 font-mono tracking-wider">PTS</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+      {/* ================= 1. TOP MINIMALIST STATUS HEADER ================= */}
+      <header className="executive-top-bar">
+        {/* Callsign & Rank Crest with Interactive Profile Dropdown */}
+        <div className="top-user-group" ref={profileDropdownRef}>
+          <button 
+            className="callsign-capsule-btn"
+            onClick={() => setIsProfileDropdownOpen((prev) => !prev)}
+            aria-expanded={isProfileDropdownOpen}
+            aria-haspopup="true"
+          >
+            <div className="callsign-box">
+              <span className="callsign-text">
+                <span className="status-beacon-dot"></span>
+                COMMANDER // {user?.username?.toUpperCase() || "VRUSHALI"}
+                <ChevronDown size={14} className={`capsule-dropdown-chevron ${isProfileDropdownOpen ? 'open' : ''}`} />
+              </span>
+              <span className="callsign-sub-tag">STATUS: ONLINE // WAR-ROOM</span>
             </div>
+          </button>
 
-            {/* Tactical Live Protocol */}
-            <div className="mt-6 border-t border-white/10 pt-4">
-              <h3 className="font-military text-xs text-cyan-400 tracking-widest mb-3 flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
-                LIVE STATUS PROTOCOL
-              </h3>
-              <div className="grid grid-cols-2 gap-2 text-[10px] font-mono text-gray-400">
-                <div className="bg-black/50 p-2 border border-white/10">
-                  <span className="block text-gray-500">TOTAL SQUADS</span>
-                  <span className="text-white font-bold">1,402 Active</span>
-                </div>
-                <div className="bg-black/50 p-2 border border-white/10">
-                  <span className="block text-gray-500">MIN. REQ.</span>
-                  <span className="text-white font-bold">4000+ PTS</span>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </section>
-
-        {/* ================= CENTER SECTION: TACTICAL OPERATOR CARD & CTAS ================= */}
-        <section className="lg:col-span-2 flex flex-col justify-between items-center relative animate-fade-in-up">
-          
-          {/* TACTICAL OPERATOR SHOWCASE CARD */}
-          <div className="operator-card-container my-auto">
-            {/* Ambient Background Aura */}
-            <div className="operator-aura-glow"></div>
-
-            {/* Top Loadout Badge */}
-            <div className="loadout-badge-pill">
-              <Zap size={13} className="text-[#FACC15]" />
-              <span>LOADOUT: CONQUEROR M416 + LEVEL 3 HELMET</span>
-            </div>
-
-            {/* Character Full-Body Armored Silhouette SVG Illustration */}
-            <div className="relative w-full flex-1 flex items-center justify-center my-2 pointer-events-none">
-              <svg className="w-64 h-64 filter drop-shadow-[0_0_20px_rgba(0,255,204,0.3)]" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-                {/* Armored Pedestal & Hologram Rings */}
-                <ellipse cx="100" cy="180" rx="70" ry="14" fill="#00ffcc" opacity="0.1" />
-                <ellipse cx="100" cy="180" rx="70" ry="14" stroke="#00ffcc" strokeWidth="1.5" strokeDasharray="4 4" />
-                <ellipse cx="100" cy="180" rx="45" ry="9" stroke="#facc15" strokeWidth="1" />
-
-                {/* Tactical Armored Body / Mummy Suit Silhouette */}
-                {/* Torso & Armor Vest */}
-                <path d="M70 75 L130 75 L140 130 L125 175 L75 175 L60 130 Z" fill="#121722" stroke="#00ffcc" strokeWidth="2" />
-                <path d="M85 85 L115 85 L120 120 L80 120 Z" fill="#1a2233" stroke="#facc15" strokeWidth="1.5" />
-                
-                {/* Shoulder Armor Pads */}
-                <path d="M50 75 L70 70 L75 100 L55 105 Z" fill="#1a2233" stroke="#00ffcc" strokeWidth="1.5" />
-                <path d="M150 75 L130 70 L125 100 L145 105 Z" fill="#1a2233" stroke="#00ffcc" strokeWidth="1.5" />
-
-                {/* Level 3 Helmet & Visor */}
-                <path d="M75 55 C75 35 125 35 125 55 L120 75 L80 75 Z" fill="#1e2638" stroke="#00ffcc" strokeWidth="2" />
-                <path d="M82 50 H118 V62 H82 Z" fill="#00ffcc" opacity="0.85" filter="drop-shadow(0 0 8px #00ffcc)" />
-                <line x1="82" y1="56" x2="118" y2="56" stroke="#0b0e14" strokeWidth="2" />
-
-                {/* Tactical Weapon (M416 Slung Across) */}
-                <path d="M45 110 L155 70 L158 78 L48 118 Z" fill="#2d374d" stroke="#facc15" strokeWidth="1.5" />
-                <circle cx="150" cy="73" r="4" fill="#ff4757" />
-              </svg>
-            </div>
-
-            {/* Bottom Stats Strip */}
-            <div className="operator-stats-strip">
-              <div className="stat-badge-item">
-                <span className="stat-badge-label">CURRENT TIER</span>
-                <span className="stat-badge-val text-[#FACC15]">GOLD I</span>
-              </div>
-              <div className="stat-badge-item">
-                <span className="stat-badge-label">WIN RATE</span>
-                <span className="stat-badge-val text-[#00ffcc]">68.4%</span>
-              </div>
-              <div className="stat-badge-item">
-                <span className="stat-badge-label">K/D RATIO</span>
-                <span className="stat-badge-val text-white">4.20</span>
-              </div>
-            </div>
+          <div className="conqueror-pill-badge clip-tactical-badge">
+            <ConquerorCrest />
+            <span className="conqueror-pill-text">CONQUEROR TIER</span>
           </div>
 
-          {/* Matchmaking Overlay */}
-          {isMatching && (
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 bg-[#0c0d12]/95 border-2 border-[#FACC15] py-3 px-8 flex items-center gap-4 clip-industrial-card backdrop-blur-md animate-pulse">
-              <Radio className="text-[#FACC15] w-6 h-6 animate-pulse" />
-              <div className="font-mono text-sm">
-                <span className="text-gray-400">SEARCHING ARENA...</span>
-                <span className="text-[#FACC15] ml-2 font-bold">{formatMatchTime(matchTime)}</span>
-              </div>
+          {/* Profile Dropdown Menu */}
+          {isProfileDropdownOpen && (
+            <div className="profile-dropdown-menu clip-tactical-card">
+              <button 
+                className="profile-dropdown-item"
+                onClick={handleViewIntel}
+              >
+                <BarChart2 size={14} className="dropdown-icon amber" />
+                <span>VIEW INTEL & STATS</span>
+              </button>
+              <button 
+                className="profile-dropdown-item"
+                onClick={() => {
+                  setIsProfileDropdownOpen(false);
+                  setIsInviteModalOpen(true);
+                }}
+              >
+                <UserPlus size={14} className="dropdown-icon cyan" />
+                <span>DISPATCH MATCH INVITE</span>
+              </button>
+              <div className="dropdown-divider"></div>
+              <button 
+                className="profile-dropdown-item danger"
+                onClick={handleDisconnectSession}
+              >
+                <LogOut size={14} className="dropdown-icon red" />
+                <span>DISCONNECT SESSION</span>
+              </button>
             </div>
           )}
+        </div>
 
-          {/* HIGH-CONTRAST SKEWED LOBBY CTAS */}
-          <div className="lobby-cta-row">
-            <button
-              onClick={handleStartMatch}
-              className="cta-btn-gamer cta-btn-yellow"
-            >
-              <span>{isMatching ? 'CANCEL' : 'START DUO MATCH'}</span>
-              <span className="cta-subtext">{isMatching ? 'MATCHMAKING...' : 'RANDOM 1V1 MATCHMAKING'}</span>
-            </button>
-            
-            <button
-              onClick={() => {
-                try { audioService.playBeep(900, 0.06, 'sine'); } catch (e) {}
-                setIsJoinModalOpen(true);
-              }}
-              className="cta-btn-gamer cta-btn-cyan"
-            >
-              <span>JOIN BY INVITE LINK</span>
-              <span className="cta-subtext">PASTE MATCH COORDINATES</span>
-            </button>
+        {/* Real-Time Telemetry Metrics */}
+        <div className="top-telemetry-metrics">
+          <div className="telemetry-item">
+            <span className="telemetry-lbl">SEASON MMR</span>
+            <span className="telemetry-val amber">3,850 MMR</span>
+          </div>
+          <div className="telemetry-item">
+            <span className="telemetry-lbl">ROOM CARDS</span>
+            <span className="telemetry-val cyan">14 CARDS</span>
+          </div>
+          <div className="telemetry-item">
+            <span className="telemetry-lbl">GLOBAL RANK</span>
+            <span className="telemetry-val">#42 WORLD</span>
+          </div>
+        </div>
+
+        {/* Top System Tabs */}
+        <div className="top-actions-right">
+          <button 
+            onClick={() => navigate('/lobby')} 
+            className="top-tab-btn active clip-tactical-badge"
+          >
+            COMMAND DECK
+          </button>
+          <button 
+            onClick={() => navigate('/theme')} 
+            className="top-tab-btn clip-tactical-badge"
+          >
+            SECTOR THEMES
+          </button>
+          <button 
+            onClick={() => navigate('/stream')} 
+            className="top-tab-btn clip-tactical-badge"
+          >
+            LIVE BROADCAST
+          </button>
+          <button 
+            onClick={() => navigate('/inventory')} 
+            className="top-tab-btn clip-tactical-badge"
+          >
+            ARMORY LOCKER
+          </button>
+          <button 
+            onClick={() => navigate('/clan')} 
+            className="top-tab-btn clip-tactical-badge"
+          >
+            CLAN OPS
+          </button>
+          <button 
+            onClick={() => setIsSettingsOpen(true)}
+            className="settings-btn-round clip-tactical-badge"
+            title="Settings"
+          >
+            <Settings size={14} />
+          </button>
+        </div>
+      </header>
+
+      {/* ================= 2. MAIN THREE-COLUMN WORKSPACE ================= */}
+      <main className="executive-main-grid">
+        
+        {/* ================= LEFT TACTICAL NAVIGATION BLADE ================= */}
+        <aside className="left-tactical-blade">
+          {/* Brand Mark with Glitch Effect */}
+          <div className="brand-header-refined">
+            <h1 className="brand-title-text brand-glitch">
+              CODE<span className="accent-slash">//</span>BATTLE
+            </h1>
+            <span className="brand-micro-tag">
+              TACTICAL COMPILER // PROTOCOL 04
+            </span>
           </div>
 
+          {/* Numbered Index Menu Blade */}
+          <nav className="tactical-blade-menu">
+            <button 
+              onClick={() => handleBladeClick('01', '/arena')}
+              className={`blade-menu-item ${activeBladeItem === '01' ? 'active-blade' : ''}`}
+            >
+              <div className="blade-item-label">
+                <span>01 // 1V1 DUEL ARENA</span>
+              </div>
+              <Flame size={13} className="text-[#F59E0B] animate-pulse" />
+            </button>
+
+            <button 
+              onClick={() => handleBladeClick('02', '/rooms')}
+              className={`blade-menu-item ${activeBladeItem === '02' ? 'active-blade' : ''}`}
+            >
+              <span>02 // CUSTOM ROOMS</span>
+              <span className="blade-muted-badge clip-tactical-badge">HOST</span>
+            </button>
+
+            <button 
+              onClick={() => handleBladeClick('03', '/theme')}
+              className={`blade-menu-item ${activeBladeItem === '03' ? 'active-blade' : ''}`}
+            >
+              <span>03 // SECTOR THEMES</span>
+            </button>
+
+            <button 
+              onClick={() => handleBladeClick('04', '/stream')}
+              className={`blade-menu-item ${activeBladeItem === '04' ? 'active-blade' : ''}`}
+            >
+              <span>04 // LIVE BROADCAST</span>
+              <span className="blade-live-badge clip-tactical-badge">LIVE</span>
+            </button>
+
+            <button 
+              onClick={() => handleBladeClick('05', '/inventory')}
+              className={`blade-menu-item ${activeBladeItem === '05' ? 'active-blade' : ''}`}
+            >
+              <span>05 // PLAYER LOCKER</span>
+            </button>
+
+            <button 
+              onClick={() => handleBladeClick('06', '/clan')}
+              className={`blade-menu-item ${activeBladeItem === '06' ? 'active-blade' : ''}`}
+            >
+              <span>06 // CLAN OPS</span>
+            </button>
+          </nav>
+
+          <div></div>
+        </aside>
+
+        {/* ================= CENTER PURE ARCHITECTURAL ATMOSPHERE (NO IMAGES / CUTOUTS) ================= */}
+        <section className="center-architectural-stage">
+          <div className="atmospheric-hologram-dossier clip-tactical-card">
+            <div className="holo-corner-tag top-l">[GRID_04 // SEC_KEY 0x98A1]</div>
+            <div className="holo-corner-tag top-r">[PROTOCOL_04_ACTIVE]</div>
+
+            <span className="briefing-sector-code">
+              <Crosshair size={14} className="text-[#00F5D4]" />
+              SANHOK REDLINE PROTOCOL
+            </span>
+
+            <h2 className="architectural-main-title">
+              HIGH-IMPACT ALGORITHMIC COMPETITION
+            </h2>
+
+            <div className="briefing-params-strip">
+              <div className="briefing-chip amber">
+                <Clock size={13} />
+                <span>15:00 MAX RUNTIME</span>
+              </div>
+
+              <div className="briefing-chip cyan">
+                <Activity size={13} />
+                <span>02:45 / WAVE 3 SHRINK</span>
+              </div>
+
+              <div className="briefing-chip green">
+                <ShieldCheck size={13} />
+                <span>AES-256 ENCRYPTED</span>
+              </div>
+            </div>
+
+            <div className="holo-domain-tag">
+              [DOMAIN FOCUS: GRAPH THEORY &amp; DYNAMIC PROGRAMMING]
+            </div>
+          </div>
         </section>
 
-        {/* ================= RIGHT SECTION: MAP & MUSIC SELECTOR (GLASSMORPHISM) ================= */}
-        <section className="lg:col-span-1 flex flex-col gap-4 animate-fade-in-up">
-          <div className="glass-panel-industrial p-5 h-full flex flex-col justify-between clip-industrial-card relative">
-            <div className="absolute top-0 left-8 w-12 h-[2px] bg-yellow-400"></div>
+        {/* ================= RIGHT ACTIVE CHALLENGERS ROSTER & AUDIO STRIP ================= */}
+        <aside className="right-roster-dock">
+          
+          {/* Active Challengers Board */}
+          <div className="glass-panel-graphite roster-panel-card clip-tactical-card">
+            <div className="roster-header-row">
+              <span className="roster-header-title">
+                <Swords size={14} className="text-[#F59E0B]" />
+                ACTIVE CHALLENGERS ROSTER
+              </span>
+              <span className="roster-count-tag clip-tactical-badge">
+                5 ONLINE
+              </span>
+            </div>
 
-            <div className="flex flex-col gap-4">
-              
-              <div className="flex items-center gap-2 border-b border-white/10 pb-3">
-                <Gamepad2 className="text-cyan-400 w-5 h-5" />
-                <h2 className="font-military text-lg tracking-wider text-white">
-                  TACTICAL ARENA
-                </h2>
-              </div>
-
-              {/* Map Preview */}
-              <div className="relative group border border-white/15 overflow-hidden bg-black/50 clip-industrial-card">
-                <div className="h-40 w-full relative overflow-hidden">
-                  <img 
-                    src={activeTheme.image} 
-                    alt={`Map ${activeTheme.name}`} 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
-                </div>
-
-                <div className="absolute bottom-3 left-4 right-4">
-                  <span className="block font-military text-[10px] text-cyan-400 tracking-widest font-bold" style={{ color: activeTheme.accentColor }}>CURRENT MAP</span>
-                  <h3 className="font-military text-lg text-white tracking-wide" style={{ textShadow: `0 0 10px ${activeTheme.accentGlow}` }}>
-                    {activeTheme.name}
-                  </h3>
-                </div>
-              </div>
-
-              {/* Music Player */}
-              <div className="bg-black/60 border border-white/10 p-3.5 clip-industrial-card flex flex-col gap-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Music className="text-[#1DB954] w-4 h-4" />
-                    <span className="text-[10px] font-military text-gray-400 tracking-widest">MUSIC PLAYER</span>
-                  </div>
-                  
-                  <div className="flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#1DB954] animate-pulse"></span>
-                    <span className="text-[8px] font-mono text-[#1DB954]">LINKED</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <div className="relative flex-shrink-0">
-                    <div className={`w-9 h-9 rounded-full bg-black border border-gray-800 flex items-center justify-center relative ${isPlayingMusic ? 'animate-spin-slow' : ''}`}>
-                      <Disc className="w-5 h-5 text-gray-500" />
+            <div className="roster-scroll-list">
+              {challengersList.map((coder, idx) => (
+                <div key={idx} className="roster-entry-chip clip-tactical-badge">
+                  <div className="entry-user-details">
+                    <div className="entry-avatar-tag clip-tactical-badge">
+                      {coder.avatar}
+                    </div>
+                    <div className="entry-name-column">
+                      <span className="entry-username-text">{coder.name}</span>
+                      <span className="entry-telemetry-sub">
+                        {coder.rank} • {coder.mmr} MMR ({coder.winRate} WR)
+                      </span>
                     </div>
                   </div>
 
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-military text-xs text-white truncate tracking-wide">{currentTrack.title}</h4>
-                    <p className="font-mono text-[9px] text-gray-500 truncate">{currentTrack.artist}</p>
-                  </div>
+                  <button 
+                    onClick={() => handleChallengePlayer(coder.name)}
+                    className="engage-action-btn clip-tactical-badge"
+                  >
+                    ENGAGE
+                  </button>
                 </div>
+              ))}
+            </div>
+          </div>
 
-                <div className="flex items-center justify-between pt-1 border-t border-white/10 mt-1">
-                  <div className="flex items-center gap-2">
-                    <button className="text-gray-500 hover:text-white transition-colors"><SkipBack size={13} /></button>
-                    <button 
-                      onClick={() => setIsPlayingMusic(!isPlayingMusic)} 
-                      className="w-6 h-6 rounded-full bg-[#1db954]/10 border border-[#1db954]/30 flex items-center justify-center text-[#1db954] hover:bg-[#1db954]/20 hover:scale-105 transition-all"
-                    >
-                      {isPlayingMusic ? <Pause size={10} /> : <Play size={10} />}
-                    </button>
-                    <button className="text-gray-500 hover:text-white transition-colors"><SkipForward size={13} /></button>
-                  </div>
-
-                  <div className="flex items-end gap-[2px] h-4">
-                    <span className={`w-[2px] bg-[#1DB954] rounded-t-full transition-all duration-300 ${isPlayingMusic ? 'h-3 animate-pulse' : 'h-1'}`}></span>
-                    <span className={`w-[2px] bg-[#1DB954] rounded-t-full transition-all duration-300 ${isPlayingMusic ? 'h-4 animate-pulse' : 'h-1.5'}`} style={{ animationDelay: '0.1s' }}></span>
-                    <span className={`w-[2px] bg-[#1DB954] rounded-t-full transition-all duration-300 ${isPlayingMusic ? 'h-2 animate-pulse' : 'h-1'}`} style={{ animationDelay: '0.2s' }}></span>
-                  </div>
-                </div>
-
+          {/* Minimal Single-Line Audio Strip */}
+          <div className="glass-panel-graphite minimal-audio-strip clip-tactical-card">
+            <div className="audio-left-meta">
+              <div className="mini-equalizer-bars">
+                <span className={`mini-eq-bar ${isPlayingMusic && !isMuted ? 'playing' : ''}`} style={{ animationDelay: '0s' }} />
+                <span className={`mini-eq-bar ${isPlayingMusic && !isMuted ? 'playing' : ''}`} style={{ animationDelay: '0.2s' }} />
+                <span className={`mini-eq-bar ${isPlayingMusic && !isMuted ? 'playing' : ''}`} style={{ animationDelay: '0.4s' }} />
               </div>
-
+              <span className="audio-track-name">{currentTrack.title}</span>
             </div>
 
-            <div className="mt-6">
+            <div className="audio-inline-controls">
               <button 
-                onClick={() => navigate('/theme')}
-                className="w-full py-2.5 bg-transparent border border-white/15 hover:border-cyan-400 hover:text-cyan-400 font-military text-xs tracking-wider transition-all duration-300 clip-industrial-card flex items-center justify-center gap-2 text-gray-300 cursor-pointer"
+                onClick={() => setIsMuted(!isMuted)} 
+                className="audio-icon-btn"
+                title={isMuted ? "Unmute" : "Mute"}
               >
-                <span>CHANGE ARENA MAP</span>
+                {isMuted ? <VolumeX size={13} /> : <Volume2 size={13} />}
+              </button>
+              
+              <button 
+                onClick={() => setIsPlayingMusic(!isPlayingMusic)} 
+                className="audio-icon-btn"
+                title={isPlayingMusic ? "Pause" : "Play"}
+              >
+                {isPlayingMusic ? <Pause size={13} /> : <Play size={13} />}
+              </button>
+            </div>
+          </div>
+
+        </aside>
+
+      </main>
+
+      {/* ================= 3. BOTTOM PRECISION COMMAND BAR ================= */}
+      <footer className="executive-bottom-bar">
+        {/* Live Ticker Stream with Timestamps */}
+        <div className="bottom-live-ticker clip-tactical-card">
+          <div className="ticker-protocol-tag">
+            <Terminal size={13} />
+            <span>LIVE PROTOCOL LOGS</span>
+          </div>
+
+          <div className="ticker-marquee-scroll">
+            <div className="ticker-log-entry">
+              <span className="font-mono text-gray-500">[17:51:20]</span>
+              <span className="log-tag-breach">[BREACH]</span> @NEO_GHOST defeated @VEX_HUNTER in 03:12 (Graph Theory)
+            </div>
+            <div className="ticker-log-entry">
+              <span className="font-mono text-gray-500">[17:51:04]</span>
+              <span className="log-tag-win">[MATCH WIN]</span> @KODER_SAGE promoted to CONQUEROR DIVISION [4,020 MMR]
+            </div>
+            <div className="ticker-log-entry">
+              <span className="font-mono text-gray-500">[17:50:48]</span>
+              <span className="log-tag-sys">[SYSTEM]</span> CUSTOM ROOM #8921 initiated by @CYBER_REAPER
+            </div>
+            {/* Duplicate for infinite loop */}
+            <div className="ticker-log-entry">
+              <span className="font-mono text-gray-500">[17:51:20]</span>
+              <span className="log-tag-breach">[BREACH]</span> @NEO_GHOST defeated @VEX_HUNTER in 03:12 (Graph Theory)
+            </div>
+          </div>
+        </div>
+
+        {/* Dual High-Impact Skewed CTA Buttons */}
+        <div className="bottom-action-ctas">
+          <button
+            onClick={() => {
+              try { audioService.playBeep(800, 0.05, 'sine'); } catch (e) {}
+              navigate('/arena');
+            }}
+            className="precision-cta-btn cta-hazard-amber clip-tactical-btn"
+          >
+            <span>START 1V1 DUEL</span>
+          </button>
+
+          <button
+            onClick={() => {
+              try { audioService.playBeep(900, 0.05, 'sine'); } catch (e) {}
+              navigate('/rooms');
+            }}
+            className="precision-cta-btn cta-dark-cyan clip-tactical-btn"
+          >
+            <span>CUSTOM MATCH LINK</span>
+          </button>
+        </div>
+      </footer>
+
+      {/* TACTICAL MATCH DISPATCH MODAL */}
+      {isInviteModalOpen && (
+        <div className="modal-backdrop-overlay">
+          <div className="tactical-modal-card glass-panel-graphite clip-tactical-card">
+            <div className="modal-header-row">
+              <div className="modal-title-group">
+                <UserPlus size={16} className="text-[#F59E0B]" />
+                <span className="modal-title-text">TACTICAL DISPATCH // MATCH INVITE</span>
+              </div>
+              <button 
+                onClick={() => setIsInviteModalOpen(false)}
+                className="modal-close-btn"
+              >
+                <X size={16} />
               </button>
             </div>
 
-          </div>
-        </section>
+            <div className="modal-body-content">
+              <div className="dispatch-input-group">
+                <label className="input-label">DIRECT DUEL ROOM LINK</label>
+                <div className="input-copy-wrapper">
+                  <input 
+                    type="text" 
+                    readOnly 
+                    value="https://codebattle.io/room/ROOM-8921" 
+                    className="tactical-read-input"
+                  />
+                  <button 
+                    onClick={handleCopyRoomLink}
+                    className="copy-btn clip-tactical-badge"
+                  >
+                    {isCopied ? <Check size={14} className="text-green-400" /> : <Copy size={14} />}
+                    <span>{isCopied ? 'COPIED' : 'COPY LINK'}</span>
+                  </button>
+                </div>
+              </div>
 
-      </main>
+              <form onSubmit={handleSendDispatch} className="dispatch-input-group">
+                <label className="input-label">DISPATCH TO GITHUB HANDLE / CALLSIGN</label>
+                <div className="input-copy-wrapper">
+                  <input 
+                    type="text"
+                    placeholder="e.g. @vrushali or NEO_GHOST"
+                    value={inviteTarget}
+                    onChange={(e) => setInviteTarget(e.target.value)}
+                    className="tactical-text-input"
+                  />
+                  <button 
+                    type="submit"
+                    className="dispatch-submit-btn cta-hazard-amber clip-tactical-badge"
+                  >
+                    <span>{inviteSent ? 'DISPATCHED!' : 'SEND DISPATCH'}</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modals */}
       <SettingsModal 

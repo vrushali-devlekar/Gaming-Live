@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Users, Trophy, Shield, Swords, PlusCircle } from 'lucide-react';
-import GamerHeader from '../../components/GamerHeader/GamerHeader';
+import { Users, Trophy, Shield, Swords, PlusCircle, UserPlus, Zap, Activity, Clock, CheckCircle2, AlertTriangle, ChevronRight } from 'lucide-react';
+import CommandHeader from '../../components/CommandHeader/CommandHeader';
 import SettingsModal from '../../components/SettingsModal/SettingsModal';
-import GamerCard from '../../ui/GamerCard/GamerCard';
-import GamerButton from '../../ui/GamerButton/GamerButton';
 import './Clan.css';
 
 export default function Clan() {
@@ -12,151 +10,233 @@ export default function Clan() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const squadTasks = [
-    { id: 1, name: 'FIREWALL BYPASS ROUTINE', assignee: 'GHOST_CODER', status: 'COMPILED' },
-    { id: 2, name: 'BUFFER OVERFLOW SHIELD', assignee: 'NEON_VIPER', status: 'IN PROGRESS' },
-    { id: 3, name: 'DNS INFILTRATION EVASION', assignee: 'CYBER_ACE', status: 'READY' },
-    { id: 4, name: 'SSL SOCKETS HANDSHAKE', assignee: 'WAITING FOR SQUAD MATE...', status: 'OPEN SLOT' }
+    { id: 1, name: 'FIREWALL BYPASS ROUTINE', assignee: 'GHOST_CODER', status: 'COMPILED', speed: '0.04ms', testCases: '10/10' },
+    { id: 2, name: 'BUFFER OVERFLOW SHIELD', assignee: 'NEON_VIPER', status: 'IN PROGRESS', speed: 'COMPILING...', testCases: '8/10' },
+    { id: 3, name: 'DNS INFILTRATION EVASION', assignee: 'CYBER_ACE', status: 'READY', speed: '0.08ms', testCases: '10/10' },
+    { id: 4, name: 'SSL SOCKETS HANDSHAKE', assignee: 'OPEN SQUAD SLOT', status: 'OPEN SLOT', speed: 'N/A', testCases: '0/10' }
   ];
 
   const clanLeaderboard = [
-    { rank: 1, name: 'APEX_CODERS', leader: 'ApexMaster', rating: 24850, size: '48 / 50' },
-    { rank: 2, name: 'STACK_BREACHERS', leader: 'HeapOverflow', rating: 22100, size: '45 / 50' },
-    { rank: 3, name: 'RECOIL_SQUAD', leader: 'ZeroGrip', rating: 19420, size: '50 / 50' },
-    { rank: 4, name: 'CYBER_INTEGRATORS', leader: 'WebSockets', rating: 17200, size: '39 / 50' }
+    { rank: 1, name: 'APEX_CODERS', leader: 'ApexMaster', rating: 24850, size: '48 / 50', status: 'DOMINANT' },
+    { rank: 2, name: 'STACK_BREACHERS', leader: 'HeapOverflow', rating: 22100, size: '45 / 50', status: 'CONTENDER' },
+    { rank: 3, name: 'RECOIL_SQUAD', leader: 'ZeroGrip', rating: 19420, size: '50 / 50', status: 'ACTIVE' },
+    { rank: 4, name: 'CYBER_INTEGRATORS', leader: 'WebSockets', rating: 17200, size: '39 / 50', status: 'ACTIVE' }
   ];
 
   return (
-    <div className="gaming-dashboard-page hud-grid hud-scanline">
-      
-      {/* Gamer Header */}
-      <GamerHeader 
-        onOpenSettings={() => setIsSettingsOpen(true)} 
-        username="GHOST_CODER" 
-        currentXP={2840} 
-        maxXP={5000} 
-      />
+    <div className="clan-page-container">
+      {/* Top Command Bar */}
+      <CommandHeader onOpenSettings={() => setIsSettingsOpen(true)} />
 
-      {/* Breadcrumb Exit row */}
-      <div className="lobby-navigation-row pb-2">
-        <button 
-          onClick={() => navigate('/lobby')} 
-          className="exit-lobby-btn font-military"
-        >
-          <ArrowLeft size={16} />
-          <span>RETURN TO LOBBY</span>
-        </button>
-        <span className="lobby-breadcrumbs font-mono-tactical">
-          SYSTEM_CONSOLE / CLAN_OPERATIONS / DIRECTORY
-        </span>
-      </div>
-
-      {/* Main Content Grid */}
-      <main className="clan-main-grid p-6 max-w-[1400px] mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6 pb-20 md:pb-6">
+      {/* Main Content Area */}
+      <main className="clan-main-content">
         
-        {/* ================= LEFT COLUMN: SQUAD BATTLES 4v4 (6 COLS) ================= */}
-        <section className="lg:col-span-6 flex flex-col gap-4">
-          <GamerCard title="4V4 SQUAD BATTLES - ACTIVE OPER." highlight={true}>
-            <div className="flex flex-col gap-4">
-              
-              <div className="bg-[#0f1016] border border-[#254a34] p-3 text-[10px] font-mono text-[#00ffcc] leading-relaxed">
-                <span className="font-bold block uppercase mb-1">TACTICAL COOPERATIVE MISSION:</span>
-                Assemble your squad to construct the Secure Perimeter firewall array. Each member compiles one sub-system routine. Unlocking all modules triggers full squad integration!
+        {/* Banner / Operational Dossier Header */}
+        <section className="clan-hero-banner clip-tactical-card">
+          <div className="clan-hero-overlay"></div>
+          <div className="clan-hero-body">
+            <div className="clan-hero-title-group">
+              <span className="clan-hero-badge">
+                <Shield size={12} className="text-[#F59E0B]" />
+                SQUAD COMMAND CENTER // ALGORITHM CLANS
+              </span>
+              <h1 className="clan-hero-title">TASK FORCE 141 // SQUAD OPS</h1>
+              <p className="clan-hero-subtitle">
+                COOPERATIVE 4V4 HIGH-LATENCY CODE BREACH OPERATIONS & REGIONAL LEADERBOARDS
+              </p>
+            </div>
+
+            <div className="clan-hero-stats">
+              <div className="clan-stat-box">
+                <span className="clan-stat-label">CURRENT CLAN</span>
+                <span className="clan-stat-value text-amber-400">APEX_CODERS</span>
+              </div>
+              <div className="clan-stat-divider"></div>
+              <div className="clan-stat-box">
+                <span className="clan-stat-label">SQUAD MMR</span>
+                <span className="clan-stat-value text-cyan-400">24,850</span>
+              </div>
+              <div className="clan-stat-divider"></div>
+              <div className="clan-stat-box">
+                <span className="clan-stat-label">GLOBAL RANK</span>
+                <span className="clan-stat-value text-white">#01 ASIA-SOUTH</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 2-Column Tactical Grid */}
+        <div className="clan-grid-layout">
+          
+          {/* LEFT: 4V4 ACTIVE SQUAD OPERATIONS (60%) */}
+          <div className="clan-left-column">
+            <div className="tactical-card clip-tactical-card glass-tactical-card">
+              <div className="card-header">
+                <div className="card-header-title">
+                  <Swords size={16} className="text-[#F59E0B]" />
+                  <span>4V4 SQUAD BATTLES - ACTIVE OPERATIONAL MODULES</span>
+                </div>
+                <span className="status-live-chip">
+                  <Activity size={10} className="animate-pulse text-emerald-400" />
+                  3/4 MODULES SYNCED
+                </span>
+              </div>
+
+              <div className="squad-mission-brief">
+                <div className="brief-title font-mono text-cyan-400">OPERATION: CYBER-FORTRESS ARRAY</div>
+                <p className="brief-desc">
+                  Assemble your squad to construct the Secure Perimeter firewall array. Each member compiles one sub-system routine. Unlocking all modules triggers full squad integration and unlocks +500 MMR bonus!
+                </p>
               </div>
 
               {/* Tasks List */}
-              <div className="flex flex-col gap-3">
+              <div className="squad-tasks-list">
                 {squadTasks.map((task) => (
                   <div 
                     key={task.id}
-                    className={`p-3 bg-black/40 border clip-steel-sm flex items-center justify-between transition-colors ${
-                      task.status === 'COMPILED' ? 'border-[#00ffcc]/40 bg-[#00ffcc]/5' :
-                      task.status === 'OPEN SLOT' ? 'border-dashed border-slate-700/60' : 'border-[#2d3142]/60'
+                    className={`task-card clip-tactical-badge ${
+                      task.status === 'COMPILED' ? 'task-compiled' :
+                      task.status === 'OPEN SLOT' ? 'task-open' : 'task-in-progress'
                     }`}
                   >
-                    <div>
-                      <span className="text-[9px] font-mono text-gray-500 block">MODULE 0{task.id}</span>
-                      <h4 className="font-military text-sm text-white tracking-wide">{task.name}</h4>
-                      <div className="flex items-center gap-1.5 mt-1 text-[9px] font-mono text-gray-400">
-                        <span>OPERATOR:</span>
-                        <span className={task.status === 'OPEN SLOT' ? 'text-yellow-500' : 'text-[#00ffcc] font-bold'}>
+                    <div className="task-left">
+                      <div className="task-id font-mono">MODULE 0{task.id}</div>
+                      <div className="task-name">{task.name}</div>
+                      <div className="task-meta">
+                        <span>OPERATOR: </span>
+                        <span className={task.status === 'OPEN SLOT' ? 'text-amber-400' : 'text-cyan-400 font-bold'}>
                           {task.assignee}
                         </span>
+                        <span className="meta-dot">•</span>
+                        <span>TESTS: {task.testCases}</span>
                       </div>
                     </div>
 
-                    <div className="text-right">
+                    <div className="task-right">
                       {task.status === 'OPEN SLOT' ? (
-                        <GamerButton variant="primary" size="sm" onClick={() => alert("INVITING PLAYERS TO SQUAD...")}>
-                          INVITE
-                        </GamerButton>
-                      ) : (
-                        <span 
-                          className={`font-military text-[10px] px-2 py-0.5 rounded font-black tracking-widest ${
-                            task.status === 'COMPILED' ? 'bg-[#00ffcc] text-black' :
-                            task.status === 'READY' ? 'bg-[#FACC15] text-black' : 'bg-slate-800 text-slate-400'
-                          }`}
+                        <button 
+                          className="clip-tactical-btn invite-btn"
+                          onClick={() => alert("INVITING PLAYERS TO SQUAD...")}
                         >
-                          {task.status}
-                        </span>
+                          <UserPlus size={12} />
+                          <span>INVITE</span>
+                        </button>
+                      ) : (
+                        <div className="task-status-badge">
+                          <span className={`status-text ${task.status === 'COMPILED' ? 'text-cyan-400' : 'text-amber-400'}`}>
+                            {task.status}
+                          </span>
+                          <span className="task-speed font-mono">{task.speed}</span>
+                        </div>
                       )}
                     </div>
                   </div>
                 ))}
               </div>
 
+              {/* Squad Progress Bar */}
+              <div className="squad-progress-container">
+                <div className="progress-label-row font-mono">
+                  <span>SQUAD SYNCHRONIZATION</span>
+                  <span className="text-cyan-400 font-bold">75%</span>
+                </div>
+                <div className="progress-track">
+                  <div className="progress-fill" style={{ width: '75%' }}></div>
+                </div>
+              </div>
+
+              <div className="squad-actions">
+                <button className="clip-tactical-btn primary-action-btn flex-1">
+                  <Zap size={14} />
+                  <span>INITIATE SQUAD SYNCHRONIZATION</span>
+                </button>
+                <button className="clip-tactical-btn secondary-action-btn">
+                  <Clock size={14} />
+                  <span>REQUEST AIRDROP HINT</span>
+                </button>
+              </div>
             </div>
-          </GamerCard>
-        </section>
+          </div>
 
-        {/* ================= RIGHT COLUMN: CLAN LEADERBOARD (6 COLS) ================= */}
-        <section className="lg:col-span-6 flex flex-col gap-4">
-          <GamerCard title="GLOBAL REGIONAL CLAN STANDINGS">
-            <div className="flex flex-col gap-4">
-              
-              {/* Leaderboard Table */}
-              <div className="flex flex-col gap-2.5">
+          {/* RIGHT: CLAN STANDINGS & LEADERBOARD (40%) */}
+          <div className="clan-right-column">
+            
+            {/* Regional Clan Standings */}
+            <div className="tactical-card clip-tactical-card glass-tactical-card">
+              <div className="card-header">
+                <div className="card-header-title">
+                  <Trophy size={16} className="text-[#F59E0B]" />
+                  <span>GLOBAL REGIONAL CLAN STANDINGS</span>
+                </div>
+              </div>
+
+              <div className="leaderboard-list">
                 {clanLeaderboard.map((clan) => (
-                  <div 
-                    key={clan.rank}
-                    className="p-3.5 bg-black/45 border border-[#2d3142] clip-steel-sm flex items-center justify-between hover:border-yellow-400/30 transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center font-military font-bold text-white border border-[#2d3142]">
-                        0{clan.rank}
+                  <div key={clan.rank} className="leaderboard-item clip-tactical-badge">
+                    <div className="rank-badge font-mono">
+                      #{clan.rank < 10 ? `0${clan.rank}` : clan.rank}
+                    </div>
+                    
+                    <div className="clan-info">
+                      <div className="clan-name-row">
+                        <span className="clan-name">{clan.name}</span>
+                        <span className="clan-status-tag">{clan.status}</span>
                       </div>
-
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-military text-sm font-bold text-white tracking-wide">{clan.name}</span>
-                          <span className="text-[9px] font-mono text-gray-500">LEADER: {clan.leader}</span>
-                        </div>
-                        <div className="flex items-center gap-3 mt-1 text-[9px] font-mono text-gray-400">
-                          <span className="flex items-center gap-1">
-                            <Users size={10} className="text-[#00ffcc]" />
-                            {clan.size} MEMBERS
-                          </span>
-                        </div>
+                      <div className="clan-details font-mono">
+                        <span>LEADER: {clan.leader}</span>
+                        <span className="meta-dot">•</span>
+                        <span>{clan.size}</span>
                       </div>
                     </div>
 
-                    <div className="text-right">
-                      <span className="block font-mono text-xs text-yellow-400 font-bold">{clan.rating}</span>
-                      <span className="text-[8px] font-mono text-gray-500 tracking-wider">CLAN POINTS</span>
+                    <div className="clan-rating font-mono">
+                      <span className="rating-num">{clan.rating.toLocaleString()}</span>
+                      <span className="rating-label">PTS</span>
                     </div>
                   </div>
                 ))}
               </div>
 
-              {/* Action bar */}
-              <div className="pt-2 border-t border-[#2d3142]/60 flex gap-3">
-                <GamerButton variant="steel" className="flex-1" onClick={() => alert("INITIALIZING NEW CLAN OPERATIONS...")}>
-                  CREATE NEW CLAN
-                </GamerButton>
+              {/* Clan Actions */}
+              <div className="clan-card-footer">
+                <button className="clip-tactical-btn outline-btn full-width" onClick={() => alert("INITIALIZING NEW CLAN OPERATIONS...")}>
+                  <PlusCircle size={14} />
+                  <span>CREATE NEW ALGORITHM CLAN</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Upcoming Clan War Widget */}
+            <div className="tactical-card clip-tactical-card glass-tactical-card clan-war-card">
+              <div className="card-header">
+                <div className="card-header-title">
+                  <Shield size={16} className="text-rose-500" />
+                  <span>NEXT SECTOR CLAN WAR</span>
+                </div>
+                <span className="text-xs font-mono text-rose-400 animate-pulse">02H 14M 35S</span>
               </div>
 
+              <div className="clan-war-vs font-mono">
+                <div className="vs-team">
+                  <span className="text-cyan-400 font-bold">APEX_CODERS</span>
+                  <span className="text-[10px] text-gray-400">YOUR CLAN</span>
+                </div>
+                <div className="vs-badge">VS</div>
+                <div className="vs-team text-right">
+                  <span className="text-rose-400 font-bold">KRONOS_SYNDICATE</span>
+                  <span className="text-[10px] text-gray-400">RANK #02</span>
+                </div>
+              </div>
+
+              <div className="clan-war-meta font-mono text-gray-400 text-xs mt-2">
+                <span>SECTOR: </span>
+                <span className="text-white">NEO-SHIBUYA MATRIX (GRAPH THEORY)</span>
+              </div>
             </div>
-          </GamerCard>
-        </section>
+
+          </div>
+
+        </div>
 
       </main>
 
@@ -165,7 +245,7 @@ export default function Clan() {
         isOpen={isSettingsOpen} 
         onClose={() => setIsSettingsOpen(false)} 
       />
-
     </div>
   );
 }
+

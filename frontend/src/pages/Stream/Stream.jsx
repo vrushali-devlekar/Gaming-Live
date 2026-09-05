@@ -1,46 +1,55 @@
-import React from 'react';
-import Sidebar from '../../components/Sidebar';
-import Header from '../../components/Header';
+import React, { useState } from 'react';
 import VideoPlayer from '../../components/VideoPlayer';
-import FeaturedCategories from '../../components/FeaturedCategories';
-import OtherVideos from '../../components/OtherVideos';
 import LiveChat from '../../components/LiveChat';
+import CommandHeader from '../../components/CommandHeader/CommandHeader';
+import SettingsModal from '../../components/SettingsModal/SettingsModal';
+import { Flame, Radio, Eye } from 'lucide-react';
+import './Stream.css';
 
 export default function Stream() {
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
   return (
-    <div className="flex min-h-screen bg-dark-bg text-slate-100 font-sans select-none antialiased">
-      {/* Sidebar Navigation */}
-      <Sidebar />
+    <div className="stream-studio-viewport">
+      {/* Shared Command Header */}
+      <CommandHeader onOpenSettings={() => setIsSettingsOpen(true)} />
 
-      {/* Main Panel Area */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Header Bar */}
-        <Header />
-
-        {/* Dash Grid Dashboard Layout */}
-        <main className="p-6 pb-20 md:pb-6 flex-1 grid grid-cols-1 xl:grid-cols-4 gap-6 max-w-[1600px] mx-auto w-full">
+      {/* Main Broadcast Grid Layout */}
+      <main className="stream-main-grid">
+        
+        {/* Left 75%: Live Match Code Execution View */}
+        <section className="flex flex-col gap-4 min-h-0 overflow-y-auto custom-scrollbar pr-1">
           
-          {/* Main Video & Content Column */}
-          <section className="xl:col-span-3 flex flex-col gap-6">
-            
-            {/* Primary Live Stream Player */}
-            <VideoPlayer />
-            
-            {/* Featured Categories Side-by-Side Cards */}
-            <FeaturedCategories />
-            
-            {/* Additional Videos List Grid */}
-            <OtherVideos />
+          <div className="glass-panel-graphite p-3 px-5 flex items-center justify-between clip-tactical-card">
+            <div className="flex items-center gap-3">
+              <Radio size={16} className="text-[#FF3366] animate-pulse" />
+              <span className="font-header text-sm font-bold text-white tracking-[0.15em]">
+                ESPORTS BROADCAST STUDIO // LIVE MATCH ARENA
+              </span>
+            </div>
 
-          </section>
+            <div className="flex items-center gap-2 font-code text-[10px] text-[#06B6D4]">
+              <Eye size={13} />
+              <span>SPECTATOR MODE (1,842 VIEWERS)</span>
+            </div>
+          </div>
 
-          {/* Sticky Live Chat Column */}
-          <section className="xl:col-span-1 h-full">
-            <LiveChat />
-          </section>
+          {/* Primary Stream Video Player */}
+          <VideoPlayer />
+        </section>
 
-        </main>
-      </div>
+        {/* Right 25%: Tactical Kill Feed & Squad Comms */}
+        <section className="flex flex-col gap-4 min-h-0 h-full">
+          <LiveChat />
+        </section>
+
+      </main>
+
+      {/* Settings Modal */}
+      <SettingsModal 
+        isOpen={isSettingsOpen} 
+        onClose={() => setIsSettingsOpen(false)} 
+      />
     </div>
   );
 }

@@ -1,0 +1,27 @@
+/* ==========================================================================
+   ESPORTS BROADCAST STUDIO // STREAM STYLESHEET
+   ========================================================================== */
+
+.stream-studio-viewport {
+  width: 100vw;
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
+  background-color: var(--bg-obsidian);
+  display: flex;
+  flex-direction: column;
+  color: #FFFFFF;
+  font-family: var(--font-gamer);
+  position: relative;
+}
+
+.stream-main-grid {
+  display: grid;
+  grid-template-columns: 75% 25%;
+  gap: 20px;
+  padding: 20px 28px;
+  flex: 1;
+  min-height: 0;
+  max-height: calc(100vh - 65px);
+  overflow: hidden;
+}
