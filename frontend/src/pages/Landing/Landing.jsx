@@ -1,158 +1,148 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
 
 import CyberGridCanvas from './CyberGridCanvas';
 import HoloSphereCanvas from './HoloSphereCanvas';
+import IsometricCubeCanvas from './IsometricCubeCanvas';
+
+import { 
+  Code2, 
+  Search,
+  ArrowUpRight,
+  Shield, 
+  Trophy, 
+  Users, 
+  Radio, 
+  Menu, 
+  X, 
+  Zap, 
+  Check, 
+  Crosshair,
+  Award,
+  ChevronRight,
+  ChevronDown,
+  Layers,
+  Terminal,
+  Activity,
+  Package,
+  Eye
+} from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { themeService } from '../../services/themeService';
+import './Landing.css';
 
 gsap.registerPlugin(ScrollTrigger);
 
-import { 
-  Terminal, 
-  Swords, 
-  RefreshCw, 
-  ShieldAlert, 
-  Wifi, 
-  Users, 
-  Zap, 
-  Trophy, 
-  Crosshair, 
-  Box, 
-  Volume2, 
-  VolumeX,
-  Search,
-  Sparkles,
-  Lock,
-  Shield,
-  ChevronRight,
-  Flame,
-  Cpu,
-  Activity,
-  Layers,
-  MapPin,
-  Radio,
-  Eye
-} from 'lucide-react';
-import { themeService } from '../../services/themeService';
-import { useAuth } from '../../context/AuthContext';
-import './Landing.css';
-
-// Map & Air Drop Assets
-import sanhokMapImg from '../../assets/sanhok_map.png';
-import erangelMapImg from '../../assets/erangel_map.png';
-import airDropCrateImg from '../../assets/air_drop_crate.png';
-
 export default function Landing() {
   const navigate = useNavigate();
-  const { isLoggedIn, loginWithGoogle, loginWithGithub } = useAuth();
-  
-  // Interactive State
-  const [isEntering, setIsEntering] = useState(false);
-  const [syncStep, setSyncStep] = useState(0);
-  const [soundEnabled, setSoundEnabled] = useState(true);
-  const [selectedSector, setSelectedSector] = useState('sanhok');
-  const [activeDebuffTab, setActiveDebuffTab] = useState('smoke');
-  const [glitchEffect, setGlitchEffect] = useState(null); // 'smoke', 'flashbang', 'emp'
-  const [searchQuery, setSearchQuery] = useState('');
+  const { isLoggedIn, user } = useAuth();
+  const activeTheme = themeService.getCurrentTheme();
 
-  // Modals
-  const [showRoyalePassModal, setShowRoyalePassModal] = useState(false);
-  const [showRulesModal, setShowRulesModal] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [activeChallengeFilter, setActiveChallengeFilter] = useState('all');
+  const [activeLeaderTab, setActiveLeaderTab] = useState('global');
+  const [liveProblems, setLiveProblems] = useState([]);
 
-  // Live Combat Log Feed
-  const [combatLogs, setCombatLogs] = useState([
-    { id: 1, time: 'T+01:22', text: '@cyber_ninja initiated [Sanhok_Perimeter] duel against @syntax_reaper', type: 'system' },
-    { id: 2, time: 'T+01:24', text: '@cipher_fox: Submitting TwoSum solution (JavaScript)...', type: 'submit' },
-    { id: 3, time: 'T+01:25', text: 'CRITICAL HIT: 5/5 test cases verified (O(n) time complexity)', type: 'crit' },
-    { id: 4, time: 'T+01:25', text: '@null_pointer suffered -40HP zone recoil damage!', type: 'damage' },
-    { id: 5, time: 'T+01:28', text: 'AIR DROP CRATE: Spawned at Zone 3 (Binary Search Riddle)', type: 'airdrop' },
-  ]);
-
-  // Web Audio Synthesizer
-  const playBeep = (freq = 800, duration = 0.08, type = 'sine') => {
-    if (!soundEnabled) return;
-    try {
-      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const oscillator = audioCtx.createOscillator();
-      const gainNode = audioCtx.createGain();
-      oscillator.type = type;
-      oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
-      gainNode.gain.setValueAtTime(0.04, audioCtx.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
-      oscillator.connect(gainNode);
-      gainNode.connect(audioCtx.destination);
-      oscillator.start();
-      oscillator.stop(audioCtx.currentTime + duration);
-    } catch (e) {
-      // Audio fallback
+  // Curated Challenges matching exact screenshot
+  const challengesList = [
+    {
+      id: 'two-sum',
+      num: '01',
+      title: 'Two Sum Problem',
+      category: 'Array • Hashing',
+      difficulty: 'Easy',
+      diffColor: 'easy',
+      xp: '+50 XP',
+      languages: ['JS', 'PY', 'C++']
+    },
+    {
+      id: 'valid-parens',
+      num: '02',
+      title: 'Valid Socket Sequence',
+      category: 'Stack • Queue',
+      difficulty: 'Medium',
+      diffColor: 'medium',
+      xp: '+75 XP',
+      languages: ['JS', 'PY', 'C++']
+    },
+    {
+      id: 'lru-cache',
+      num: '03',
+      title: 'LRU Firewall Cache Buffer',
+      category: 'String • Buffer',
+      difficulty: 'Medium',
+      diffColor: 'medium',
+      xp: '+75 XP',
+      languages: ['JS', 'PY', 'C++']
+    },
+    {
+      id: 'network-delay',
+      num: '04',
+      title: 'Subnet Delay Time',
+      category: 'Graph • Shortest Path',
+      difficulty: 'Hard',
+      diffColor: 'hard',
+      xp: '+120 XP',
+      languages: ['JS', 'PY', 'C++']
+    },
+    {
+      id: 'trap-rain',
+      num: '05',
+      title: 'Trapping Water Grid',
+      category: 'Array • Dynamic Programming',
+      difficulty: 'Hard',
+      diffColor: 'hard',
+      xp: '+120 XP',
+      languages: ['JS', 'PY', 'C++']
     }
-  };
+  ];
 
-  // Trigger Screen Glitch Overlay
-  const triggerDebuffGlitch = (effectType) => {
-    playBeep(400, 0.15, 'sawtooth');
-    setActiveDebuffTab(effectType);
-    setGlitchEffect(effectType);
-    setTimeout(() => {
-      setGlitchEffect(null);
-    }, 1500);
-  };
+  // Leaderboard entries matching exact screenshot
+  const globalLeaderboard = [
+    { rank: '01', name: 'Aryan_Dev', tier: 'Diamond III', winRate: '78%', points: '12,450', avatar: 'Aryan' },
+    { rank: '02', name: 'CodeNinja', tier: 'Diamond II', winRate: '72%', points: '11,980', avatar: 'Ninja' },
+    { rank: '03', name: 'PixelRogue', tier: 'Diamond II', winRate: '69%', points: '10,870', avatar: 'Pixel' },
+    { rank: '04', name: 'DevKunal', tier: 'Platinum I', winRate: '64%', points: '9,430', avatar: 'Kunal' },
+    { rank: '05', name: 'ByteQueen', tier: 'Platinum I', winRate: '60%', points: '8,920', avatar: 'Queen' }
+  ];
 
-  // Simulated Live Terminal Stream Loop
-  useEffect(() => {
-    const logPool = [
-      { text: '@vortex_dev triggered [Smoke Screen] debuff on rival compiler!', type: 'debuff' },
-      { text: '@binary_boss executed QuickSort in 1.2ms (Zero Allocation)', type: 'crit' },
-      { text: '@ghost_coder claimed Air Drop Crate (+30 HP Shield restored)', type: 'airdrop' },
-      { text: '@null_pointer: Solution failed on Test Case #4 (IndexOutOfBounds)', type: 'damage' },
-      { text: 'PLAYZONE WARNING: Safe zone shrinking in 15 seconds...', type: 'system' },
-      { text: '@cipher_fox achieved 10x STREAK: Conqueror Tier Bonus awarded!', type: 'crit' },
-    ];
+  const clanLeaderboard = [
+    { rank: '01', name: 'TASK FORCE 141', tier: 'Elite Clan', winRate: '88%', points: '48,250', avatar: 'TF' },
+    { rank: '02', name: 'APEX CODERS', tier: 'Grandmaster', winRate: '84%', points: '42,100', avatar: 'AP' },
+    { rank: '03', name: 'STACK BREACHERS', tier: 'Dominator', winRate: '81%', points: '39,800', avatar: 'SB' },
+    { rank: '04', name: 'NEO MATRIX', tier: 'Master Clan', winRate: '77%', points: '36,450', avatar: 'NM' },
+    { rank: '05', name: 'RECOIL SQUAD', tier: 'Challenger', winRate: '73%', points: '32,190', avatar: 'RS' }
+  ];
 
-    const interval = setInterval(() => {
-      const randomLog = logPool[Math.floor(Math.random() * logPool.length)];
-      const now = new Date();
-      const timestamp = `T+0${now.getMinutes() % 10}:${now.getSeconds() < 10 ? '0' : ''}${now.getSeconds()}`;
+  const friendsLeaderboard = [
+    { rank: '01', name: 'Aryan_Dev', tier: 'Diamond III', winRate: '78%', points: '12,450', avatar: 'Aryan' },
+    { rank: '02', name: 'GHOST_OPERATOR', tier: 'Diamond I', winRate: '75%', points: '11,200', avatar: 'Ghost' },
+    { rank: '03', name: 'NEON_VIPER', tier: 'Platinum II', winRate: '68%', points: '9,850', avatar: 'Viper' },
+    { rank: '04', name: 'CYBER_ACE', tier: 'Platinum III', winRate: '62%', points: '8,400', avatar: 'Ace' }
+  ];
 
-      setCombatLogs((prevLogs) => [
-        ...prevLogs.slice(-6),
-        { id: Date.now(), time: timestamp, text: randomLog.text, type: randomLog.type }
-      ]);
-    }, 3200);
+  const currentLeaderboard = activeLeaderTab === 'clans' 
+    ? clanLeaderboard 
+    : activeLeaderTab === 'friends' 
+      ? friendsLeaderboard 
+      : globalLeaderboard;
 
-    return () => clearInterval(interval);
-  }, []);
-
-  // Keyboard Event Listener: Press ENTER to Launch Lobby
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'Enter' && !showAuthModal && !showRulesModal && !showRoyalePassModal && !isEntering) {
-        handleEnterLobby();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isLoggedIn, isEntering, showAuthModal, showRulesModal, showRoyalePassModal]);
-
-  // Lenis Smooth Scroll Setup
+  // Smooth Scroll
   useEffect(() => {
     const lenis = new Lenis({
-      duration: 1.2,
+      duration: 1.1,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothTouch: true,
     });
-
-    lenis.on('scroll', ScrollTrigger.update);
 
     const updateTicker = (time) => {
       lenis.raf(time * 1000);
     };
 
     gsap.ticker.add(updateTicker);
-    gsap.ticker.lagSmoothing(0);
 
     return () => {
       gsap.ticker.remove(updateTicker);
@@ -160,799 +150,807 @@ export default function Landing() {
     };
   }, []);
 
-  // GSAP Entrance Animations
-  useEffect(() => {
-    gsap.fromTo('.landing-navbar', 
-      { y: -60, opacity: 0 }, 
-      { y: 0, opacity: 1, duration: 0.8, ease: 'power4.out', delay: 0.1 }
-    );
-
-    const tl = gsap.timeline({ delay: 0.2 });
-    
-    tl.fromTo('.hero-protocol-badge',
-      { scale: 0.85, opacity: 0 },
-      { scale: 1, opacity: 1, duration: 0.5, ease: 'back.out(1.7)' }
-    )
-    .fromTo('.hero-stencil-headline',
-      { y: 40, opacity: 0 },
-      { y: 0, opacity: 1, duration: 0.8, ease: 'power4.out' },
-      '-=0.2'
-    )
-    .fromTo('.btn-hazard-amber, .btn-glass-volt',
-      { y: 20, opacity: 0 },
-      { y: 0, opacity: 1, duration: 0.6, ease: 'power2.out', stagger: 0.12 },
-      '-=0.4'
-    );
-
-    gsap.fromTo('.combat-radar-terminal',
-      { x: 70, opacity: 0 },
-      { x: 0, opacity: 1, duration: 1, ease: 'power4.out', delay: 0.4 }
-    );
-
-    gsap.fromTo('.sector-nav-tab',
-      { y: 40, opacity: 0 },
-      {
-        y: 0,
-        opacity: 1,
-        duration: 0.7,
-        stagger: 0.15,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: '#arenas-section',
-          start: 'top 80%',
-          toggleActions: 'play none none none'
-        }
-      }
-    );
-  }, []);
-
-  // Scroll Helper
-  const scrollToSection = (id) => {
-    playBeep(600, 0.05, 'triangle');
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  // Matchmaking Enter Lobby
-  const handleEnterLobby = () => {
-    if (isEntering) return;
-    playBeep(900, 0.25, 'triangle');
-
-    if (!isLoggedIn) {
-      setShowAuthModal(true);
-      return;
-    }
-
-    setIsEntering(true);
-    setSyncStep(1);
-
-    setTimeout(() => {
-      setSyncStep(2);
-      playBeep(700, 0.08, 'sine');
-      setTimeout(() => {
-        setSyncStep(3);
-        playBeep(850, 0.08, 'sine');
-        setTimeout(() => {
-          navigate('/lobby');
-        }, 1100);
-      }, 800);
-    }, 700);
-  };
-
-  // Auth Handler
-  const handleAuthAction = (provider) => {
-    playBeep(1000, 0.1, 'sine');
-    setShowAuthModal(false);
-    if (provider === 'google' && loginWithGoogle) loginWithGoogle();
-    else if (provider === 'github' && loginWithGithub) loginWithGithub();
-    else navigate('/login');
-  };
-
-  // Sector Data for Asymmetric Dossiers
-  const sectorData = {
-    sanhok: {
-      id: 'SECTOR_01',
-      name: 'SANHOK PERIMETER',
-      mode: '1V1 SUDDEN DEATH',
-      duration: '5-MIN BLITZ',
-      elevation: '120m Terrain | Jungle Dense Node Mesh',
-      tier: 'ACE MASTER',
-      img: erangelMapImg,
-      description: 'High-intensity 1-on-1 algorithmic speed duel. First programmer to pass all test cases or highest accuracy before zone collapse claims victory.'
-    },
-    military: {
-      id: 'SECTOR_02',
-      name: 'MILITARY BASE',
-      mode: 'SQUAD DEFENSE (4V4)',
-      duration: '15-MIN SQUAD',
-      elevation: '340m Bunker | Shared Microservice Sandbox',
-      tier: 'CONQUEROR',
-      img: sanhokMapImg,
-      description: 'Collaborative microservice architecture challenge. Synchronize code modules, share compiler state, and out-code rival squads in real-time.'
-    },
-    erangel: {
-      id: 'SECTOR_03',
-      name: 'ERANGEL SECTOR',
-      mode: '100-CODER ROYALE',
-      duration: '30-MIN ROYALE',
-      elevation: '450m Peak | 90s Memory Overflow Elimination',
-      tier: 'CONQUEROR',
-      img: erangelMapImg,
-      description: 'Drop into the massive 100-player compiler matrix. Every 90 seconds the bottom 15% get memory-overflowed and eliminated.'
+  const handleEnterArena = () => {
+    if (isLoggedIn) {
+      navigate('/arena');
+    } else {
+      navigate('/login');
     }
   };
 
-  const activeSector = sectorData[selectedSector];
-
-  // Esports Scoreboard Data
-  const leaderboardData = [
-    { rank: 1, handle: 'ViperX_Coder', tier: 'CONQUEROR', winRate: '94.2%', kdRatio: '14.8', bp: '24,850', lang: 'C++', breach: 'First Blood on TwoSum' },
-    { rank: 2, handle: 'Shadow_Ninja', tier: 'CONQUEROR', winRate: '91.8%', kdRatio: '12.4', bp: '22,400', lang: 'Rust', breach: '10x Kill Streak in Squad' },
-    { rank: 3, handle: 'NullPointer_God', tier: 'ACE MASTER', winRate: '88.5%', kdRatio: '10.9', bp: '19,950', lang: 'Python', breach: 'Solved Air Drop in 4.2s' },
-    { rank: 4, handle: 'Erangel_King', tier: 'ACE MASTER', winRate: '86.1%', kdRatio: '9.7', bp: '18,200', lang: 'JS/TS', breach: '100-Royale Winner' },
-    { rank: 5, handle: 'Glacier_M416', tier: 'CROWN I', winRate: '82.4%', kdRatio: '8.5', bp: '16,750', lang: 'Go', breach: 'Defused EMP Surge' },
-  ];
-
-  const filteredLeaderboard = leaderboardData.filter((item) =>
-    item.handle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.lang.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredChallenges = activeChallengeFilter === 'all'
+    ? challengesList
+    : challengesList.filter(c => c.difficulty.toLowerCase() === activeChallengeFilter);
 
   return (
-    <div className="command-center-root relative">
-      
-      {/* Dynamic Debuff Screen Glitch Overlay */}
-      {glitchEffect && (
-        <div className={`screen-glitch-overlay ${
-          glitchEffect === 'smoke' ? 'glitch-smoke' : glitchEffect === 'flashbang' ? 'glitch-flashbang' : 'glitch-emp'
-        }`} />
-      )}
-
-      {/* 2D CyberGrid Canvas */}
+    <div className="landing-editorial-root">
+      {/* Background Subtle Canvas */}
       <CyberGridCanvas />
 
-      {/* Outer Coordinate Ruler Bars & Screen Reticle Corners */}
-      <div className="coordinate-ruler-top">
-        <span>LAT 19.404 / LON 72.821</span>
-        <span className="text-[#00F5D4] font-bold">SYSTEM STATUS: 100% OPERATIONAL // PORT_5005</span>
-        <span>UTC 14:02:46</span>
-      </div>
-
-      <div className="coordinate-ruler-side">
-        [SYS_RETICLE_v4.2] // VALORANT_PROTOCOL_ACTIVE // MATRIX_READY
-      </div>
-
-      <div className="hud-corner-reticle reticle-tl" />
-      <div className="hud-corner-reticle reticle-tr" />
-      <div className="hud-corner-reticle reticle-bl" />
-      <div className="hud-corner-reticle reticle-br" />
-
-      <div className="landing-scanlines" />
-      <div className="bg-glow-volt" />
-      <div className="bg-glow-amber" />
-
-      {/* --------------------------------------------------------------------------
-          SECTION 1: COMMAND NAVBAR
-          -------------------------------------------------------------------------- */}
-      <nav className="landing-navbar px-6 py-3.5 flex items-center justify-between">
-        
-        {/* Left: Brand Mark & Barcode */}
-        <div 
-          className="flex items-center gap-3 cursor-pointer"
-          onClick={() => navigate('/')}
-          onMouseEnter={() => playBeep(1200, 0.03, 'sine')}
-        >
-          <div className="w-9 h-9 bg-[#00F5D4]/10 border border-[#00F5D4] flex items-center justify-center shadow-[0_0_15px_rgba(0,245,212,0.35)] clip-badge-sm">
-            <Swords size={20} className="text-[#00F5D4] animate-pulse" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="brand-glitch-title text-xl font-bold tracking-widest text-white leading-none">
-                CODE<span className="text-[#00F5D4]">//BATTLE_01</span>
-              </span>
-              <span className="barcode-stamp text-xs text-gray-500 font-mono">||| | ||||</span>
+      {/* ================= SECTION A — NAVBAR ================= */}
+      <header className="cb-navbar">
+        <div className="cb-nav-container">
+          {/* Brand Logo */}
+          <Link to="/" className="cb-brand">
+            <div className="cb-brand-icon">
+              <Code2 size={20} className="text-[#bef264]" />
             </div>
-            <span className="text-[9px] font-mono text-gray-400 tracking-[0.2em] block uppercase mt-0.5">
-              Asymmetric Command Client v4.2
-            </span>
+            <span className="cb-brand-text">CodeBattle</span>
+          </Link>
+
+          {/* Nav Links */}
+          <nav className="cb-nav-links desktop-only">
+            <a href="#experience" className="cb-nav-item">Discover</a>
+            <Link to="/arena" className="cb-nav-item">Arena</Link>
+            <a href="#challenges" className="cb-nav-item">Challenges</a>
+            <a href="#leaderboard" className="cb-nav-item">Leaderboard</a>
+            <Link to="/stream" className="cb-nav-item">Live Streams</Link>
+          </nav>
+
+          {/* Right Actions */}
+          <div className="cb-nav-actions">
+            <button className="cb-icon-btn desktop-only" aria-label="Search">
+              <Search size={16} />
+            </button>
+            <Link to="/login" className="cb-sign-in-link desktop-only">
+              Sign In
+            </Link>
+            <button onClick={handleEnterArena} className="cb-btn-enter">
+              <span>Enter Arena</span>
+              <ArrowUpRight size={14} />
+            </button>
+
+            {/* Mobile Nav Toggle */}
+            <button 
+              onClick={() => setMobileNavOpen(!mobileNavOpen)}
+              className="cb-mobile-toggle mobile-only"
+              aria-label="Toggle navigation"
+            >
+              {mobileNavOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
           </div>
         </div>
 
-        {/* Center: Match Telemetry Pill */}
-        <div className="hidden lg:flex items-center gap-3 px-4 py-1.5 bg-black/60 border border-[#00F5D4]/30 rounded-full font-mono text-xs shadow-[0_0_15px_rgba(0,245,212,0.1)]">
-          <span className="w-2 h-2 bg-[#00F5D4] rounded-full animate-ping" />
-          <span className="text-white font-bold">1,842 ACTIVE CODERS</span>
-          <span className="text-gray-600">|</span>
-          <span className="text-[#FF9E00] font-bold">AVG MATCH: 4M 12S</span>
-        </div>
-
-        {/* Right Nav & Terminal Access Trigger */}
-        <div className="flex items-center gap-4">
-          <div className="hidden md:flex items-center gap-2">
-            <button className="nav-link-btn" onClick={() => scrollToSection('arenas-section')}>ARENAS</button>
-            <button className="nav-link-btn" onClick={() => scrollToSection('leaderboard-section')}>STANDINGS</button>
-            <button className="nav-link-btn text-[#FF9E00]" onClick={() => setShowRoyalePassModal(true)}>⚡ PASS</button>
-            <button className="nav-link-btn" onClick={() => setShowRulesModal(true)}>RULES</button>
+        {/* Mobile Drawer */}
+        {mobileNavOpen && (
+          <div className="cb-mobile-drawer mobile-only">
+            <a href="#experience" onClick={() => setMobileNavOpen(false)} className="cb-mobile-link">Discover</a>
+            <Link to="/arena" onClick={() => setMobileNavOpen(false)} className="cb-mobile-link">Arena</Link>
+            <a href="#challenges" onClick={() => setMobileNavOpen(false)} className="cb-mobile-link">Challenges</a>
+            <a href="#leaderboard" onClick={() => setMobileNavOpen(false)} className="cb-mobile-link">Leaderboard</a>
+            <Link to="/stream" onClick={() => setMobileNavOpen(false)} className="cb-mobile-link">Live Streams</Link>
+            <div className="cb-mobile-actions">
+              <Link to="/login" onClick={() => setMobileNavOpen(false)} className="cb-mobile-signin">
+                Sign In
+              </Link>
+              <button onClick={() => { setMobileNavOpen(false); handleEnterArena(); }} className="cb-btn-enter w-full">
+                <span>Enter Arena</span>
+                <ArrowUpRight size={14} />
+              </button>
+            </div>
           </div>
+        )}
+      </header>
 
-          <button
-            onClick={() => setSoundEnabled(!soundEnabled)}
-            className="p-2 bg-black/50 border border-white/10 hover:border-[#00F5D4]/50 text-gray-400 hover:text-white rounded transition-all cursor-pointer"
-            title={soundEnabled ? 'Mute SFX' : 'Enable SFX'}
-          >
-            {soundEnabled ? <Volume2 size={16} className="text-[#00F5D4]" /> : <VolumeX size={16} />}
-          </button>
-
-          <button
-            onClick={() => {
-              playBeep(850, 0.08, 'sine');
-              if (!isLoggedIn) setShowAuthModal(true);
-              else handleEnterLobby();
-            }}
-            onMouseEnter={() => playBeep(1100, 0.03, 'sine')}
-            className="btn-glass-volt px-5 py-2.5 text-xs clip-angular-btn flex items-center gap-2 cursor-pointer font-military tracking-wider"
-          >
-            <Lock size={14} />
-            <span>TERMINAL ACCESS</span>
-          </button>
-        </div>
-      </nav>
-
-      {/* --------------------------------------------------------------------------
-          SECTION 2: THE STAGING GROUND (55/45 Hero & Live Radar Box)
-          -------------------------------------------------------------------------- */}
-      <section className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-16 w-full flex flex-col items-center">
-        <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
+      {/* ================= SECTION B — EDITORIAL HERO ================= */}
+      <section className="cb-hero-section">
+        <div className="cb-hero-container">
           
-          {/* Left 55%: Stencil Headlines & CTAs */}
-          <div className="lg:col-span-7 flex flex-col items-start gap-6">
-            
-            <div className="hero-protocol-badge">
-              <span className="w-1.5 h-1.5 bg-[#FF2A6D] rounded-full animate-ping" />
-              <span>[PROTOCOL ACTIVATED: SEASON 04 RANKED]</span>
+          {/* Hero Left: Editorial Copy */}
+          <div className="cb-hero-content">
+            <div className="cb-hero-eyebrow">
+              <span className="cb-beacon-dot"></span>
+              <span>COMPETITIVE PROGRAMMING / REAL-TIME MULTIPLAYER</span>
             </div>
 
+            <h1 className="cb-hero-headline">
+              YOUR CODE.<br />
+              YOUR COMPETITION.<br />
+              <span className="cb-headline-lime">YOUR LEGACY.</span>
+            </h1>
+
+            <p className="cb-hero-subtext">
+              Not another coding platform. A live arena where developers solve problems, challenge rivals, and earn their place on the leaderboard.
+            </p>
+
+            <div className="cb-hero-actions">
+              <button onClick={handleEnterArena} className="cb-btn-primary">
+                <span>Enter the Arena</span>
+                <ArrowUpRight size={15} />
+              </button>
+              <button 
+                onClick={() => {
+                  const el = document.getElementById('challenges');
+                  if (el) el.scrollIntoView({ behavior: 'smooth' });
+                }} 
+                className="cb-btn-secondary"
+              >
+                <span>Explore Challenges</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Hero Right: Live Battle Preview & HoloSphere */}
+          <div className="cb-hero-graphic-wrap">
+            <div className="cb-hero-card-window">
+              
+              {/* Top Match HUD Bar */}
+              <div className="cb-hero-match-hud">
+                <div className="cb-hud-player left">
+                  <div className="cb-avatar-dot green"></div>
+                  <div className="cb-health-bar green"><div className="cb-health-fill" style={{ width: '85%' }}></div></div>
+                </div>
+
+                <div className="cb-hud-timer">04:12</div>
+
+                <div className="cb-hud-player right">
+                  <div className="cb-health-bar red"><div className="cb-health-fill" style={{ width: '45%' }}></div></div>
+                  <div className="cb-avatar-dot red"></div>
+                </div>
+              </div>
+
+              {/* Middle Window Area: Code Tab + Radar Sphere */}
+              <div className="cb-hero-window-split">
+                
+                {/* Left Code Editor Pane */}
+                <div className="cb-hero-code-pane">
+                  <div className="cb-tab-label">
+                    <span className="cb-tab-dot"></span>
+                    <span>main.js</span>
+                  </div>
+                  <pre className="cb-hero-code">
+                    <code>
+                      <span className="cb-c-kw">function</span> <span className="cb-c-fn">twoSum</span>(nums, target) {'{\n'}
+                      {'  '}<span className="cb-c-kw">const</span> map = <span className="cb-c-kw">new</span> Map();{'\n'}
+                      {'  '}<span className="cb-c-kw">for</span> (<span className="cb-c-kw">let</span> i = 0; i &lt; nums.length; i++) {'{\n'}
+                      {'    '}<span className="cb-c-kw">const</span> complement = target - nums[i];{'\n'}
+                      {'    '}<span className="cb-c-kw">if</span> (map.has(complement)) {'{\n'}
+                      {'      '}<span className="cb-c-kw">return</span> [map.get(complement), i];{'\n'}
+                      {'    }\n'}
+                      {'    '}map.set(nums[i], i);{'\n'}
+                      {'  }\n'}
+                      {'}'}
+                    </code>
+                  </pre>
+                  <div className="cb-cursor-indicator green">
+                    <span>Aryan_Dev</span>
+                  </div>
+                </div>
+
+                {/* Right Radar / 3D Sphere */}
+                <div className="cb-hero-sphere-box">
+                  <HoloSphereCanvas />
+                </div>
+
+              </div>
+
+              {/* Bottom Live Battle Connected Badge */}
+              <div className="cb-hero-bottom-status">
+                <div className="flex items-center gap-2">
+                  <span className="cb-live-indicator-square"></span>
+                  <span className="cb-status-title">Live Battle</span>
+                </div>
+                <span className="cb-status-sub">212 players connected</span>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+        {/* 3 Bottom Feature Points */}
+        <div className="cb-hero-feature-strip">
+          <div className="cb-feature-point">
+            <span className="cb-feat-dot"></span>
             <div>
-              <h1 className="hero-stencil-headline text-4xl sm:text-5xl lg:text-6xl uppercase tracking-tight">
-                DEATHMATCH <br />
-                <span className="text-[#00F5D4] drop-shadow-[0_0_25px_rgba(0,245,212,0.5)]">FOR CODERS.</span>
-              </h1>
-              <p className="font-mono text-xs sm:text-sm text-gray-300 max-w-xl leading-relaxed mt-4">
-                Real-time 1v1 and squad duel arena. Write optimal algorithms, dodge zone shrinkage, and trigger debuffs to wipe out the opponent's runtime.
+              <strong className="cb-feat-title">Real-time Battles</strong>
+              <span className="cb-feat-sub">Code together, compete live</span>
+            </div>
+          </div>
+
+          <div className="cb-feature-point">
+            <span className="cb-feat-dot"></span>
+            <div>
+              <strong className="cb-feat-title">Global Leaderboard</strong>
+              <span className="cb-feat-sub">Climb, earn, be seen</span>
+            </div>
+          </div>
+
+          <div className="cb-feature-point">
+            <span className="cb-feat-dot"></span>
+            <div>
+              <strong className="cb-feat-title">Build Your Identity</strong>
+              <span className="cb-feat-sub">Costumes, Equip, Stand out</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ================= SECTION C — THE CODEBATTLE EXPERIENCE ================= */}
+      <section className="cb-section" id="experience">
+        <div className="cb-container">
+          
+          {/* Section Heading Row */}
+          <div className="cb-section-header-split">
+            <div>
+              <span className="cb-section-eyebrow">THE CODEBATTLE EXPERIENCE</span>
+              <h2 className="cb-section-heading">ENGINEERED FOR<br />SERIOUS CODERS.</h2>
+            </div>
+            <p className="cb-section-lead-text">
+              More than just code. It's a community, a platform, and a competitive arena built for developers who want more.
+            </p>
+          </div>
+
+          {/* Asymmetric Product Grid */}
+          <div className="cb-experience-grid">
+            
+            {/* Left 65%: Live Battle Arena Large Card */}
+            <div className="cb-card-arena-large">
+              <div className="cb-arena-mockup-frame">
+                
+                {/* Battle Top HUD */}
+                <div className="cb-arena-mock-hud">
+                  <div className="cb-mock-player left">
+                    <div className="cb-mock-avatar">
+                      <img src="https://api.dicebear.com/7.x/bottts/svg?seed=You" alt="You" />
+                    </div>
+                    <div className="cb-mock-health-track">
+                      <div className="cb-mock-health-fill green" style={{ width: '85%' }}></div>
+                    </div>
+                  </div>
+
+                  <div className="cb-mock-timer">04:12</div>
+
+                  <div className="cb-mock-player right">
+                    <div className="cb-mock-health-track">
+                      <div className="cb-mock-health-fill red" style={{ width: '45%' }}></div>
+                    </div>
+                    <div className="cb-mock-avatar">
+                      <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Pixel" alt="Rival" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Workspace Split (Problem & Monaco Code) */}
+                <div className="cb-arena-mock-workspace">
+                  
+                  {/* Left: Problem Panel */}
+                  <div className="cb-arena-mock-problem">
+                    <div className="cb-mock-panel-tag">Problem</div>
+                    <h4 className="cb-mock-problem-title">Two Sum</h4>
+                    <p className="cb-mock-problem-desc">
+                      Given an array of integers, return indices of the two numbers such that they add up to a target.
+                    </p>
+                    <div className="cb-mock-constraints">
+                      <span className="cb-const-label">Constraints:</span>
+                      <ul>
+                        <li>2 &le; nums.length &le; 10⁴</li>
+                        <li>-10⁹ &le; nums[i] &le; 10⁹</li>
+                        <li>2 &le; target &le; 10⁹</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  {/* Right: Code Monaco Window */}
+                  <div className="cb-arena-mock-code">
+                    <div className="cb-mock-code-tab">
+                      <span className="cb-tab-dot"></span>
+                      <span>main.js</span>
+                    </div>
+
+                    <pre className="cb-mock-syntax">
+                      <code>
+                        <span className="cb-c-kw">const</span> <span className="cb-c-fn">twoSum</span> = (nums, target) =&gt; {'{\n'}
+                        {'  '}<span className="cb-c-kw">const</span> map = <span className="cb-c-kw">new</span> Map();{'\n'}
+                        {'  '}<span className="cb-c-kw">for</span> (<span className="cb-c-kw">let</span> i = 0; i &lt; nums.length; i++) {'{\n'}
+                        {'    '}<span className="cb-c-kw">const</span> complement = target - nums[i];{'\n'}
+                        {'    '}<span className="cb-c-kw">if</span> (map.has(complement)) {'{\n'}
+                        {'      '}<span className="cb-c-kw">return</span> [map.get(complement), i];{'\n'}
+                        {'    }\n'}
+                        {'    '}map.set(nums[i], i);{'\n'}
+                        {'  }\n'}
+                        {'}'}
+                      </code>
+                    </pre>
+
+                    {/* Active Keystroke Cursors */}
+                    <div className="cb-arena-cursor green" style={{ top: '48px', left: '160px' }}>
+                      <span className="cb-cursor-badge">Aryan_Dev</span>
+                    </div>
+                    <div className="cb-arena-cursor red" style={{ top: '110px', left: '220px' }}>
+                      <span className="cb-cursor-badge">PixelRogue</span>
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* Bottom Console & Submit Strip */}
+                <div className="cb-arena-mock-bottom">
+                  <div className="cb-console-tabs">
+                    <span className="cb-console-tab active">Console</span>
+                    <span className="cb-console-tab">Test Results</span>
+                    <span className="cb-test-pass-badge">
+                      <Check size={12} />
+                      <span>4 tests passed</span>
+                      <Zap size={11} className="text-[#bef264]" />
+                    </span>
+                  </div>
+
+                  <div className="cb-console-actions">
+                    <div className="cb-lang-dropdown">
+                      <span>Javascript</span>
+                      <ChevronDown size={13} />
+                    </div>
+                    <button className="cb-btn-submit-mock">Submit</button>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Arena Card Caption */}
+              <div className="cb-card-caption">
+                <h3 className="cb-caption-title">Live Battle Arena</h3>
+                <p className="cb-caption-desc">
+                  Code in real-time with your squad and push your limits together.
+                </p>
+              </div>
+            </div>
+
+            {/* Right 35%: Stacked Cards (Leaderboard, Identity, Locker) */}
+            <div className="cb-experience-sidebar">
+              
+              {/* 1. Leaderboard Mini Card */}
+              <div className="cb-side-card">
+                <div className="cb-side-card-header">
+                  <span className="cb-side-card-title">Global Leaderboard</span>
+                  <Link to="/clan" className="cb-side-card-link">View all &gt;</Link>
+                </div>
+                <div className="cb-side-leader-list">
+                  {globalLeaderboard.slice(0, 4).map((item, idx) => (
+                    <div key={idx} className="cb-side-leader-row">
+                      <div className="flex items-center gap-2.5">
+                        <span className="cb-side-rank-num">{item.rank}</span>
+                        <div className="cb-side-avatar-circle">
+                          <img src={`https://api.dicebear.com/7.x/bottts/svg?seed=${item.avatar}`} alt={item.name} />
+                        </div>
+                        <span className="cb-side-player-name">{item.name}</span>
+                      </div>
+                      <span className="cb-side-player-points">{item.points}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* 2. Your Identity Mini Card */}
+              <div className="cb-side-card">
+                <div className="cb-side-card-header">
+                  <span className="cb-side-card-title">Your Identity</span>
+                  <Link to="/analytics" className="cb-side-card-link">Rank &gt;</Link>
+                </div>
+                <div className="cb-side-identity-body">
+                  <div className="flex items-center gap-3">
+                    <div className="cb-identity-avatar-frame">
+                      <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Commander" alt="Operator" />
+                    </div>
+                    <div className="flex-1">
+                      <span className="cb-identity-rank-label">Rank</span>
+                      <div className="flex items-center gap-1.5">
+                        <Shield size={13} className="text-[#bef264]" />
+                        <span className="cb-identity-rank-val">Diamond III</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="cb-identity-win-bar">
+                    <div className="flex justify-between text-[11px] font-mono mb-1">
+                      <span className="text-muted">Win Rate</span>
+                      <span className="text-white font-bold">68%</span>
+                    </div>
+                    <div className="cb-win-bar-track">
+                      <div className="cb-win-bar-fill" style={{ width: '68%' }}></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 3. Locker Room Mini Card */}
+              <div className="cb-side-card">
+                <div className="cb-side-card-header">
+                  <span className="cb-side-card-title">Locker Room</span>
+                  <Link to="/inventory" className="cb-side-card-link">View &gt;</Link>
+                </div>
+                <div className="cb-side-locker-items">
+                  <div className="cb-locker-preview-box">
+                    <Package size={18} className="text-[#bef264]" />
+                  </div>
+                  <div className="cb-locker-preview-box">
+                    <Shield size={18} className="text-[#38bdf8]" />
+                  </div>
+                  <div className="cb-locker-preview-box">
+                    <Zap size={18} className="text-[#f59e0b]" />
+                  </div>
+                  <div className="cb-locker-preview-box">
+                    <Layers size={18} className="text-muted" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Locker Room Caption */}
+              <div className="cb-card-caption">
+                <h3 className="cb-caption-title">Locker Room</h3>
+                <p className="cb-caption-desc">
+                  Customise your avatar, themes and show your style.
+                </p>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      {/* ================= SECTION D — HOW IT WORKS ================= */}
+      <section className="cb-section cb-bg-subtle" id="how-it-works">
+        <div className="cb-container">
+          
+          <div className="cb-how-header-row">
+            <div>
+              <span className="cb-section-eyebrow">HOW IT WORKS</span>
+              <h2 className="cb-section-heading">
+                THINK FAST. CODE CLEAN.<br />
+                WIN TOGETHER.
+              </h2>
+            </div>
+            <div className="cb-how-steps-indicator desktop-only">
+              <span className="cb-step-dot active">01</span>
+              <span className="cb-step-line"></span>
+              <span className="cb-step-dot">02</span>
+              <span className="cb-step-line"></span>
+              <span className="cb-step-dot">03</span>
+            </div>
+          </div>
+
+          <div className="cb-how-steps-grid">
+            
+            {/* Step 1 */}
+            <div className="cb-how-step-card">
+              <div className="cb-how-icon-circle">
+                <Crosshair size={22} className="text-[#bef264]" />
+              </div>
+              <h3 className="cb-how-step-title">Find Your Rival</h3>
+              <p className="cb-how-step-desc">
+                Join a battle, create a room, or challenge another developer.
               </p>
             </div>
 
-            {/* Dual Action Triggers */}
-            <div className="flex flex-wrap items-center gap-4 w-full sm:w-auto pt-2">
-              <button
-                onClick={handleEnterLobby}
-                onMouseEnter={() => playBeep(1200, 0.04, 'triangle')}
-                className="btn-hazard-amber px-8 py-3.5 text-sm clip-angular-btn flex items-center gap-2.5 w-full sm:w-auto justify-center"
-              >
-                <Crosshair size={18} className="text-black stroke-[2.5]" />
-                <span>INSTANT DUEL (1V1)</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  playBeep(750, 0.1, 'sine');
-                  if (!isLoggedIn) setShowAuthModal(true);
-                  else navigate('/room-lobby');
-                }}
-                onMouseEnter={() => playBeep(950, 0.04, 'sine')}
-                className="btn-glass-volt px-8 py-3.5 text-sm clip-angular-btn flex items-center gap-2.5 w-full sm:w-auto justify-center"
-              >
-                <Users size={16} />
-                <span>ENTER AS SQUAD</span>
-              </button>
+            {/* Connector Arrow */}
+            <div className="cb-how-arrow desktop-only">
+              <ArrowUpRight size={18} className="rotate-45 text-[#bef264]/40" />
             </div>
 
-            {/* Quick Metrics Bar */}
-            <div className="grid grid-cols-3 gap-6 pt-6 border-t border-white/10 w-full max-w-lg font-mono">
-              <div>
-                <div className="font-military text-2xl text-white font-bold">1,842</div>
-                <div className="text-[10px] text-gray-400 uppercase mt-0.5">ONLINE CODERS</div>
+            {/* Step 2 */}
+            <div className="cb-how-step-card">
+              <div className="cb-how-icon-circle">
+                <Code2 size={22} className="text-[#bef264]" />
               </div>
-              <div>
-                <div className="font-military text-2xl text-[#00F5D4] font-bold">0.2ms</div>
-                <div className="text-[10px] text-gray-400 uppercase mt-0.5">JUDGE LATENCY</div>
+              <h3 className="cb-how-step-title">Build Under Pressure</h3>
+              <p className="cb-how-step-desc">
+                Write and test your solution in a synchronized multiplayer coding arena.
+              </p>
+            </div>
+
+            {/* Connector Arrow */}
+            <div className="cb-how-arrow desktop-only">
+              <ArrowUpRight size={18} className="rotate-45 text-[#bef264]/40" />
+            </div>
+
+            {/* Step 3 */}
+            <div className="cb-how-step-card">
+              <div className="cb-how-icon-circle">
+                <Trophy size={22} className="text-[#bef264]" />
               </div>
-              <div>
-                <div className="font-military text-2xl text-[#FF9E00] font-bold">2,500 BP</div>
-                <div className="text-[10px] text-gray-400 uppercase mt-0.5">CHICKEN REWARD</div>
-              </div>
+              <h3 className="cb-how-step-title">Earn Your Rank</h3>
+              <p className="cb-how-step-desc">
+                Track your progress, unlock achievements, and climb the leaderboard.
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      {/* ================= SECTION E — FEATURED CHALLENGES ================= */}
+      <section className="cb-section" id="challenges">
+        <div className="cb-container">
+          
+          <div className="cb-challenges-header">
+            <div>
+              <span className="cb-section-eyebrow">FEATURED CHALLENGES</span>
+              <h2 className="cb-section-heading">THE NEXT MOVE IS YOURS.</h2>
+              <p className="cb-section-lead-text">
+                Every challenge is an opportunity to prove what you're made of.
+              </p>
+            </div>
+
+            {/* Filter Pills */}
+            <div className="cb-filter-pills">
+              {['all', 'easy', 'medium', 'hard'].map(filter => (
+                <button
+                  key={filter}
+                  onClick={() => setActiveChallengeFilter(filter)}
+                  className={`cb-filter-pill-btn ${activeChallengeFilter === filter ? 'active' : ''}`}
+                >
+                  {filter.charAt(0).toUpperCase() + filter.slice(1)}
+                </button>
+              ))}
             </div>
           </div>
 
-          {/* Right 45%: Tactical Live Match Radar Box */}
-          <div className="lg:col-span-5 w-full">
-            <div className="combat-radar-terminal p-5 font-mono text-xs flex flex-col gap-4 relative">
-              
-              {/* Terminal Header */}
-              <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                <div className="flex items-center gap-2">
-                  <Radio size={16} className="text-[#00F5D4] animate-pulse" />
-                  <span className="font-military text-xs text-white font-bold tracking-wider uppercase">
-                    TACTICAL LIVE MATCH RADAR
+          {/* Challenge Rows Table */}
+          <div className="cb-challenges-table">
+            {filteredChallenges.map((item) => (
+              <div key={item.id} className="cb-challenge-row">
+                <span className="cb-ch-num">{item.num}</span>
+
+                <div className="cb-ch-info">
+                  <h4 className="cb-ch-title">{item.title}</h4>
+                  <span className="cb-ch-category">{item.category}</span>
+                </div>
+
+                <div className="cb-ch-diff">
+                  <span className={`cb-diff-badge ${item.diffColor}`}>
+                    {item.difficulty}
                   </span>
                 </div>
-                <span className="text-[10px] text-[#00F5D4] bg-[#00F5D4]/10 px-2 py-0.5 rounded border border-[#00F5D4]/30 font-bold">
-                  RADAR ACTIVE
-                </span>
-              </div>
 
-              {/* 3D Hologram Radar Embedded Box */}
-              <div className="w-full h-36 rounded bg-black/60 border border-white/10 overflow-hidden relative">
-                <HoloSphereCanvas />
-              </div>
+                <div className="cb-ch-langs">
+                  {item.languages.map((lang, idx) => (
+                    <span key={idx} className="cb-lang-chip">{lang}</span>
+                  ))}
+                </div>
 
-              {/* Live Combat Log Entries */}
-              <div className="flex flex-col gap-2 h-44 overflow-y-auto pr-1 select-none">
-                {combatLogs.map((log) => (
-                  <div 
-                    key={log.id} 
-                    className={`terminal-log-row flex items-start gap-2 p-2 rounded border ${
-                      log.type === 'crit' 
-                        ? 'bg-[#00F5D4]/10 border-[#00F5D4]/40 text-[#00F5D4]'
-                        : log.type === 'damage'
-                        ? 'bg-[#FF2A6D]/10 border-[#FF2A6D]/40 text-[#FF2A6D]'
-                        : log.type === 'airdrop'
-                        ? 'bg-[#FF9E00]/10 border-[#FF9E00]/40 text-[#FF9E00]'
-                        : 'bg-black/40 border-white/10 text-gray-300'
-                    }`}
+                <div className="cb-ch-xp">
+                  <span className="cb-xp-val">{item.xp}</span>
+                </div>
+
+                <div className="cb-ch-action">
+                  <button 
+                    onClick={() => navigate(`/arena?problemId=${item.id}`)}
+                    className="cb-btn-solve-row"
                   >
-                    <span className="text-gray-500 font-bold flex-shrink-0">[{log.time}]</span>
-                    <span className="leading-tight">{log.text}</span>
+                    <span>Solve Challenge</span>
+                    <ArrowUpRight size={13} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+        </div>
+      </section>
+
+      {/* ================= SECTION F — LEADERBOARD ================= */}
+      <section className="cb-section cb-bg-subtle" id="leaderboard">
+        <div className="cb-container">
+          
+          <div className="cb-leaderboard-intro">
+            <span className="cb-section-eyebrow">LEADERBOARD</span>
+            <h2 className="cb-section-heading">REPUTATION IS EARNED.</h2>
+            <p className="cb-section-lead-text">
+              Every solution counts. Every victory moves you forward.
+            </p>
+          </div>
+
+          <div className="cb-leaderboard-split-layout">
+            
+            {/* Left 65%: Table Card */}
+            <div className="cb-leader-table-card">
+              {/* Tabs */}
+              <div className="cb-leader-tabs">
+                <button 
+                  onClick={() => setActiveLeaderTab('global')}
+                  className={`cb-leader-tab ${activeLeaderTab === 'global' ? 'active' : ''}`}
+                >
+                  Global
+                </button>
+                <button 
+                  onClick={() => setActiveLeaderTab('clans')}
+                  className={`cb-leader-tab ${activeLeaderTab === 'clans' ? 'active' : ''}`}
+                >
+                  Clans
+                </button>
+                <button 
+                  onClick={() => setActiveLeaderTab('friends')}
+                  className={`cb-leader-tab ${activeLeaderTab === 'friends' ? 'active' : ''}`}
+                >
+                  Friends
+                </button>
+              </div>
+
+              {/* Table Header */}
+              <div className="cb-leader-th-row">
+                <span className="cb-th-rank">#</span>
+                <span className="cb-th-player">PLAYER</span>
+                <span className="cb-th-tier">RANK</span>
+                <span className="cb-th-win">WIN RATE</span>
+                <span className="cb-th-points">POINTS</span>
+              </div>
+
+              {/* Table Rows */}
+              <div className="cb-leader-rows-wrap">
+                {currentLeaderboard.map((row, idx) => (
+                  <div key={idx} className="cb-leader-data-row">
+                    <span className="cb-td-rank">{row.rank}</span>
+
+                    <div className="cb-td-player">
+                      <div className="cb-player-avatar-small">
+                        <img src={`https://api.dicebear.com/7.x/bottts/svg?seed=${row.avatar}`} alt={row.name} />
+                      </div>
+                      <span className="cb-player-name-text">{row.name}</span>
+                    </div>
+
+                    <div className="cb-td-tier">
+                      <Shield size={12} className="text-[#38bdf8]" />
+                      <span>{row.tier}</span>
+                    </div>
+
+                    <span className="cb-td-win">{row.winRate}</span>
+                    <span className="cb-td-points">{row.points}</span>
                   </div>
                 ))}
               </div>
 
-              {/* Telemetry Status Bar */}
-              <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[10px] text-gray-400">
-                <span className="flex items-center gap-1">
-                  <Activity size={12} className="text-green-400" />
-                  <span>SYNTAX MATRIX: STABLE</span>
-                </span>
-                <span className="text-[#00F5D4]">ANTI-CHEAT: ACTIVE</span>
+              {/* View All Rankings Link */}
+              <div className="cb-leader-card-footer">
+                <Link to="/clan" className="cb-view-rankings-btn">
+                  <span>View All Rankings</span>
+                  <ArrowUpRight size={13} />
+                </Link>
+              </div>
+            </div>
+
+            {/* Right 35%: Radar Graphic & Quote Card */}
+            <div className="cb-leader-quote-card">
+              <div className="cb-quote-radar-visual">
+                <div className="cb-radar-circle outer"></div>
+                <div className="cb-radar-circle middle"></div>
+                <div className="cb-radar-circle inner"></div>
+                <div className="cb-radar-sweep"></div>
+                <div className="cb-radar-blip"></div>
               </div>
 
+              <div className="cb-quote-text-wrap">
+                <h3 className="cb-quote-title">
+                  Higher rank.<br />
+                  Bigger challenges.<br />
+                  Greater rewards.
+                </h3>
+                <div className="cb-quote-dash"></div>
+              </div>
             </div>
+
           </div>
 
         </div>
       </section>
 
-      {/* --------------------------------------------------------------------------
-          SECTION 3: OPERATIONAL SECTORS (Asymmetric Horizontal Dossier Layout)
-          -------------------------------------------------------------------------- */}
-      <section id="arenas-section" className="relative z-10 max-w-7xl mx-auto px-6 py-16 w-full">
-        <div className="text-center max-w-2xl mx-auto mb-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#00F5D4]/10 border border-[#00F5D4]/30 text-[#00F5D4] font-military text-xs tracking-widest clip-badge-sm mb-3">
-            <Layers size={13} />
-            <span>OPERATIONAL SECTORS</span>
-          </div>
-          <h2 className="font-military text-4xl text-white font-bold tracking-wider uppercase">
-            ARENA <span className="text-[#00F5D4]">PROTOCOLS</span>
-          </h2>
-        </div>
-
-        {/* Sector Navigation Tabs */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div
-            className={`sector-nav-tab p-4 rounded clip-badge-sm ${selectedSector === 'sanhok' ? 'active' : ''}`}
-            onClick={() => {
-              playBeep(700, 0.05, 'sine');
-              setSelectedSector('sanhok');
-            }}
-          >
-            <div className="flex items-center justify-between mb-1">
-              <span className="font-military text-sm text-white font-bold">SECTOR 01: SANHOK</span>
-              <span className="text-[10px] font-mono text-[#00F5D4]">1V1 DUEL</span>
-            </div>
-            <span className="font-mono text-xs text-gray-400 block">5-Minute Sudden Death Blitz</span>
-          </div>
-
-          <div
-            className={`sector-nav-tab p-4 rounded clip-badge-sm ${selectedSector === 'military' ? 'active' : ''}`}
-            onClick={() => {
-              playBeep(700, 0.05, 'sine');
-              setSelectedSector('military');
-            }}
-          >
-            <div className="flex items-center justify-between mb-1">
-              <span className="font-military text-sm text-white font-bold">SECTOR 02: MILITARY BASE</span>
-              <span className="text-[10px] font-mono text-[#FF9E00]">4V4 SQUAD</span>
-            </div>
-            <span className="font-mono text-xs text-gray-400 block">Shared Microservice Sandbox</span>
-          </div>
-
-          <div
-            className={`sector-nav-tab p-4 rounded clip-badge-sm ${selectedSector === 'erangel' ? 'active' : ''}`}
-            onClick={() => {
-              playBeep(700, 0.05, 'sine');
-              setSelectedSector('erangel');
-            }}
-          >
-            <div className="flex items-center justify-between mb-1">
-              <span className="font-military text-sm text-white font-bold">SECTOR 03: ERANGEL</span>
-              <span className="text-[10px] font-mono text-[#FF2A6D]">100 ROYALE</span>
-            </div>
-            <span className="font-mono text-xs text-gray-400 block">90s Memory Overflow Elimination</span>
-          </div>
-        </div>
-
-        {/* Expanded Asymmetric Sector Dossier */}
-        <div className="active-dossier-box p-8 rounded-xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-          
-          {/* Dossier Map Elevation Preview */}
-          <div className="lg:col-span-5 h-64 rounded-lg overflow-hidden relative border border-white/15">
-            <img src={activeSector.img} alt={activeSector.name} className="w-full h-full object-cover dossier-map-img" />
-            <div className="absolute top-3 left-3 bg-black/85 px-3 py-1 border border-[#00F5D4]/40 text-[#00F5D4] font-military text-xs font-bold rounded">
-              {activeSector.id} // {activeSector.mode}
-            </div>
-            <div className="absolute bottom-3 left-3 bg-black/85 px-3 py-1 font-mono text-[10px] text-gray-300 rounded border border-white/10">
-              <MapPin size={11} className="inline mr-1 text-[#FF9E00]" />
-              {activeSector.elevation}
-            </div>
-          </div>
-
-          {/* Dossier Tactical Constraints & Launch Action */}
-          <div className="lg:col-span-7 flex flex-col gap-5">
-            <div>
-              <div className="inline-flex items-center gap-2 text-[10px] font-mono text-[#00F5D4] mb-1 uppercase tracking-widest">
-                <span>CLASSIFIED MISSION DOSSIER</span>
-              </div>
-              <h3 className="font-military text-3xl text-white font-bold">{activeSector.name}</h3>
-              <p className="font-mono text-xs text-gray-300 leading-relaxed mt-2">{activeSector.description}</p>
-            </div>
-
-            <div className="grid grid-cols-3 gap-4 font-mono text-xs">
-              <div className="p-3 bg-black/50 border border-white/10 rounded">
-                <span className="text-gray-500 block text-[10px]">TIME CONSTRAINT</span>
-                <strong className="text-white font-bold">{activeSector.duration}</strong>
-              </div>
-              <div className="p-3 bg-black/50 border border-white/10 rounded">
-                <span className="text-gray-500 block text-[10px]">DIFFICULTY TIER</span>
-                <strong className="text-[#FF9E00] font-bold">{activeSector.tier}</strong>
-              </div>
-              <div className="p-3 bg-black/50 border border-white/10 rounded">
-                <span className="text-gray-500 block text-[10px]">REWARD STAKE</span>
-                <strong className="text-[#00F5D4] font-bold">2,500 BP</strong>
-              </div>
-            </div>
-
-            <div className="pt-2">
-              <button
-                onClick={handleEnterLobby}
-                onMouseEnter={() => playBeep(1100, 0.04, 'triangle')}
-                className="btn-hazard-amber px-8 py-3.5 text-xs clip-angular-btn"
-              >
-                DEPLOY TO MAP ({activeSector.id})
-              </button>
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-      {/* --------------------------------------------------------------------------
-          SECTION 4: COMBAT OVERRIDE (Interactive Glitch HUD)
-          -------------------------------------------------------------------------- */}
-      <section className="relative z-10 max-w-7xl mx-auto px-6 py-16 w-full">
-        <div className="debuff-feature-box p-8 clip-dossier-panel rounded-xl grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-          
-          <div className="lg:col-span-5 flex flex-col items-center text-center relative">
-            <img src={airDropCrateImg} alt="Air Drop Crate" className="w-64 h-64 object-contain air-drop-crate-img mb-4 relative z-10" />
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#FF2A6D]/10 border border-[#FF2A6D]/40 text-[#FF2A6D] font-military text-xs tracking-widest clip-badge-sm mb-2 z-10">
-              <Box size={14} />
-              <span>COMBAT OVERRIDE MECHANICS</span>
-            </div>
-            <h3 className="font-military text-2xl text-white font-bold z-10">TACTICAL DEBUFFS &amp; PERKS</h3>
-            <p className="font-mono text-xs text-gray-400 max-w-sm mt-2 leading-relaxed z-10">
-              Click any debuff trigger below to test the screen visual override effect in real-time!
-            </p>
-          </div>
-
-          {/* Interactive Clickable Debuff Cards */}
-          <div className="lg:col-span-7 flex flex-col gap-6">
-            <div>
-              <span className="font-mono text-xs text-[#00F5D4] tracking-widest uppercase block mb-1">
-                INTERACTIVE OVERRIDE TESTING
-              </span>
-              <h3 className="font-military text-3xl text-white font-bold uppercase">
-                CLICK TO TRIGGER SCREEN GLITCH
-              </h3>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              
-              <div
-                className={`debuff-hud-card p-4 rounded clip-badge-sm ${activeDebuffTab === 'smoke' ? 'active' : ''}`}
-                onClick={() => triggerDebuffGlitch('smoke')}
-              >
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xl">💨</span>
-                  <span className="font-military text-sm text-white font-bold">SMOKE SCREEN</span>
-                </div>
-                <p className="font-mono text-xs text-gray-400">Blurs opponent syntax highlighting for 12 seconds.</p>
-              </div>
-
-              <div
-                className={`debuff-hud-card p-4 rounded clip-badge-sm ${activeDebuffTab === 'flashbang' ? 'active' : ''}`}
-                onClick={() => triggerDebuffGlitch('flashbang')}
-              >
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xl">💥</span>
-                  <span className="font-military text-sm text-white font-bold">FLASHBANG</span>
-                </div>
-                <p className="font-mono text-xs text-gray-400">Triggers blinding white flash burst on code compile.</p>
-              </div>
-
-              <div
-                className={`debuff-hud-card p-4 rounded clip-badge-sm ${activeDebuffTab === 'emp' ? 'active' : ''}`}
-                onClick={() => triggerDebuffGlitch('emp')}
-              >
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xl">⚡</span>
-                  <span className="font-military text-sm text-white font-bold">EMP SURGE</span>
-                </div>
-                <p className="font-mono text-xs text-gray-400">Inverts test case inputs &amp; disables auto-suggestions.</p>
-              </div>
-
-              <div
-                className={`debuff-hud-card p-4 rounded clip-badge-sm ${activeDebuffTab === 'airdrop' ? 'active' : ''}`}
-                onClick={() => triggerDebuffGlitch('smoke')}
-              >
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xl">📦</span>
-                  <span className="font-military text-sm text-white font-bold">AIR DROP CRATE</span>
-                </div>
-                <p className="font-mono text-xs text-gray-400">Solve 20-second riddle to restore +30 HP &amp; hints.</p>
-              </div>
-
-            </div>
-
-            <div className="bg-black/60 p-4 border border-white/10 rounded font-mono text-xs text-gray-300">
-              STATUS: <span className="text-[#00F5D4]">OVERRIDE SYSTEM READY</span> // Click debuff card above to preview combat penalty!
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-      {/* --------------------------------------------------------------------------
-          SECTION 5: LIVE TIER STANDINGS (Brutalist Esports Scoreboard)
-          -------------------------------------------------------------------------- */}
-      <section id="leaderboard-section" className="relative z-10 max-w-7xl mx-auto px-6 py-16 w-full">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#FF9E00]/10 border border-[#FF9E00]/30 text-[#FF9E00] font-military text-xs tracking-widest clip-badge-sm mb-3">
-              <Trophy size={13} />
-              <span>CONQUERORS HALL OF FAME</span>
-            </div>
-            <h2 className="font-military text-4xl text-white font-bold tracking-wider uppercase">
-              HIGH-IMPACT <span className="text-[#FF9E00]">STANDINGS</span>
-            </h2>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="relative">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-              <input
-                type="text"
-                placeholder="Search callsign or tech..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 pr-4 py-2 bg-black/60 border border-white/15 focus:border-[#00F5D4] text-xs font-mono text-white rounded outline-none w-48 sm:w-64"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="brutalist-table">
-            <thead>
-              <tr>
-                <th>RANK</th>
-                <th>CALLSIGN</th>
-                <th>TIER BADGE</th>
-                <th>WIN RATE</th>
-                <th>SOLVE RATIO</th>
-                <th>BP POINTS</th>
-                <th>RECENT BREACH</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredLeaderboard.map((player) => (
-                <tr key={player.rank} className="brutalist-row" onMouseEnter={() => playBeep(1000, 0.02, 'sine')}>
-                  <td>
-                    <span className="font-military text-sm text-[#FF9E00] font-bold pl-2">#{player.rank}</span>
-                  </td>
-                  <td>
-                    <div className="flex items-center gap-3">
-                      <span className="font-bold text-white tracking-wide">{player.handle}</span>
-                      <span className="text-[10px] font-mono px-1.5 py-0.5 bg-white/5 border border-white/10 text-gray-400 rounded">
-                        {player.lang}
-                      </span>
-                    </div>
-                  </td>
-                  <td>
-                    <span className="text-xs font-mono font-bold text-[#00F5D4]">{player.tier}</span>
-                  </td>
-                  <td className="font-mono text-sm text-green-400 font-bold">{player.winRate}</td>
-                  <td className="font-mono text-sm text-gray-300">{player.kdRatio}</td>
-                  <td className="font-mono text-sm text-[#FF9E00] font-bold">{player.bp}</td>
-                  <td className="font-mono text-xs text-gray-400">{player.breach}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      {/* --------------------------------------------------------------------------
-          SECTION 6: FINAL EXTRACTION CTA & KEYBOARD SHORTCUT
-          -------------------------------------------------------------------------- */}
-      <section className="relative z-10 max-w-7xl mx-auto px-6 py-12 w-full">
-        <div className="extraction-cta-banner p-10 flex flex-col items-center text-center gap-6">
-          
-          <div className="w-16 h-16 bg-[#FF9E00]/10 border border-[#FF9E00] rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,158,0,0.35)] z-10">
-            <Trophy size={32} className="text-[#FF9E00]" />
-          </div>
-
-          <h2 className="font-military text-3xl sm:text-5xl text-white font-bold tracking-wider uppercase max-w-3xl z-10">
-            READY TO CLAIM YOUR FIRST <span className="text-[#FF9E00]">CHICKEN DINNER?</span>
-          </h2>
-
-          <p className="font-mono text-xs sm:text-sm text-gray-300 max-w-xl leading-relaxed z-10">
-            Join 1,842+ competitive coders currently battling in real-time. Drop into the compiler matrix and test your algorithms under zone pressure.
-          </p>
-
-          <div className="flex flex-wrap items-center justify-center gap-4 pt-2 z-10">
-            <button onClick={() => handleAuthAction('github')} className="social-oauth-btn clip-angular-btn">
-              <span>AUTH WITH GITHUB</span>
-            </button>
+      {/* ================= SECTION G — JOIN THE ARENA / FINAL CTA ================= */}
+      <section className="cb-section">
+        <div className="cb-container">
+          <div className="cb-final-cta-card">
             
-            <button onClick={() => handleAuthAction('google')} className="social-oauth-btn clip-angular-btn">
-              <span>AUTH WITH GOOGLE</span>
-            </button>
+            <div className="cb-cta-left">
+              <span className="cb-section-eyebrow text-[#bef264]">JOIN THE ARENA</span>
+              <h2 className="cb-cta-heading">
+                READY TO MAKE<br />YOUR NEXT MOVE?
+              </h2>
+              <p className="cb-cta-sub">
+                Step into the arena. Challenge your limits. Let your code speak.
+              </p>
 
-            <button onClick={handleEnterLobby} className="btn-hazard-amber px-8 py-3.5 text-sm clip-angular-btn">
-              LAUNCH BATTLE LOBBY
-            </button>
+              <div className="cb-cta-btns">
+                <button onClick={handleEnterArena} className="cb-btn-primary">
+                  <span>Enter the Arena</span>
+                  <ArrowUpRight size={15} />
+                </button>
+                <button 
+                  onClick={() => {
+                    const el = document.getElementById('challenges');
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="cb-btn-secondary"
+                >
+                  <span>Explore Challenges</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Right: 3D Wireframe Glowing Isometric Cube */}
+            <div className="cb-cta-cube-visual">
+              <IsometricCubeCanvas />
+            </div>
+
           </div>
-
-          <div className="font-mono text-xs text-[#00F5D4] tracking-widest z-10 animate-pulse mt-2">
-            [PRESS ENTER TO LAUNCH BATTLE]
-          </div>
-
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="command-footer relative z-10 text-gray-500 font-mono text-xs">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 border-b border-white/10 pb-8">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-[#00F5D4]/10 border border-[#00F5D4] rounded flex items-center justify-center">
-              <Swords size={16} className="text-[#00F5D4]" />
+      {/* ================= SECTION H — FOOTER ================= */}
+      <footer className="cb-footer">
+        <div className="cb-container">
+          
+          <div className="cb-footer-top-grid">
+            
+            {/* Brand column */}
+            <div className="cb-footer-brand-col">
+              <div className="cb-brand mb-2">
+                <div className="cb-brand-icon">
+                  <Code2 size={18} className="text-[#bef264]" />
+                </div>
+                <span className="cb-brand-text">CodeBattle</span>
+              </div>
+              <p className="cb-footer-tagline">
+                Where code meets competition.
+              </p>
+
+              {/* Social icons */}
+              <div className="cb-social-icons-row">
+                <a href="https://discord.com" target="_blank" rel="noreferrer" className="cb-social-icon" aria-label="Discord">
+                  <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028z"/></svg>
+                </a>
+                <a href="https://github.com" target="_blank" rel="noreferrer" className="cb-social-icon" aria-label="GitHub">
+                  <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                </a>
+                <a href="https://youtube.com" target="_blank" rel="noreferrer" className="cb-social-icon" aria-label="YouTube">
+                  <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                </a>
+                <a href="https://twitter.com" target="_blank" rel="noreferrer" className="cb-social-icon" aria-label="X">
+                  <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                </a>
+              </div>
             </div>
-            <div>
-              <span className="font-military text-lg text-white font-bold tracking-widest block leading-none">
-                CODEBATTLE ROYALE
-              </span>
-              <span className="text-[10px] text-gray-400">COMMAND CLIENT V4.2 // COMPETITIVE COMPILER ENGINE</span>
+
+            {/* Col 1: Platform */}
+            <div className="cb-footer-col">
+              <span className="cb-footer-col-title">Platform</span>
+              <a href="#experience" className="cb-footer-link">Discover</a>
+              <Link to="/arena" className="cb-footer-link">Arena</Link>
+              <a href="#challenges" className="cb-footer-link">Challenges</a>
+              <a href="#leaderboard" className="cb-footer-link">Leaderboard</a>
             </div>
+
+            {/* Col 2: Community */}
+            <div className="cb-footer-col">
+              <span className="cb-footer-col-title">Community</span>
+              <Link to="/stream" className="cb-footer-link">Live Streams</Link>
+              <Link to="/clan" className="cb-footer-link">Clans</Link>
+              <Link to="/analytics" className="cb-footer-link">Players</Link>
+              <Link to="/theme" className="cb-footer-link">Events</Link>
+            </div>
+
+            {/* Col 3: Account */}
+            <div className="cb-footer-col">
+              <span className="cb-footer-col-title">Account</span>
+              <Link to="/login" className="cb-footer-link">Sign In</Link>
+              <Link to="/login" className="cb-footer-link">Sign Up</Link>
+              <a href="#" className="cb-footer-link">Privacy Policy</a>
+              <a href="#" className="cb-footer-link">Terms of Service</a>
+            </div>
+
           </div>
 
-          <div className="flex flex-wrap items-center gap-6 text-[11px]">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-ping" />
-              <span>SERVERS: <strong className="text-green-400">OPERATIONAL</strong></span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Shield size={13} className="text-[#00F5D4]" />
-              <span>VAC ANTI-CHEAT: <strong className="text-[#00F5D4]">ACTIVE</strong></span>
-            </div>
+          {/* Bottom copyright & ping */}
+          <div className="cb-footer-bottom-row">
+            <span className="cb-footer-copy">
+              © {new Date().getFullYear()} CodeBattle. Built by developers, for developers.
+            </span>
+            <span className="cb-footer-ping">
+              Ping: 12ms (Optimal)
+            </span>
           </div>
-        </div>
 
-        <div className="max-w-7xl mx-auto pt-6 flex flex-col sm:flex-row items-center justify-between text-[11px] text-gray-600 gap-4">
-          <span>&copy; 2026 CODEBATTLE ROYALE. ALL RIGHTS RESERVED.</span>
-          <div className="flex items-center gap-6">
-            <span className="hover:text-gray-400 cursor-pointer" onClick={() => setShowRulesModal(true)}>TERMS OF COMBAT</span>
-            <span className="hover:text-gray-400 cursor-pointer" onClick={() => setShowRulesModal(true)}>ANTI-CHEAT POLICY</span>
-            <span className="hover:text-gray-400 cursor-pointer" onClick={() => setShowRoyalePassModal(true)}>ROYALE PASS REWARDS</span>
-          </div>
         </div>
       </footer>
-
-      {/* Modals */}
-      {showRoyalePassModal && (
-        <div className="modal-overlay" onClick={() => setShowRoyalePassModal(false)}>
-          <div className="modal-container p-6 clip-dossier-panel rounded-xl" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-6">
-              <div className="flex items-center gap-2">
-                <Sparkles size={20} className="text-[#FF9E00]" />
-                <h3 className="font-military text-2xl text-white font-bold">SEASON 04 ROYALE PASS</h3>
-              </div>
-              <button onClick={() => setShowRoyalePassModal(false)} className="text-gray-400 hover:text-white text-xl font-bold cursor-pointer">✕</button>
-            </div>
-            <div className="font-mono text-xs text-gray-300">
-              <p>Tier 1: Cyberpunk Editor Theme (Unlocked)</p>
-              <p className="mt-2">Tier 50: Glacier M416 Syntax Highlighter</p>
-            </div>
-            <div className="mt-6 flex justify-end">
-              <button onClick={() => setShowRoyalePassModal(false)} className="btn-hazard-amber px-6 py-2.5 text-xs clip-angular-btn font-military">CLOSE PREVIEW</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showRulesModal && (
-        <div className="modal-overlay" onClick={() => setShowRulesModal(false)}>
-          <div className="modal-container p-6 clip-dossier-panel rounded-xl" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-6">
-              <div className="flex items-center gap-2">
-                <ShieldAlert size={20} className="text-[#00F5D4]" />
-                <h3 className="font-military text-2xl text-white font-bold">RULES OF COMBAT</h3>
-              </div>
-              <button onClick={() => setShowRulesModal(false)} className="text-gray-400 hover:text-white text-xl font-bold cursor-pointer">✕</button>
-            </div>
-            <div className="font-mono text-xs text-gray-300 space-y-3">
-              <p>1. Playzone shrinkage damages submission time buffer by -15% on failed test cases.</p>
-              <p>2. Air Drop crates grant +30 HP shield or thermal hints.</p>
-            </div>
-            <div className="mt-6 flex justify-end">
-              <button onClick={() => setShowRulesModal(false)} className="btn-glass-volt px-6 py-2.5 text-xs clip-angular-btn font-military">UNDERSTOOD</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showAuthModal && (
-        <div className="modal-overlay" onClick={() => setShowAuthModal(false)}>
-          <div className="modal-container p-8 clip-dossier-panel rounded-xl max-w-md relative" onClick={(e) => e.stopPropagation()}>
-            <button onClick={() => setShowAuthModal(false)} className="absolute top-4 right-4 text-gray-500 hover:text-white font-bold text-sm bg-transparent border-none cursor-pointer">✕</button>
-            <div className="flex flex-col items-center text-center">
-              <div className="w-12 h-12 rounded-full bg-[#00F5D4]/10 border border-[#00F5D4] text-[#00F5D4] flex items-center justify-center mb-3">
-                <Shield size={22} />
-              </div>
-              <h2 className="font-military text-2xl text-white tracking-widest font-black uppercase mb-1">AUTHENTICATE</h2>
-              <h2 className="font-military text-2xl text-[#00F5D4] tracking-widest font-black uppercase mb-4">CODER PROFILE</h2>
-              <div className="w-full flex flex-col gap-3 mb-4">
-                <button onClick={() => handleAuthAction('github')} className="social-oauth-btn clip-angular-btn w-full justify-between">
-                  <span className="font-military text-xs">CONTINUE WITH GITHUB</span>
-                  <ChevronRight size={16} className="text-[#00F5D4]" />
-                </button>
-                <button onClick={() => handleAuthAction('google')} className="social-oauth-btn clip-angular-btn w-full justify-between">
-                  <span className="font-military text-xs text-[#FF9E00]">CONTINUE WITH GOOGLE</span>
-                  <ChevronRight size={16} className="text-[#FF9E00]" />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {isEntering && (
-        <div className="modal-overlay">
-          <div className="sync-modal-container p-8 text-center max-w-md w-full relative">
-            <div className="flex flex-col items-center justify-center gap-5">
-              <RefreshCw className="animate-spin text-[#FF9E00] w-12 h-12 mb-2" />
-              <div>
-                <h3 className="font-military text-2xl text-white tracking-widest mb-1">CONNECTING TO LOBBY</h3>
-                <span className="font-mono text-[9px] text-[#00F5D4] tracking-[0.2em] font-bold">SECURE CHANNEL PORT_5005</span>
-              </div>
-              <div className="font-mono text-[10px] text-gray-400 text-left bg-black/70 p-4 border border-gray-800 w-full h-32 flex flex-col justify-start gap-1 overflow-hidden select-none rounded">
-                <p className="text-[#FF9E00] font-bold">&gt; AUTHENTICATING USER PROFILE GHOST_CODER...</p>
-                {syncStep >= 1 && <p className="text-gray-400">&gt; Securing compiler sockets... DONE</p>}
-                {syncStep >= 2 && <p className="text-gray-400">&gt; Allocating virtual matchmaking stack... DONE</p>}
-                {syncStep >= 3 && <p className="text-green-400 font-bold">&gt; ENTRANCE PERMITTED. LAUNCHING LOBBY...</p>}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
     </div>
   );

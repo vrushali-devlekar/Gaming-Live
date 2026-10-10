@@ -1,6 +1,20 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Users, Trophy, Shield, Swords, PlusCircle, UserPlus, Zap, Activity, Clock, CheckCircle2, AlertTriangle, ChevronRight } from 'lucide-react';
+import { 
+  Users, 
+  Trophy, 
+  Shield, 
+  Swords, 
+  PlusCircle, 
+  UserPlus, 
+  Zap, 
+  Activity, 
+  Clock, 
+  CheckCircle2, 
+  AlertTriangle, 
+  ChevronRight,
+  Sparkles
+} from 'lucide-react';
 import CommandHeader from '../../components/CommandHeader/CommandHeader';
 import SettingsModal from '../../components/SettingsModal/SettingsModal';
 import './Clan.css';
@@ -8,9 +22,10 @@ import './Clan.css';
 export default function Clan() {
   const navigate = useNavigate();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('squad');
 
   const squadTasks = [
-    { id: 1, name: 'FIREWALL BYPASS ROUTINE', assignee: 'GHOST_CODER', status: 'COMPILED', speed: '0.04ms', testCases: '10/10' },
+    { id: 1, name: 'FIREWALL BYPASS ROUTINE', assignee: 'GHOST_OPERATOR', status: 'COMPILED', speed: '0.04ms', testCases: '10/10' },
     { id: 2, name: 'BUFFER OVERFLOW SHIELD', assignee: 'NEON_VIPER', status: 'IN PROGRESS', speed: 'COMPILING...', testCases: '8/10' },
     { id: 3, name: 'DNS INFILTRATION EVASION', assignee: 'CYBER_ACE', status: 'READY', speed: '0.08ms', testCases: '10/10' },
     { id: 4, name: 'SSL SOCKETS HANDSHAKE', assignee: 'OPEN SQUAD SLOT', status: 'OPEN SLOT', speed: 'N/A', testCases: '0/10' }
@@ -24,7 +39,7 @@ export default function Clan() {
   ];
 
   return (
-    <div className="clan-page-container">
+    <div className="cyber-clan-viewport">
       {/* Top Command Bar */}
       <CommandHeader onOpenSettings={() => setIsSettingsOpen(true)} />
 
@@ -32,29 +47,28 @@ export default function Clan() {
       <main className="clan-main-content">
         
         {/* Banner / Operational Dossier Header */}
-        <section className="clan-hero-banner clip-tactical-card">
-          <div className="clan-hero-overlay"></div>
+        <section className="clan-hero-banner">
           <div className="clan-hero-body">
             <div className="clan-hero-title-group">
               <span className="clan-hero-badge">
-                <Shield size={12} className="text-[#F59E0B]" />
-                SQUAD COMMAND CENTER // ALGORITHM CLANS
+                <Shield size={13} className="text-lime" />
+                <span>SQUAD COMMAND CENTER // ALGORITHM CLANS</span>
               </span>
               <h1 className="clan-hero-title">TASK FORCE 141 // SQUAD OPS</h1>
               <p className="clan-hero-subtitle">
-                COOPERATIVE 4V4 HIGH-LATENCY CODE BREACH OPERATIONS & REGIONAL LEADERBOARDS
+                COOPERATIVE 4V4 HIGH-LATENCY CODE BREACH OPERATIONS & REGIONAL CLAN LEADERBOARDS
               </p>
             </div>
 
             <div className="clan-hero-stats">
               <div className="clan-stat-box">
                 <span className="clan-stat-label">CURRENT CLAN</span>
-                <span className="clan-stat-value text-amber-400">APEX_CODERS</span>
+                <span className="clan-stat-value text-lime">APEX_CODERS</span>
               </div>
               <div className="clan-stat-divider"></div>
               <div className="clan-stat-box">
                 <span className="clan-stat-label">SQUAD MMR</span>
-                <span className="clan-stat-value text-cyan-400">24,850</span>
+                <span className="clan-stat-value text-cyan">24,850</span>
               </div>
               <div className="clan-stat-divider"></div>
               <div className="clan-stat-box">
@@ -70,20 +84,20 @@ export default function Clan() {
           
           {/* LEFT: 4V4 ACTIVE SQUAD OPERATIONS (60%) */}
           <div className="clan-left-column">
-            <div className="tactical-card clip-tactical-card glass-tactical-card">
-              <div className="card-header">
-                <div className="card-header-title">
-                  <Swords size={16} className="text-[#F59E0B]" />
-                  <span>4V4 SQUAD BATTLES - ACTIVE OPERATIONAL MODULES</span>
+            <div className="clan-card">
+              <div className="clan-card-header">
+                <div className="flex items-center gap-2">
+                  <Swords size={16} className="text-lime" />
+                  <span className="card-header-title">4V4 SQUAD BATTLES - ACTIVE OPERATIONAL MODULES</span>
                 </div>
                 <span className="status-live-chip">
-                  <Activity size={10} className="animate-pulse text-emerald-400" />
-                  3/4 MODULES SYNCED
+                  <Activity size={12} className="animate-pulse text-lime" />
+                  <span>3/4 MODULES SYNCED</span>
                 </span>
               </div>
 
               <div className="squad-mission-brief">
-                <div className="brief-title font-mono text-cyan-400">OPERATION: CYBER-FORTRESS ARRAY</div>
+                <div className="brief-title">OPERATION: CYBER-FORTRESS ARRAY</div>
                 <p className="brief-desc">
                   Assemble your squad to construct the Secure Perimeter firewall array. Each member compiles one sub-system routine. Unlocking all modules triggers full squad integration and unlocks +500 MMR bonus!
                 </p>
@@ -94,17 +108,17 @@ export default function Clan() {
                 {squadTasks.map((task) => (
                   <div 
                     key={task.id}
-                    className={`task-card clip-tactical-badge ${
+                    className={`task-card ${
                       task.status === 'COMPILED' ? 'task-compiled' :
                       task.status === 'OPEN SLOT' ? 'task-open' : 'task-in-progress'
                     }`}
                   >
                     <div className="task-left">
-                      <div className="task-id font-mono">MODULE 0{task.id}</div>
+                      <div className="task-id">MODULE 0{task.id}</div>
                       <div className="task-name">{task.name}</div>
                       <div className="task-meta">
                         <span>OPERATOR: </span>
-                        <span className={task.status === 'OPEN SLOT' ? 'text-amber-400' : 'text-cyan-400 font-bold'}>
+                        <span className={task.status === 'OPEN SLOT' ? 'text-amber' : 'text-lime font-bold'}>
                           {task.assignee}
                         </span>
                         <span className="meta-dot">•</span>
@@ -115,7 +129,7 @@ export default function Clan() {
                     <div className="task-right">
                       {task.status === 'OPEN SLOT' ? (
                         <button 
-                          className="clip-tactical-btn invite-btn"
+                          className="btn-invite-slot"
                           onClick={() => alert("INVITING PLAYERS TO SQUAD...")}
                         >
                           <UserPlus size={12} />
@@ -123,10 +137,10 @@ export default function Clan() {
                         </button>
                       ) : (
                         <div className="task-status-badge">
-                          <span className={`status-text ${task.status === 'COMPILED' ? 'text-cyan-400' : 'text-amber-400'}`}>
+                          <span className={`status-text ${task.status === 'COMPILED' ? 'text-lime' : 'text-amber'}`}>
                             {task.status}
                           </span>
-                          <span className="task-speed font-mono">{task.speed}</span>
+                          <span className="task-speed">{task.speed}</span>
                         </div>
                       )}
                     </div>
@@ -136,9 +150,9 @@ export default function Clan() {
 
               {/* Squad Progress Bar */}
               <div className="squad-progress-container">
-                <div className="progress-label-row font-mono">
+                <div className="progress-label-row">
                   <span>SQUAD SYNCHRONIZATION</span>
-                  <span className="text-cyan-400 font-bold">75%</span>
+                  <span className="text-lime font-bold">75%</span>
                 </div>
                 <div className="progress-track">
                   <div className="progress-fill" style={{ width: '75%' }}></div>
@@ -146,11 +160,14 @@ export default function Clan() {
               </div>
 
               <div className="squad-actions">
-                <button className="clip-tactical-btn primary-action-btn flex-1">
+                <button 
+                  onClick={() => navigate('/arena')}
+                  className="btn-cyber-primary flex-1"
+                >
                   <Zap size={14} />
                   <span>INITIATE SQUAD SYNCHRONIZATION</span>
                 </button>
-                <button className="clip-tactical-btn secondary-action-btn">
+                <button className="btn-cyber-secondary">
                   <Clock size={14} />
                   <span>REQUEST AIRDROP HINT</span>
                 </button>
@@ -162,44 +179,46 @@ export default function Clan() {
           <div className="clan-right-column">
             
             {/* Regional Clan Standings */}
-            <div className="tactical-card clip-tactical-card glass-tactical-card">
-              <div className="card-header">
-                <div className="card-header-title">
-                  <Trophy size={16} className="text-[#F59E0B]" />
-                  <span>GLOBAL REGIONAL CLAN STANDINGS</span>
+            <div className="clan-card">
+              <div className="clan-card-header">
+                <div className="flex items-center gap-2">
+                  <Trophy size={16} className="text-amber" />
+                  <span className="card-header-title">REGIONAL CLAN STANDINGS</span>
                 </div>
               </div>
 
-              <div className="leaderboard-list">
+              <div className="clan-leaderboard-list">
                 {clanLeaderboard.map((clan) => (
-                  <div key={clan.rank} className="leaderboard-item clip-tactical-badge">
-                    <div className="rank-badge font-mono">
+                  <div key={clan.rank} className="clan-leaderboard-row">
+                    <div className="rank-badge-box">
                       #{clan.rank < 10 ? `0${clan.rank}` : clan.rank}
                     </div>
                     
                     <div className="clan-info">
-                      <div className="clan-name-row">
+                      <div className="flex items-center gap-2">
                         <span className="clan-name">{clan.name}</span>
-                        <span className="clan-status-tag">{clan.status}</span>
+                        <span className="clan-status-pill">{clan.status}</span>
                       </div>
-                      <div className="clan-details font-mono">
+                      <div className="clan-sub-details">
                         <span>LEADER: {clan.leader}</span>
-                        <span className="meta-dot">•</span>
+                        <span>•</span>
                         <span>{clan.size}</span>
                       </div>
                     </div>
 
-                    <div className="clan-rating font-mono">
+                    <div className="clan-rating-col">
                       <span className="rating-num">{clan.rating.toLocaleString()}</span>
-                      <span className="rating-label">PTS</span>
+                      <span className="rating-lbl">PTS</span>
                     </div>
                   </div>
                 ))}
               </div>
 
-              {/* Clan Actions */}
               <div className="clan-card-footer">
-                <button className="clip-tactical-btn outline-btn full-width" onClick={() => alert("INITIALIZING NEW CLAN OPERATIONS...")}>
+                <button 
+                  className="btn-cyber-secondary w-full"
+                  onClick={() => alert("INITIALIZING NEW CLAN OPERATIONS...")}
+                >
                   <PlusCircle size={14} />
                   <span>CREATE NEW ALGORITHM CLAN</span>
                 </button>
@@ -207,28 +226,28 @@ export default function Clan() {
             </div>
 
             {/* Upcoming Clan War Widget */}
-            <div className="tactical-card clip-tactical-card glass-tactical-card clan-war-card">
-              <div className="card-header">
-                <div className="card-header-title">
-                  <Shield size={16} className="text-rose-500" />
-                  <span>NEXT SECTOR CLAN WAR</span>
+            <div className="clan-card clan-war-card">
+              <div className="clan-card-header">
+                <div className="flex items-center gap-2">
+                  <Shield size={16} className="text-danger" />
+                  <span className="card-header-title">NEXT SECTOR CLAN WAR</span>
                 </div>
-                <span className="text-xs font-mono text-rose-400 animate-pulse">02H 14M 35S</span>
+                <span className="text-xs font-mono text-danger animate-pulse font-bold">02H 14M 35S</span>
               </div>
 
-              <div className="clan-war-vs font-mono">
+              <div className="clan-war-vs">
                 <div className="vs-team">
-                  <span className="text-cyan-400 font-bold">APEX_CODERS</span>
-                  <span className="text-[10px] text-gray-400">YOUR CLAN</span>
+                  <span className="team-name text-lime">APEX_CODERS</span>
+                  <span className="team-sub">YOUR CLAN</span>
                 </div>
                 <div className="vs-badge">VS</div>
                 <div className="vs-team text-right">
-                  <span className="text-rose-400 font-bold">KRONOS_SYNDICATE</span>
-                  <span className="text-[10px] text-gray-400">RANK #02</span>
+                  <span className="team-name text-danger">KRONOS_SYNDICATE</span>
+                  <span className="team-sub">RANK #02</span>
                 </div>
               </div>
 
-              <div className="clan-war-meta font-mono text-gray-400 text-xs mt-2">
+              <div className="clan-war-meta">
                 <span>SECTOR: </span>
                 <span className="text-white">NEO-SHIBUYA MATRIX (GRAPH THEORY)</span>
               </div>
@@ -240,7 +259,6 @@ export default function Clan() {
 
       </main>
 
-      {/* Settings Modal */}
       <SettingsModal 
         isOpen={isSettingsOpen} 
         onClose={() => setIsSettingsOpen(false)} 
@@ -248,4 +266,3 @@ export default function Clan() {
     </div>
   );
 }
-

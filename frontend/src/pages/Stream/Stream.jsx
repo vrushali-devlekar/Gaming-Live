@@ -3,14 +3,14 @@ import VideoPlayer from '../../components/VideoPlayer';
 import LiveChat from '../../components/LiveChat';
 import CommandHeader from '../../components/CommandHeader/CommandHeader';
 import SettingsModal from '../../components/SettingsModal/SettingsModal';
-import { Flame, Radio, Eye } from 'lucide-react';
+import { Radio, Eye, Sparkles, Activity } from 'lucide-react';
 import './Stream.css';
 
 export default function Stream() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   return (
-    <div className="stream-studio-viewport">
+    <div className="cyber-stream-viewport">
       {/* Shared Command Header */}
       <CommandHeader onOpenSettings={() => setIsSettingsOpen(true)} />
 
@@ -18,28 +18,33 @@ export default function Stream() {
       <main className="stream-main-grid">
         
         {/* Left 75%: Live Match Code Execution View */}
-        <section className="flex flex-col gap-4 min-h-0 overflow-y-auto custom-scrollbar pr-1">
+        <section className="stream-video-col custom-scrollbar">
           
-          <div className="glass-panel-graphite p-3 px-5 flex items-center justify-between clip-tactical-card">
+          <div className="stream-broadcast-header">
             <div className="flex items-center gap-3">
-              <Radio size={16} className="text-[#FF3366] animate-pulse" />
-              <span className="font-header text-sm font-bold text-white tracking-[0.15em]">
-                ESPORTS BROADCAST STUDIO // LIVE MATCH ARENA
+              <span className="live-pill">
+                <Radio size={14} className="animate-pulse" />
+                <span>LIVE ESPORTS FEED</span>
+              </span>
+              <span className="font-header text-sm font-bold text-white tracking-wider">
+                ESPORTS BROADCAST STUDIO // MATCH ARENA
               </span>
             </div>
 
-            <div className="flex items-center gap-2 font-code text-[10px] text-[#06B6D4]">
-              <Eye size={13} />
-              <span>SPECTATOR MODE (1,842 VIEWERS)</span>
+            <div className="flex items-center gap-2 font-mono text-xs text-lime">
+              <Eye size={14} />
+              <span>1,842 SPECTATORS ONLINE</span>
             </div>
           </div>
 
           {/* Primary Stream Video Player */}
-          <VideoPlayer />
+          <div className="video-player-wrapper">
+            <VideoPlayer />
+          </div>
         </section>
 
         {/* Right 25%: Tactical Kill Feed & Squad Comms */}
-        <section className="flex flex-col gap-4 min-h-0 h-full">
+        <section className="stream-chat-col">
           <LiveChat />
         </section>
 

@@ -1,110 +1,216 @@
-import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { Settings, Shield } from 'lucide-react';
+import React, { useState } from 'react';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { 
+  Swords, 
+  LayoutDashboard, 
+  DoorOpen, 
+  Radio, 
+  BarChart3, 
+  Package, 
+  Shield, 
+  Map, 
+  Settings, 
+  LogOut, 
+  Menu, 
+  X,
+  Zap,
+  ChevronDown
+} from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import './CommandHeader.css';
 
 export default function CommandHeader({ onOpenSettings }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
   const currentPath = location.pathname;
 
-  // Conqueror Crest Badge SVG Component
-  const ConquerorCrest = () => (
-    <svg className="w-5 h-5 filter drop-shadow-[0_0_8px_rgba(245,158,11,0.7)]" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M50 5 L85 25 L85 75 L50 95 L15 75 L15 25 Z" fill="#080B11" stroke="#F59E0B" strokeWidth="5" />
-      <polygon points="50,22 58,40 78,40 62,52 68,72 50,60 32,72 38,52 22,40 42,40" fill="#F59E0B" />
-    </svg>
-  );
+  const navItems = [
+    { path: '/arena', label: 'Arena', icon: Swords, highlight: true },
+    { path: '/lobby', label: 'Dashboard', icon: LayoutDashboard },
+    { path: '/rooms', label: 'Custom Rooms', icon: DoorOpen },
+    { path: '/stream', label: 'Live Stream', icon: Radio },
+    { path: '/analytics', label: 'Telemetry', icon: BarChart3 },
+    { path: '/inventory', label: 'Locker', icon: Package },
+    { path: '/clan', label: 'Clans', icon: Shield },
+    { path: '/theme', label: 'Sectors', icon: Map },
+  ];
+
+  const handleLogout = async () => {
+    if (logout) await logout();
+    navigate('/login');
+  };
+
+  const username = user?.username || 'GHOST_OPERATOR';
+  const rank = user?.rank || 'Conqueror Tier';
+  const mmr = user?.stats?.mmr || user?.mmr || '3,850';
 
   return (
-    <header className="command-header-navbar">
-      {/* Left: User Callsign & Rank Crest */}
-      <div className="header-callsign-group">
-        <div className="callsign-title-col">
-          <span className="callsign-main-title">
+    <header className="editorial-app-header">
+      <div className="header-inner">
+        {/* Left: Brand Identity */}
+        <div className="header-left">
+          <Link to="/" className="brand-badge-container">
+            <span className="header-brand-dot"></span>
+            <span className="header-brand-text">
+              CODEBATTLE<span className="text-lime">.</span>
+            </span>
+          </Link>
+
+          <div className="operator-quick-pill desktop-only">
             <span className="status-beacon-green"></span>
-            COMMANDER // {user?.username?.toUpperCase() || "GHOST_CODER"}
-          </span>
-          <span className="callsign-subtitle-tag">STATUS: ONLINE // WAR-ROOM</span>
+            <span className="operator-callsign">{username}</span>
+            <span className="operator-tier-badge">{rank}</span>
+          </div>
         </div>
 
-        <div className="conqueror-crest-badge clip-tactical-badge">
-          <ConquerorCrest />
-          <span className="crest-text-title">{user?.rank || "CONQUEROR TIER"}</span>
+        {/* Center: Desktop Navigation */}
+        <nav className="header-nav desktop-only">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = currentPath === item.path;
+            return (
+              <button
+                key={item.path}
+                onClick={() => navigate(item.path)}
+                className={`nav-link-btn ${isActive ? 'active' : ''} ${item.highlight ? 'highlight-arena' : ''}`}
+              >
+                <Icon size={14} />
+                <span>{item.label}</span>
+                {item.highlight && <span className="live-dot" />}
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* Right: Telemetry & User Menu */}
+        <div className="header-right">
+          <div className="telemetry-pill desktop-only">
+            <Zap size={13} className="text-lime" />
+            <span className="telemetry-label">MMR</span>
+            <span className="telemetry-val">{mmr}</span>
+          </div>
+
+          <button 
+            onClick={onOpenSettings}
+            className="action-icon-btn"
+            title="Settings"
+          >
+            <Settings size={16} />
+          </button>
+
+          {/* User Profile Pill / Logout */}
+          <div className="relative">
+            <button
+              onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+              className="user-profile-btn"
+            >
+              <img 
+                src={user?.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${username}`}
+                alt="Avatar"
+                className="user-avatar-tiny"
+              />
+              <span className="user-name-label desktop-only">{username}</span>
+              <ChevronDown size={13} className="text-muted desktop-only" />
+            </button>
+
+            {userDropdownOpen && (
+              <div className="user-dropdown-menu">
+                <div className="dropdown-header">
+                  <span className="dropdown-username">{username}</span>
+                  <span className="dropdown-rank">{rank}</span>
+                </div>
+                <div className="dropdown-divider" />
+                <button onClick={() => { setUserDropdownOpen(false); navigate('/analytics'); }} className="dropdown-item">
+                  <BarChart3 size={14} />
+                  <span>Player Telemetry</span>
+                </button>
+                <button onClick={() => { setUserDropdownOpen(false); navigate('/inventory'); }} className="dropdown-item">
+                  <Package size={14} />
+                  <span>3D Locker & Skins</span>
+                </button>
+                <button onClick={() => { setUserDropdownOpen(false); if (onOpenSettings) onOpenSettings(); }} className="dropdown-item">
+                  <Settings size={14} />
+                  <span>Settings</span>
+                </button>
+                <div className="dropdown-divider" />
+                <button onClick={handleLogout} className="dropdown-item text-danger">
+                  <LogOut size={14} />
+                  <span>Disconnect Session</span>
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Mobile Menu Toggle Button */}
+          <button 
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="mobile-menu-toggle mobile-only"
+            aria-label="Toggle Navigation Menu"
+          >
+            {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
+          </button>
         </div>
       </div>
 
-      {/* Center: Telemetry Metrics */}
-      <div className="header-telemetry-metrics">
-        <div className="telemetry-chip-box">
-          <span className="chip-lbl-tag">SEASON MMR</span>
-          <span className="chip-val-text amber">3,850 MMR</span>
+      {/* Mobile Menu Drawer */}
+      {mobileMenuOpen && (
+        <div className="mobile-drawer mobile-only">
+          <div className="mobile-drawer-inner">
+            <div className="mobile-operator-info">
+              <img 
+                src={user?.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${username}`}
+                alt="Avatar"
+                className="w-8 h-8 rounded-full border border-lime"
+              />
+              <div>
+                <span className="font-display text-sm text-white font-bold block">{username}</span>
+                <span className="font-mono text-[11px] text-lime">{rank} • {mmr} MMR</span>
+              </div>
+            </div>
+
+            <div className="mobile-nav-list">
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = currentPath === item.path;
+                return (
+                  <button
+                    key={item.path}
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      navigate(item.path);
+                    }}
+                    className={`mobile-nav-item ${isActive ? 'active' : ''}`}
+                  >
+                    <Icon size={16} />
+                    <span>{item.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="mobile-drawer-footer">
+              <button 
+                onClick={() => { setMobileMenuOpen(false); if (onOpenSettings) onOpenSettings(); }}
+                className="mobile-footer-btn"
+              >
+                <Settings size={15} />
+                <span>Settings</span>
+              </button>
+              <button 
+                onClick={() => { setMobileMenuOpen(false); handleLogout(); }}
+                className="mobile-footer-btn danger"
+              >
+                <LogOut size={15} />
+                <span>Disconnect</span>
+              </button>
+            </div>
+          </div>
         </div>
-        <div className="telemetry-chip-box">
-          <span className="chip-lbl-tag">ROOM CARDS</span>
-          <span className="chip-val-text cyan">14 CARDS</span>
-        </div>
-        <div className="telemetry-chip-box">
-          <span className="chip-lbl-tag">GLOBAL RANK</span>
-          <span className="chip-val-text">#42 WORLD</span>
-        </div>
-      </div>
-
-      {/* Right: Direct Navigation Tabs & Settings */}
-      <div className="header-navigation-tabs">
-        <button 
-          onClick={() => navigate('/lobby')} 
-          className={`nav-route-tab-btn clip-tactical-badge ${currentPath === '/lobby' ? 'active-tab' : ''}`}
-        >
-          COMMAND DECK
-        </button>
-
-        <button 
-          onClick={() => navigate('/arena')} 
-          className={`nav-route-tab-btn clip-tactical-badge ${currentPath === '/arena' ? 'active-tab' : ''}`}
-        >
-          DUEL ARENA
-        </button>
-
-        <button 
-          onClick={() => navigate('/rooms')} 
-          className={`nav-route-tab-btn clip-tactical-badge ${currentPath === '/rooms' ? 'active-tab' : ''}`}
-        >
-          CUSTOM ROOMS
-        </button>
-
-        <button 
-          onClick={() => navigate('/theme')} 
-          className={`nav-route-tab-btn clip-tactical-badge ${currentPath === '/theme' ? 'active-tab' : ''}`}
-        >
-          SECTOR MAPS
-        </button>
-
-        <button 
-          onClick={() => navigate('/inventory')} 
-          className={`nav-route-tab-btn clip-tactical-badge ${currentPath === '/inventory' ? 'active-tab' : ''}`}
-        >
-          LOCKER
-        </button>
-
-        <button 
-          onClick={() => navigate('/clan')} 
-          className={`nav-route-tab-btn clip-tactical-badge ${currentPath === '/clan' ? 'active-tab' : ''}`}
-        >
-          CLAN
-        </button>
-
-        <button 
-          onClick={onOpenSettings}
-          className="settings-btn-icon clip-tactical-badge"
-          title="Settings"
-        >
-          <Settings size={16} />
-        </button>
-      </div>
+      )}
     </header>
   );
 }

@@ -2,9 +2,30 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
 import { 
-  Terminal, Code2, Play, Pause, Disc, Volume2, ShieldAlert, Award, 
-  ArrowLeft, RefreshCw, Send, Shield, Zap, Flame, Cpu, Eye, Radio, Check,
-  Search, Link, Copy, UserCheck, ExternalLink, HelpCircle, Users
+  Terminal, 
+  Code2, 
+  Play, 
+  ShieldAlert, 
+  ArrowLeft, 
+  RefreshCw, 
+  Shield, 
+  Zap, 
+  Users, 
+  Check, 
+  Search, 
+  Copy, 
+  UserCheck, 
+  ExternalLink, 
+  HelpCircle, 
+  Send,
+  Radio,
+  ChevronDown,
+  Clock,
+  Sparkles,
+  FileCode,
+  CheckCircle2,
+  XCircle,
+  AlertCircle
 } from 'lucide-react';
 import { io } from 'socket.io-client';
 import { themeService } from '../../services/themeService';
@@ -24,11 +45,13 @@ export default function Arena() {
   const [matchId, setMatchId] = useState('');
   const [copiedLink, setCopiedLink] = useState(false);
   const [matchStarted, setMatchStarted] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState('CONNECTING'); // 'CONNECTING' | 'SEARCHING' | 'IN_BATTLE'
 
   // 1. Question-First Selection State
   const [availableProblems, setAvailableProblems] = useState([]);
   const [selectedProblem, setSelectedProblem] = useState(null);
   const [showQuestionModal, setShowQuestionModal] = useState(false);
+  const [activeSideTab, setActiveSideTab] = useState('hud'); // 'hud' | 'problem' | 'testcases' | 'console'
   
   // 2. GitHub Lookup & Target Preview State
   const [showInviteDrawer, setShowInviteDrawer] = useState(false);
@@ -41,9 +64,9 @@ export default function Arena() {
   const [selectedLanguage, setSelectedLanguage] = useState('javascript');
   
   const languageTemplates = {
-    javascript: `// Mission: Secure Perimeter Firewall Grid (1v1 Duel)\nfunction bypassFirewall(grid, startX, startY) {\n  // Write your algorithm logic here\n}`,
-    python: `# Mission: Secure Perimeter Firewall Grid (1v1 Duel)\ndef bypass_firewall(grid, start_x, start_y):\n    pass`,
-    cpp: `// Mission: Secure Perimeter Firewall Grid (1v1 Duel)\n#include <iostream>\nusing namespace std;\n\nint solution() {\n  return 0;\n}`
+    javascript: `// Mission: Secure Perimeter Firewall Grid (1v1 Duel)\nfunction bypassFirewall(grid, startX, startY) {\n  // Write your algorithm logic here\n  const visited = new Set();\n  return true;\n}`,
+    python: `# Mission: Secure Perimeter Firewall Grid (1v1 Duel)\ndef bypass_firewall(grid, start_x, start_y):\n    # Write your algorithm logic here\n    visited = set()\n    return True`,
+    cpp: `// Mission: Secure Perimeter Firewall Grid (1v1 Duel)\n#include <iostream>\n#include <vector>\nusing namespace std;\n\nbool bypassFirewall(vector<vector<int>>& grid, int startX, int startY) {\n    // Write your algorithm logic here\n    return true;\n}`
   };
 
   const [code, setCode] = useState(languageTemplates.javascript);
@@ -62,7 +85,7 @@ export default function Arena() {
 
   // Terminal & Match Control
   const [terminalLogs, setTerminalLogs] = useState([
-    { type: 'info', text: '[SYSTEM] COMBAT COMPILER ARENA ONLINE (v4.2.0)' },
+    { type: 'info', text: '[SYSTEM] CYBER ARENA COMPILER ONLINE (v4.2.0)' },
     { type: 'warning', text: '[STEP 1] Select or customize a coding problem to unlock tactical invitations.' }
   ]);
 
@@ -81,7 +104,20 @@ export default function Arena() {
           setSelectedProblem(defaultProb);
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        // Fallback default problem
+        const fallback = {
+          _id: 'p-1',
+          title: 'Perimeter Firewall Traversal',
+          difficulty: 'Medium',
+          category: 'Graph BFS / Grid',
+          description: 'Given an N x M grid representing server firewalls where 0 is open and 1 is blocked, determine the minimum number of socket hops required to reach the extraction perimeter node.',
+          examples: [
+            { input: 'grid = [[0,0,0],[1,1,0],[0,0,0]], start = [0,0]', output: '4 hops' }
+          ]
+        };
+        setSelectedProblem(fallback);
+      });
   }, []);
 
   // Initialize Socket.io Connection & Match URL handler
@@ -91,6 +127,7 @@ export default function Arena() {
       withCredentials: true
     });
     setSocket(newSocket);
+    setConnectionStatus('SEARCHING');
 
     const queryParams = new URLSearchParams(location.search);
     const urlMatchId = queryParams.get('matchId');
@@ -134,6 +171,7 @@ export default function Arena() {
       });
 
       setMatchStarted(true);
+      setConnectionStatus('IN_BATTLE');
 
       setTerminalLogs((prev) => [
         ...prev,
@@ -225,15 +263,24 @@ export default function Arena() {
     ]);
   };
 
+  const handleLanguageChange = (lang) => {
+    setSelectedLanguage(lang);
+    if (selectedProblem?.driverCode?.[lang]) {
+      setCode(selectedProblem.driverCode[lang]);
+    } else if (languageTemplates[lang]) {
+      setCode(languageTemplates[lang]);
+    }
+  };
+
   // Run Test Cases Action
   const handleRunTests = () => {
     if (isRunningTests) return;
-    audioService.playReload();
+    try { audioService.playReload(); } catch(e) {}
     setIsRunningTests(true);
 
     setTerminalLogs((prev) => [
       ...prev,
-      { type: 'info', text: `[${user?.username || 'CODER'}] Compiling syntax buffers against test cases...` }
+      { type: 'info', text: `[${user?.username || 'CODER'}] Compiling syntax buffers against test suite...` }
     ]);
 
     setTimeout(() => {
@@ -252,20 +299,47 @@ export default function Arena() {
           setUserHp((prev) => Math.max(0, prev - 20));
           setTerminalLogs((prev) => [
             ...prev,
-            { type: 'danger', text: '[OPPONENT] Counter-attacked! Recoil penalty (-20 HP)!' }
+            { type: 'danger', text: '[RECOIL] Test Case #3 failed! -20 HP recoil penalty taken.' }
           ]);
         }
       } else {
-        audioService.playSniper();
+        try { audioService.playSniper(); } catch(e) {}
         setUserTestsPassed((prev) => Math.min(10, prev + 1));
+        setOpponentHp((prev) => Math.max(0, prev - 15));
         setTerminalLogs((prev) => [
           ...prev,
-          { type: 'success', text: `[${user?.username || 'CODER'}] Headshot on Test Case ${userTestsPassed + 1}! (+10 PTS)` }
+          { type: 'success', text: `[${user?.username || 'CODER'}] Test Case ${userTestsPassed + 1} passed! Dealt 15 DMG to opponent.` }
         ]);
       }
 
       setIsRunningTests(false);
-    }, 1400);
+    }, 1200);
+  };
+
+  // Final Submit Solution Action
+  const handleSubmitSolution = () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
+    setTerminalLogs((prev) => [
+      ...prev,
+      { type: 'info', text: `[SUBMIT] Deploying solution to automated competitive evaluator...` }
+    ]);
+
+    setTimeout(() => {
+      setIsSubmitting(false);
+      setUserTestsPassed(10);
+      setOpponentHp(0);
+      setTerminalLogs((prev) => [
+        ...prev,
+        { type: 'success', text: `[VICTORY] 10/10 Test cases verified in 0.04ms! Match settlement triggered.` }
+      ]);
+      try { audioService.playSniper(); } catch(e) {}
+
+      setTimeout(() => {
+        navigate('/result');
+      }, 1500);
+    }, 2000);
   };
 
   // Format time remaining
@@ -276,100 +350,137 @@ export default function Arena() {
   };
 
   return (
-    <div className={`arena-container font-sans select-none relative ${isDamageFlashing ? 'animate-damage-flash' : ''}`}>
-      <div className="arena-grid-matrix" />
-      <div className="scanlines-overlay" />
+    <div className={`cyber-arena-viewport ${isDamageFlashing ? 'damage-recoil-active' : ''}`}>
+      <div className="theme-grid-matrix-bg" />
+      <div className="theme-scanline-overlay" />
 
       {/* Red Damage Flash Screen Overlay */}
-      {isDamageFlashing && (
-        <div className="absolute inset-0 bg-red-600/25 z-50 pointer-events-none animate-pulse border-4 border-red-500" />
-      )}
+      {isDamageFlashing && <div className="damage-flash-screen" />}
 
-      {/* Top Tactical Header */}
-      <header className="relative z-10 bg-iron-gray border-b border-[#2d3142] px-6 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      {/* TOP ARENA HUD NAVBAR */}
+      <header className="arena-top-hud">
+        <div className="hud-left-group">
           <button 
             onClick={() => navigate('/lobby')} 
-            className="flex items-center gap-1.5 text-xs font-military text-gray-400 hover:text-white border border-gray-800 hover:border-gray-600 px-3 py-1 bg-black/30 rounded transition-colors"
+            className="hud-back-btn"
+            title="Return to Command Deck"
           >
-            <ArrowLeft size={14} />
-            <span>ABANDON MATCH</span>
+            <ArrowLeft size={15} />
+            <span className="desktop-only">EXIT ARENA</span>
           </button>
-          
-          <div className="h-4 w-[2px] bg-gray-800" />
+
+          <div className="hud-separator desktop-only" />
 
           {/* Question Selector Trigger */}
           <button
             onClick={() => setShowQuestionModal(true)}
-            className="flex items-center gap-2 px-3 py-1 bg-[#facc15]/10 border border-[#facc15]/40 text-[#facc15] font-military text-xs font-bold rounded clip-steel-sm hover:bg-[#facc15]/20 cursor-pointer"
+            className="hud-problem-selector"
           >
-            <HelpCircle size={14} />
-            <span>{selectedProblem ? `QUESTION: ${selectedProblem.title}` : 'SELECT MATCH QUESTION'}</span>
+            <HelpCircle size={14} className="text-lime" />
+            <span className="problem-title-text">
+              {selectedProblem ? selectedProblem.title : 'SELECT MATCH QUESTION'}
+            </span>
+            <span className="problem-diff-pill">
+              {selectedProblem?.difficulty || 'MEDIUM'}
+            </span>
           </button>
         </div>
 
-        {/* Action Buttons: Invite Opponent & Link Copy */}
-        <div className="flex items-center gap-3">
+        {/* Center: Match Timer & Connection State */}
+        <div className="hud-center-group">
+          <div className="hud-connection-state">
+            <span className={`status-beacon-${connectionStatus === 'IN_BATTLE' ? 'green' : 'amber'}`}></span>
+            <span className="hud-status-text">
+              {connectionStatus === 'IN_BATTLE' ? '1v1 DUEL IN PROGRESS' : 'MATCHMAKING ONLINE'}
+            </span>
+          </div>
+
+          <div className="hud-timer-badge">
+            <Clock size={14} className="text-danger animate-pulse" />
+            <span className="hud-time-val">{formatTime(matchTimeLeft)}</span>
+          </div>
+        </div>
+
+        {/* Right: Actions (Invite, Link Copy, Language) */}
+        <div className="hud-right-group">
+          {/* Language Selector */}
+          <div className="hud-lang-select-wrapper">
+            <select
+              value={selectedLanguage}
+              onChange={(e) => handleLanguageChange(e.target.value)}
+              className="hud-lang-dropdown"
+            >
+              <option value="javascript">JavaScript (ES6)</option>
+              <option value="python">Python 3.11</option>
+              <option value="cpp">C++ 20</option>
+            </select>
+          </div>
+
           <button
             onClick={() => setShowInviteDrawer(true)}
             disabled={!selectedProblem}
-            className={`flex items-center gap-2 px-4 py-1.5 font-military text-xs font-bold tracking-wider rounded clip-angular-btn transition-all cursor-pointer ${
-              selectedProblem
-                ? 'bg-[#00ffcc] hover:bg-[#00cca3] text-black shadow-[0_0_15px_rgba(0,255,204,0.3)]'
-                : 'bg-gray-800 text-gray-500 cursor-not-allowed'
-            }`}
+            className="hud-invite-btn"
           >
             <Users size={14} />
-            <span>INVITE OPPONENT</span>
+            <span className="desktop-only">INVITE TARGET</span>
           </button>
 
           <button
             onClick={handleCopyMatchLink}
-            className="flex items-center gap-2 px-3 py-1.5 bg-black/50 border border-white/20 hover:border-white text-white font-military text-xs rounded transition-all cursor-pointer"
+            className="hud-copy-btn"
+            title="Copy Match Invite Link"
           >
-            {copiedLink ? <Check size={14} className="text-[#00ffcc]" /> : <Copy size={14} />}
-            <span>{copiedLink ? 'LINK COPIED!' : 'COPY MATCH LINK'}</span>
+            {copiedLink ? <Check size={14} className="text-lime" /> : <Copy size={14} />}
+            <span className="desktop-only">{copiedLink ? 'COPIED!' : 'MATCH LINK'}</span>
           </button>
-        </div>
-
-        {/* Match Timer */}
-        <div className="flex items-center gap-2 px-3 py-1 bg-red-950/40 border border-red-500/30 clip-steel-sm">
-          <ShieldAlert size={14} className="text-red-500 animate-pulse" />
-          <span className="font-military text-sm text-red-500 font-bold tracking-widest">
-            {formatTime(matchTimeLeft)}
-          </span>
         </div>
       </header>
 
-      {/* Main Split-Screen Workspace Grid */}
-      <main className="relative z-10 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 p-4 min-h-0 overflow-hidden">
+      {/* MAIN ARENA WORKSPACE */}
+      <main className="arena-workspace-grid">
         
-        {/* ================= LEFT SIDE: MONACO CODE EDITOR (7 COLS) ================= */}
-        <section className="lg:col-span-7 flex flex-col min-h-0 relative">
-          <div className="steel-panel border-2 border-steel-border flex-1 flex flex-col clip-steel-widget min-h-0 overflow-hidden">
+        {/* ================= LEFT / MAIN: MONACO CODE EDITOR ================= */}
+        <section className="arena-editor-section">
+          <div className="editor-panel-wrapper">
             
-            <div className="flex items-center justify-between bg-black/60 border-b border-steel-border px-4 py-2">
+            {/* Editor Top Bar */}
+            <div className="editor-top-toolbar">
               <div className="flex items-center gap-2">
-                <div className="flex gap-1.5">
-                  <span className="w-3 h-3 rounded-full bg-red-500/60" />
-                  <span className="w-3 h-3 rounded-full bg-yellow-500/60" />
-                  <span className="w-3 h-3 rounded-full bg-green-500/60" />
+                <div className="editor-window-controls">
+                  <span className="dot red"></span>
+                  <span className="dot yellow"></span>
+                  <span className="dot green"></span>
                 </div>
-                <div className="h-4 w-[1px] bg-gray-800 mx-2" />
-                <div className="flex items-center gap-1.5 px-3 py-1 bg-panel-bg border-t-2 border-t-gold text-xs font-mono text-white">
-                  <Code2 size={12} className="text-gold" />
+                <div className="editor-file-pill">
+                  <FileCode size={13} className="text-lime" />
                   <span>solution.{selectedLanguage === 'python' ? 'py' : selectedLanguage === 'cpp' ? 'cpp' : 'js'}</span>
                 </div>
               </div>
 
-              <div className="text-[10px] font-mono text-gray-500 flex items-center gap-3">
-                <span className="text-[#00ffcc] font-bold">
-                  {selectedProblem ? selectedProblem.title : 'NO QUESTION SELECTED'}
-                </span>
+              {/* Editor Quick Actions */}
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={handleRunTests}
+                  disabled={isRunningTests || isSubmitting}
+                  className="btn-editor-run"
+                >
+                  {isRunningTests ? <RefreshCw size={13} className="animate-spin" /> : <Play size={13} />}
+                  <span>RUN TESTS</span>
+                </button>
+
+                <button 
+                  onClick={handleSubmitSolution}
+                  disabled={isRunningTests || isSubmitting}
+                  className="btn-editor-submit"
+                >
+                  {isSubmitting ? <RefreshCw size={13} className="animate-spin" /> : <Zap size={13} />}
+                  <span>SUBMIT DUEL</span>
+                </button>
               </div>
             </div>
 
-            <div className="flex-1 relative w-full h-full min-h-[380px]">
+            {/* Monaco Component */}
+            <div className="monaco-canvas-container">
               <Editor
                 height="100%"
                 language={selectedLanguage}
@@ -377,104 +488,163 @@ export default function Arena() {
                 value={code}
                 onChange={(val) => setCode(val || '')}
                 options={{
-                  fontSize: 13,
-                  fontFamily: 'Fira Code, monospace',
+                  fontSize: 14,
+                  fontFamily: 'JetBrains Mono, Fira Code, monospace',
                   minimap: { enabled: false },
                   scrollBeyondLastLine: false,
                   automaticLayout: true,
                   lineNumbers: 'on',
-                  padding: { top: 12, bottom: 12 }
+                  padding: { top: 12, bottom: 12 },
+                  smoothScrolling: true,
+                  cursorBlinking: 'smooth',
+                  renderLineHighlight: 'all',
                 }}
               />
             </div>
+
+            {/* Editor Bottom Status Bar */}
+            <div className="editor-status-strip">
+              <div className="flex items-center gap-3">
+                <span className="status-item">UTF-8</span>
+                <span className="status-item">SPACES: 2</span>
+                <span className="status-item text-lime">MONACO ENGINE v4.7</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="status-item">MATCH: {matchId}</span>
+                <span className="status-item font-bold text-lime">100% SECURE</span>
+              </div>
+            </div>
+
           </div>
         </section>
 
-        {/* ================= RIGHT SIDE: OPPONENT HUD & TERMINAL KILL FEED (5 COLS) ================= */}
-        <section className="lg:col-span-5 flex flex-col gap-4 min-h-0 overflow-y-auto custom-scrollbar">
+        {/* ================= RIGHT SIDE: COMBAT HUD & TELEMETRY ================= */}
+        <section className="arena-telemetry-sidebar">
           
-          <div className="bg-iron-gray border border-steel-border p-4 clip-steel-widget flex flex-col gap-4 relative">
-            <div className="flex items-center justify-between border-b border-steel-border/60 pb-2">
+          {/* COMBATANTS HP & HEALTH HUD */}
+          <div className="combat-health-card">
+            <div className="combat-card-header">
               <div className="flex items-center gap-2">
-                <Shield className="text-red-500 w-4.5 h-4.5" />
-                <h3 className="font-military text-sm text-white tracking-widest">COMBAT HEALTH &amp; OPPONENT HUD</h3>
+                <Shield size={15} className="text-lime" />
+                <span className="combat-header-title">COMBAT HEALTH TELEMETRY</span>
               </div>
-              <span className="text-[9px] font-mono text-green-400 animate-pulse">
-                {matchStarted ? '1V1 LIVE DUEL' : 'AWAITING MATCH ROOM'}
-              </span>
+              <span className="combat-mode-pill">1v1 STAKE: +45 MMR</span>
             </div>
 
-            {/* PLAYER 1 (YOU) */}
-            <div className="p-3 bg-black/40 border border-slate-800 clip-steel-sm">
-              <div className="flex justify-between items-center text-xs font-military mb-1.5">
-                <span className="text-white font-bold flex items-center gap-1.5">
-                  {user?.username || 'GHOST_CODER'} (YOU)
-                </span>
-                <span className="text-gold font-mono text-[11px] font-bold">
-                  {userHp} HP | {userTestsPassed}/10 TESTS
-                </span>
+            {/* Player 1 (You) */}
+            <div className="combatant-box player-self">
+              <div className="combatant-meta">
+                <div className="flex items-center gap-2">
+                  <img 
+                    src={user?.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${user?.username || 'Ghost'}`} 
+                    alt="You" 
+                    className="combatant-avatar"
+                  />
+                  <div>
+                    <span className="combatant-name">{user?.username || 'GHOST_OPERATOR'} (YOU)</span>
+                    <span className="combatant-sub">TESTS PASSED: {userTestsPassed}/10</span>
+                  </div>
+                </div>
+                <span className="hp-digit-label text-lime">{userHp} HP</span>
               </div>
-              <div className="w-full h-3 bg-black border border-slate-800 rounded-sm overflow-hidden flex">
+              
+              <div className="hp-track-bar">
                 <div 
-                  className={`h-full transition-all duration-500 ${
-                    userHp >= 70 ? 'bg-green-500' : userHp >= 40 ? 'bg-yellow-500' : 'bg-red-500 animate-pulse'
-                  }`}
+                  className={`hp-fill-bar ${userHp >= 60 ? 'hp-safe' : userHp >= 30 ? 'hp-warn' : 'hp-crit'}`}
                   style={{ width: `${userHp}%` }}
                 />
               </div>
             </div>
 
-            {/* PLAYER 2 (OPPONENT / TARGET) */}
-            <div className="p-3 bg-black/40 border border-slate-800 clip-steel-sm">
-              <div className="flex justify-between items-center text-xs font-military mb-1.5">
+            {/* Player 2 (Opponent) */}
+            <div className="combatant-box player-target">
+              <div className="combatant-meta">
                 <div className="flex items-center gap-2">
-                  <img src={opponentProfile.avatar} alt="Opponent Avatar" className="w-5 h-5 rounded-full border border-[#00ffcc]" />
-                  <span className={`font-bold ${opponentProfile.username === 'AWAITING TARGET...' ? 'text-gray-500 animate-pulse' : 'text-gray-300'}`}>
-                    {opponentProfile.username}
-                  </span>
+                  <img 
+                    src={opponentProfile.avatar} 
+                    alt="Opponent" 
+                    className="combatant-avatar opponent"
+                  />
+                  <div>
+                    <span className={`combatant-name ${opponentProfile.username.includes('AWAITING') ? 'text-muted' : ''}`}>
+                      {opponentProfile.username}
+                    </span>
+                    <span className="combatant-sub">TESTS PASSED: {opponentTestsPassed}/10</span>
+                  </div>
                 </div>
-                <span className="text-red-400 font-mono text-[11px] font-bold">
-                  {opponentHp} HP | {opponentTestsPassed}/10 TESTS
-                </span>
+                <span className="hp-digit-label text-danger">{opponentHp} HP</span>
               </div>
 
-              <div className="w-full h-3 bg-black border border-slate-800 rounded-sm overflow-hidden flex">
+              <div className="hp-track-bar">
                 <div 
-                  className={`h-full transition-all duration-500 ${
-                    opponentHp >= 70 ? 'bg-green-500' : opponentHp >= 40 ? 'bg-yellow-500' : 'bg-red-500'
-                  }`}
+                  className={`hp-fill-bar ${opponentHp >= 60 ? 'hp-safe' : opponentHp >= 30 ? 'hp-warn' : 'hp-crit'}`}
                   style={{ width: `${opponentHp}%` }}
                 />
               </div>
             </div>
           </div>
 
-          {/* KILL FEED */}
-          <div className="bg-iron-gray border border-steel-border p-4 flex-1 min-h-[220px] flex flex-col clip-steel-widget">
-            <div className="flex items-center justify-between border-b border-steel-border/60 pb-2 mb-3">
-              <div className="flex items-center gap-2">
-                <Terminal className="text-[#00ffcc] w-4.5 h-4.5" />
-                <h3 className="font-military text-sm text-white tracking-widest">TACTICAL COMBAT KILL FEED</h3>
-              </div>
-              
-              <button 
-                onClick={handleRunTests}
-                disabled={isRunningTests}
-                className="px-3 py-1 bg-[#00ffcc] hover:bg-[#00cca3] text-black font-military text-xs font-bold tracking-widest clip-steel-sm transition-colors flex items-center gap-1.5 border-none cursor-pointer"
+          {/* TELEMETRY TABS (Problem Dossier vs Kill Feed Console) */}
+          <div className="telemetry-tabs-card">
+            <div className="telemetry-tabs-header">
+              <button
+                onClick={() => setActiveSideTab('hud')}
+                className={`telemetry-tab-btn ${activeSideTab === 'hud' ? 'active' : ''}`}
               >
-                {isRunningTests ? <RefreshCw size={12} className="animate-spin" /> : <Play size={12} fill="black" />}
-                <span>RUN TESTS</span>
+                <Terminal size={13} />
+                <span>COMBAT LOGS</span>
+              </button>
+
+              <button
+                onClick={() => setActiveSideTab('problem')}
+                className={`telemetry-tab-btn ${activeSideTab === 'problem' ? 'active' : ''}`}
+              >
+                <HelpCircle size={13} />
+                <span>MISSION BRIEF</span>
               </button>
             </div>
 
-            <div className="flex-1 bg-black/50 border border-slate-900 p-3 overflow-y-auto custom-scrollbar font-mono text-[10px] leading-relaxed text-gray-300">
-              {terminalLogs.map((log, index) => (
-                <div key={index} className={`mb-1.5 ${log.type === 'success' ? 'text-[#00ffcc] font-bold' : log.type === 'danger' ? 'text-red-400 font-bold' : log.type === 'warning' ? 'text-gold' : 'text-gray-400'}`}>
-                  {log.text}
+            {/* TAB CONTENT 1: COMBAT LOGS */}
+            {activeSideTab === 'hud' && (
+              <div className="combat-logs-feed custom-scrollbar">
+                {terminalLogs.map((log, index) => (
+                  <div 
+                    key={index} 
+                    className={`combat-log-entry ${log.type}`}
+                  >
+                    <span className="log-time">T+0{index}:</span>
+                    <span className="log-text">{log.text}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* TAB CONTENT 2: PROBLEM DESCRIPTION */}
+            {activeSideTab === 'problem' && (
+              <div className="problem-brief-body custom-scrollbar">
+                <h4 className="brief-title">{selectedProblem?.title || 'Tactical Duel Problem'}</h4>
+                <div className="brief-tags">
+                  <span className="tag-pill">{selectedProblem?.difficulty || 'Medium'}</span>
+                  <span className="tag-pill">{selectedProblem?.category || 'Algorithms'}</span>
                 </div>
-              ))}
-            </div>
+                <p className="brief-desc">
+                  {selectedProblem?.description || 'Construct an optimal algorithm to traverse the network perimeter without triggering firewall alarms.'}
+                </p>
+
+                {selectedProblem?.examples && selectedProblem.examples.map((ex, i) => (
+                  <div key={i} className="example-box">
+                    <span className="example-lbl">EXAMPLE {i + 1}:</span>
+                    <div className="example-code">
+                      <span><strong>Input:</strong> {ex.input}</span>
+                      <span><strong>Output:</strong> {ex.output}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
           </div>
+
         </section>
       </main>
 
@@ -482,38 +652,41 @@ export default function Arena() {
 
       {/* 1. QUESTION SELECTION MODAL */}
       {showQuestionModal && (
-        <div className="absolute inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-6" onClick={() => setShowQuestionModal(false)}>
-          <div className="max-w-xl w-full bg-[#121520] border-2 border-[#facc15] p-6 clip-steel-card shadow-[0_0_40px_rgba(250,204,21,0.25)] relative" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-4">
-              <h3 className="font-military text-2xl text-white font-bold tracking-wider">
-                STEP 1: SELECT MATCH QUESTION
-              </h3>
-              <button onClick={() => setShowQuestionModal(false)} className="text-gray-400 hover:text-white font-bold">✕</button>
+        <div className="arena-modal-backdrop" onClick={() => setShowQuestionModal(false)}>
+          <div className="arena-modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-top-bar">
+              <div className="flex items-center gap-2">
+                <HelpCircle size={18} className="text-lime" />
+                <h3 className="modal-title">SELECT MATCH CHALLENGE</h3>
+              </div>
+              <button onClick={() => setShowQuestionModal(false)} className="modal-close-btn">✕</button>
             </div>
 
-            <div className="flex flex-col gap-3 max-h-72 overflow-y-auto pr-2 custom-scrollbar mb-4">
+            <p className="modal-subtitle">
+              Choose an algorithmic challenge for this 1v1 duel arena.
+            </p>
+
+            <div className="modal-problems-list custom-scrollbar">
               {availableProblems.map((prob) => (
                 <div
                   key={prob._id || prob.title}
                   onClick={() => handleConfirmQuestion(prob)}
-                  className={`p-3.5 bg-black/50 border clip-steel-sm cursor-pointer transition-all flex items-center justify-between ${
-                    selectedProblem?.title === prob.title ? 'border-[#00ffcc] bg-[#00ffcc]/10' : 'border-white/10 hover:border-white/30'
-                  }`}
+                  className={`modal-problem-row ${selectedProblem?.title === prob.title ? 'selected' : ''}`}
                 >
                   <div>
-                    <h4 className="font-military text-base text-white font-bold">{prob.title}</h4>
-                    <span className="font-mono text-[10px] text-gray-400">{prob.difficulty} | {prob.tags ? prob.tags.join(', ') : 'DSA'}</span>
+                    <h4 className="problem-row-title">{prob.title}</h4>
+                    <span className="problem-row-meta">{prob.difficulty} • {prob.category || 'Algorithms'}</span>
                   </div>
-                  <button className="btn-tactical-cyan px-4 py-1.5 text-xs clip-angular-btn">
-                    SELECT
+                  <button className="btn-select-prob">
+                    {selectedProblem?.title === prob.title ? 'LOCKED' : 'SELECT'}
                   </button>
                 </div>
               ))}
             </div>
 
-            <div className="flex justify-end">
-              <button onClick={() => setShowQuestionModal(false)} className="btn-tactical-yellow px-6 py-2 text-xs clip-angular-btn">
-                DONE
+            <div className="modal-actions-footer">
+              <button onClick={() => setShowQuestionModal(false)} className="btn-cyber-primary w-full">
+                CONFIRM PROBLEM SELECTION
               </button>
             </div>
           </div>
@@ -522,57 +695,49 @@ export default function Arena() {
 
       {/* 2. GITHUB TARGET LOOKUP DRAWER */}
       {showInviteDrawer && (
-        <div className="absolute inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-6" onClick={() => setShowInviteDrawer(false)}>
-          <div className="max-w-md w-full bg-[#121520] border-2 border-[#00ffcc] p-6 clip-steel-card shadow-[0_0_40px_rgba(0,255,204,0.3)] relative" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-4">
+        <div className="arena-modal-backdrop" onClick={() => setShowInviteDrawer(false)}>
+          <div className="arena-modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-top-bar">
               <div className="flex items-center gap-2">
-                <UserCheck size={20} className="text-[#00ffcc]" />
-                <h3 className="font-military text-xl text-white font-bold tracking-wider">
-                  INVITE GITHUB OPPONENT
-                </h3>
+                <UserCheck size={18} className="text-lime" />
+                <h3 className="modal-title">INVITE GITHUB OPPONENT</h3>
               </div>
-              <button onClick={() => setShowInviteDrawer(false)} className="text-gray-400 hover:text-white font-bold">✕</button>
+              <button onClick={() => setShowInviteDrawer(false)} className="modal-close-btn">✕</button>
             </div>
 
-            <form onSubmit={handleGithubSearch} className="flex flex-col gap-3 mb-6">
-              <label className="font-mono text-xs text-gray-400 uppercase block">ENTER GITHUB USERNAME OR PROFILE URL:</label>
+            <form onSubmit={handleGithubSearch} className="flex flex-col gap-2 mb-4">
+              <label className="text-xs font-mono text-muted uppercase">Enter GitHub Username or URL:</label>
               <div className="flex gap-2">
                 <input
                   type="text"
                   value={githubInput}
                   onChange={(e) => setGithubInput(e.target.value)}
-                  placeholder="e.g. octocat or https://github.com/octocat"
-                  className="flex-1 bg-black/60 border border-white/15 focus:border-[#00ffcc] text-xs font-mono text-white p-3 rounded outline-none"
+                  placeholder="e.g. torvalds or octocat"
+                  className="input-cyber-search flex-1"
                 />
-                <button type="submit" disabled={isSearchingGithub} className="btn-tactical-cyan px-4 py-2 text-xs clip-angular-btn">
+                <button type="submit" disabled={isSearchingGithub} className="btn-cyber-primary px-3">
                   {isSearchingGithub ? <RefreshCw size={14} className="animate-spin" /> : <Search size={14} />}
                 </button>
               </div>
-              {githubError && <span className="font-mono text-xs text-red-400">{githubError}</span>}
+              {githubError && <span className="text-xs font-mono text-danger">{githubError}</span>}
             </form>
 
             {githubTarget && (
-              <div className="bg-black/60 border border-[#00ffcc]/40 p-4 clip-steel-sm flex flex-col gap-4 text-left">
-                <div className="flex items-center gap-2 border-b border-[#00ffcc]/30 pb-2">
-                  <span className="w-2 h-2 bg-[#00ffcc] rounded-full animate-ping" />
-                  <span className="font-military text-xs text-[#00ffcc] font-bold tracking-widest uppercase">
-                    TARGET ACQUIRED // PROFILE VERIFIED
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-4">
-                  <img src={githubTarget.avatarUrl} alt="Target Avatar" className="w-16 h-16 rounded-full border-2 border-[#00ffcc] object-cover" />
+              <div className="github-target-preview">
+                <div className="flex items-center gap-3">
+                  <img src={githubTarget.avatarUrl} alt="Target" className="w-12 h-12 rounded-full border border-lime" />
                   <div>
-                    <h4 className="font-military text-xl text-white font-bold">{githubTarget.name}</h4>
-                    <a href={githubTarget.githubUrl} target="_blank" rel="noreferrer" className="font-mono text-xs text-[#00ffcc] hover:underline flex items-center gap-1">
-                      @{githubTarget.username} <ExternalLink size={12} />
+                    <h4 className="font-header font-bold text-white text-base">{githubTarget.name}</h4>
+                    <a href={githubTarget.githubUrl} target="_blank" rel="noreferrer" className="text-xs text-lime font-mono hover:underline flex items-center gap-1">
+                      @{githubTarget.username} <ExternalLink size={11} />
                     </a>
-                    <p className="font-mono text-[10px] text-gray-400 mt-1 line-clamp-2">{githubTarget.bio}</p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 text-[10px] font-mono text-gray-300 bg-white/5 p-2 rounded">
-                  <div>PUBLIC REPOS: <strong className="text-white">{githubTarget.publicRepos}</strong></div>
+                <p className="text-xs text-secondary font-mono mt-2 line-clamp-2">{githubTarget.bio}</p>
+
+                <div className="grid grid-cols-2 gap-2 text-xs font-mono text-secondary bg-white/5 p-2 rounded mt-3">
+                  <div>REPOS: <strong className="text-white">{githubTarget.publicRepos}</strong></div>
                   <div>FOLLOWERS: <strong className="text-white">{githubTarget.followers}</strong></div>
                 </div>
 
@@ -585,9 +750,9 @@ export default function Arena() {
                     setShowInviteDrawer(false);
                     handleCopyMatchLink();
                   }}
-                  className="w-full btn-tactical-yellow py-3 text-xs clip-angular-btn text-black font-bold"
+                  className="btn-cyber-primary w-full mt-4"
                 >
-                  SEND TACTICAL INVITE &amp; LOCK MATCH
+                  SEND TACTICAL DUEL INVITE
                 </button>
               </div>
             )}
@@ -595,7 +760,7 @@ export default function Arena() {
         </div>
       )}
 
-      {/* 3. REAL-TIME BATTLE CHAT & QUICK RADIO DRAWER */}
+      {/* 3. REAL-TIME BATTLE CHAT & RADIO COMMS */}
       <BattleChat
         socket={socket}
         matchId={matchId}

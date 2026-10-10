@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Award, Trophy, ArrowRight, Share2, Check, AlertTriangle, Clock, Zap } from 'lucide-react';
+import { Award, Trophy, ArrowRight, Check, Zap, ArrowLeft, Swords } from 'lucide-react';
 import ThreeCharacter from '../../components/ThreeCharacter/ThreeCharacter';
 import { themeService } from '../../services/themeService';
 import { audioService } from '../../services/audioService';
@@ -26,94 +26,101 @@ export default function Result() {
   };
 
   return (
-    <div className="result-extraction-viewport p-6">
+    <div className="cyber-result-viewport p-6">
       <div className="theme-grid-matrix-bg" />
       <div className="theme-scanline-overlay" />
 
       {/* Main Result Settlement Card */}
-      <div className="result-card-container relative z-10 max-w-4xl w-full p-8 clip-tactical-card flex flex-col lg:flex-row gap-8 items-stretch">
+      <div className="result-settlement-card">
         
         {/* Left: 3D Champion Winner Stand */}
-        <div className="flex-1 flex flex-col justify-between items-center text-center border-b lg:border-b-0 lg:border-r border-white/10 pb-6 lg:pb-0 lg:pr-8">
-          <div>
-            <Award className="text-[#F59E0B] w-10 h-10 mb-2 animate-bounce mx-auto" />
-            <h1 className="font-header text-3xl text-[#F59E0B] font-extrabold tracking-[0.15em] leading-none">
+        <div className="result-left-podium">
+          <div className="text-center">
+            <div className="winner-trophy-box">
+              <Trophy className="text-lime w-7 h-7" />
+            </div>
+            <h1 className="font-header text-3xl text-lime font-black tracking-wider leading-none mb-1">
               SECTOR DOMINATED
             </h1>
-            <span className="font-code text-[10px] text-[#06B6D4] tracking-[0.25em] font-bold block mt-2 uppercase">
-              // WINNER WINNER CHICKEN DINNER
+            <span className="font-mono text-xs text-muted tracking-widest block uppercase">
+              // 1V1 DUEL VICTORY SETTLEMENT
             </span>
           </div>
 
-          <div className="relative w-full flex-1 flex flex-col justify-center items-center my-4">
-            <div className="w-full max-w-[240px]">
-              <ThreeCharacter activeTheme={activeTheme} />
-            </div>
+          <div className="result-three-character-stage">
+            <ThreeCharacter activeTheme={activeTheme} />
           </div>
 
-          <div className="font-code text-xs text-gray-400">
-            SQUAD STATUS: <span className="text-[#06B6D4] font-bold">100% OPERATIONAL</span>
+          <div className="font-mono text-xs text-muted">
+            OPERATOR STATUS: <span className="text-lime font-bold">100% SECURED</span>
           </div>
         </div>
 
         {/* Right: Detailed Combat Telemetry Analysis */}
-        <div className="flex-1 flex flex-col justify-between gap-5 text-left">
+        <div className="result-right-telemetry">
           <div>
-            <div className="flex items-center gap-2 border-b border-white/10 pb-2 mb-4">
-              <Trophy className="text-[#F59E0B] w-5 h-5" />
-              <h2 className="font-header text-base text-white font-bold tracking-[0.15em]">
+            <div className="flex items-center gap-2 border-b border-white/10 pb-3 mb-4">
+              <Award className="text-lime w-5 h-5" />
+              <h2 className="font-header text-base text-white font-bold tracking-wider">
                 EXTRACTION TELEMETRY ANALYSIS
               </h2>
             </div>
 
             {/* Stats List */}
-            <div className="flex flex-col gap-2 font-code text-xs text-gray-300">
-              <div className="flex justify-between py-1.5 border-b border-white/5">
-                <span className="text-gray-400">TEST CASES PASSED:</span>
-                <span className="text-[#06B6D4] font-bold">{performanceStats.testCases}</span>
+            <div className="flex flex-col gap-2.5 font-mono text-xs text-secondary">
+              <div className="flex justify-between py-2 border-b border-white/5">
+                <span className="text-muted">TEST CASES PASSED:</span>
+                <span className="text-lime font-bold">{performanceStats.testCases}</span>
               </div>
 
-              <div className="flex justify-between py-1.5 border-b border-white/5">
-                <span className="text-gray-400">EXECUTION TIME:</span>
+              <div className="flex justify-between py-2 border-b border-white/5">
+                <span className="text-muted">EXECUTION TIME:</span>
                 <span className="text-white font-semibold">{performanceStats.executionTime}</span>
               </div>
 
-              <div className="flex justify-between py-1.5 border-b border-white/5">
-                <span className="text-gray-400">MEMORY DELTA:</span>
-                <span className="text-white font-semibold">{performanceStats.memoryUsage}</span>
+              <div className="flex justify-between py-2 border-b border-white/5">
+                <span className="text-muted">TIME COMPLEXITY:</span>
+                <span className="text-cyan font-semibold">{performanceStats.complexity}</span>
               </div>
 
-              <div className="flex justify-between py-1.5 border-b border-white/5">
-                <span className="text-gray-400">MMR GAINED:</span>
-                <span className="text-[#F59E0B] font-bold">{performanceStats.rankGained}</span>
+              <div className="flex justify-between py-2 border-b border-white/5">
+                <span className="text-muted">MMR GAINED:</span>
+                <span className="text-lime font-bold">{performanceStats.rankGained}</span>
               </div>
             </div>
 
             {/* Reward Badges */}
-            <div className="mt-5 grid grid-cols-3 gap-2 text-center">
-              <div className="bg-black/60 border border-white/10 p-2.5 clip-tactical-badge">
-                <span className="text-[8px] font-code text-gray-400 block uppercase">EXP EARNED</span>
-                <span className="font-header text-sm text-[#06B6D4] font-bold block mt-1">{performanceStats.expGained}</span>
+            <div className="mt-6 grid grid-cols-3 gap-3 text-center">
+              <div className="reward-chip-box">
+                <span className="text-[10px] font-mono text-muted block uppercase">EXP EARNED</span>
+                <span className="font-header text-base text-cyan font-bold block mt-1">{performanceStats.expGained}</span>
               </div>
-              <div className="bg-black/60 border border-white/10 p-2.5 clip-tactical-badge">
-                <span className="text-[8px] font-code text-gray-400 block uppercase">BP REWARD</span>
-                <span className="font-header text-sm text-[#F59E0B] font-bold block mt-1">{performanceStats.bpGained}</span>
+              <div className="reward-chip-box">
+                <span className="text-[10px] font-mono text-muted block uppercase">BP REWARD</span>
+                <span className="font-header text-base text-amber font-bold block mt-1">{performanceStats.bpGained}</span>
               </div>
-              <div className="bg-black/60 border border-white/10 p-2.5 clip-tactical-badge">
-                <span className="text-[8px] font-code text-gray-400 block uppercase">MMR DELTA</span>
-                <span className="font-header text-sm text-emerald-400 font-bold block mt-1">{performanceStats.rankGained}</span>
+              <div className="reward-chip-box">
+                <span className="text-[10px] font-mono text-muted block uppercase">RATING MMR</span>
+                <span className="font-header text-base text-lime font-bold block mt-1">{performanceStats.rankGained}</span>
               </div>
             </div>
           </div>
 
           {/* Action Row */}
-          <div className="flex gap-3 pt-4 border-t border-white/10">
+          <div className="flex gap-3 pt-6 border-t border-white/10 mt-6">
+            <button
+              onClick={() => navigate('/arena')}
+              className="btn-cyber-secondary flex-1 py-3"
+            >
+              <Swords size={16} />
+              <span>PLAY AGAIN</span>
+            </button>
             <button
               onClick={() => navigate('/lobby')}
-              className="flex-1 py-3 bg-[#F59E0B] hover:bg-[#FFB703] text-black font-header font-bold text-sm tracking-wider clip-tactical-btn transition-all flex items-center justify-center gap-2 border-none cursor-pointer"
+              className="btn-cyber-primary flex-1 py-3"
             >
-              <span>RETURN TO COMMAND DECK</span>
-              <ArrowRight size={16} fill="black" />
+              <span>COMMAND DECK</span>
+              <ArrowRight size={16} />
             </button>
           </div>
         </div>

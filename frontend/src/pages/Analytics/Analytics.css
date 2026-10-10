@@ -1,1001 +1,346 @@
 /* ==========================================================================
-   OPERATOR DOSSIER & COMBAT TELEMETRY // STYLESHEET
-   AAA Gaming Standard / Obsidian Command Deck Aesthetic
+   CODEBATTLE: CYBER ARENA — PLAYER TELEMETRY STYLES
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700;800&family=Fira+Code:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap');
-
-:root {
-  --dossier-obsidian: #07090E;
-  --dossier-glass-card: rgba(13, 17, 26, 0.85);
-  --dossier-border-razor: rgba(255, 255, 255, 0.08);
-  --dossier-border-amber: rgba(245, 158, 11, 0.4);
-
-  --tactical-amber: #F59E0B;
-  --tactical-amber-glow: rgba(245, 158, 11, 0.35);
-
-  --ice-cyan: #00F5D4;
-  --ice-cyan-glow: rgba(0, 245, 212, 0.35);
-
-  --victory-green: #10B981;
-  --victory-green-glow: rgba(16, 185, 129, 0.35);
-
-  --defeat-red: #EF4444;
-  --defeat-red-glow: rgba(239, 68, 68, 0.35);
-
-  --muted-slate: #64748B;
-  --font-gamer: 'Rajdhani', sans-serif;
-  --font-header: 'Chakra Petch', sans-serif;
-  --font-code: 'Fira Code', monospace;
-}
-
-/* Viewport Shell */
-.analytics-dossier-viewport {
-  width: 100vw;
-  height: 100vh;
-  max-height: 100vh;
-  overflow: hidden;
-  background-color: var(--dossier-obsidian);
-  background-image: 
-    radial-gradient(circle at 20% 30%, rgba(0, 245, 212, 0.05) 0%, transparent 60%),
-    radial-gradient(circle at 80% 70%, rgba(245, 158, 11, 0.05) 0%, transparent 60%),
-    radial-gradient(circle at 50% 50%, rgba(7, 9, 14, 0.3) 0%, rgba(7, 9, 14, 0.98) 100%);
+.cyber-analytics-viewport {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #06070a;
+  color: #f1f5f9;
   display: flex;
   flex-direction: column;
-  color: #FFFFFF;
-  font-family: var(--font-gamer);
-  position: relative;
-  user-select: none;
+  font-family: 'Outfit', sans-serif;
 }
 
-/* Faint Grid Background */
-.dossier-grid-overlay {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-image: 
-    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 36px 36px;
-  z-index: 1;
-}
-
-/* Scanlines Layer */
-.dossier-scanline-layer {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(rgba(18, 19, 26, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
-  background-size: 100% 4px;
-  opacity: 0.3;
-  z-index: 2;
-}
-
-/* Glassmorphism Dossier Panel */
-.glass-dossier-panel {
-  background: var(--dossier-glass-card);
-  backdrop-filter: blur(20px);
-  border: 1px solid var(--dossier-border-razor);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.75);
-  transition: all 0.25s ease;
-}
-
-.glass-dossier-panel:hover {
-  border-color: rgba(255, 255, 255, 0.15);
-}
-
-/* Chamfer Clips */
-.clip-tactical-badge {
-  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
-}
-
-.clip-tactical-btn {
-  clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
-}
-
-.clip-tactical-card {
-  clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
-}
-
-/* ==========================================================================
-   1. TOP NAVIGATION BAR
-   ========================================================================== */
-.dossier-top-bar {
+.analytics-main-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1.5rem;
   width: 100%;
-  background: rgba(13, 17, 26, 0.92);
-  border-bottom: 1px solid var(--dossier-border-razor);
-  padding: 12px 32px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: relative;
-  z-index: 30;
-  backdrop-filter: blur(16px);
-}
-
-.dossier-top-bar::after {
-  content: '';
-  position: absolute;
-  bottom: -1px;
-  left: 0;
-  width: 100%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--ice-cyan), var(--tactical-amber), transparent);
-  opacity: 0.5;
-}
-
-.top-bar-left {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.return-lobby-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  font-family: var(--font-header);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  color: var(--muted-slate);
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--dossier-border-razor);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.return-lobby-btn:hover {
-  color: var(--tactical-amber);
-  border-color: var(--tactical-amber);
-  background: rgba(245, 158, 11, 0.08);
-  box-shadow: 0 0 12px var(--tactical-amber-glow);
-}
-
-.top-title-group {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1.5rem;
 }
 
-.top-status-indicator {
-  font-family: var(--font-code);
-  font-size: 9px;
-  color: var(--ice-cyan);
-  letter-spacing: 0.18em;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+/* --------------------------------------------------------------------------
+   DOSSIER CARD
+   -------------------------------------------------------------------------- */
+.profile-dossier-card {
+  background: #0d1017;
+  border: 1px solid rgba(163, 230, 53, 0.25);
+  border-radius: 10px;
+  padding: 1.75rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(163, 230, 53, 0.08);
 }
 
-.beacon-pulse {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background-color: var(--ice-cyan);
-  box-shadow: 0 0 8px var(--ice-cyan);
-  animation: beaconGlow 1.5s infinite alternate ease-in-out;
-}
-
-@keyframes beaconGlow {
-  0% { opacity: 0.4; transform: scale(0.9); }
-  100% { opacity: 1; transform: scale(1.1); }
-}
-
-.top-main-title {
-  font-family: var(--font-header);
-  font-size: 18px;
-  font-weight: 800;
-  color: #FFFFFF;
-  letter-spacing: 0.16em;
-}
-
-.top-main-title span.title-slash {
-  color: var(--tactical-amber);
-}
-
-.invite-action-top-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 7px 14px;
-  font-family: var(--font-header);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  color: var(--tactical-amber);
-  background: rgba(245, 158, 11, 0.08);
-  border: 1px solid var(--tactical-amber);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.invite-action-top-btn:hover {
-  background: var(--tactical-amber);
-  color: #000000;
-  box-shadow: 0 0 16px var(--tactical-amber-glow);
-}
-
-/* ==========================================================================
-   2. MAIN WORKSPACE LAYOUT
-   ========================================================================== */
-.dossier-main-layout {
+.profile-dossier-inner {
   display: grid;
-  grid-template-columns: 340px 1fr;
-  gap: 24px;
-  padding: 24px 32px;
-  flex: 1;
-  min-height: 0;
-  max-height: calc(100vh - 75px);
-  overflow: hidden;
-  z-index: 10;
+  grid-template-columns: 140px 1fr 340px;
+  gap: 2rem;
+  align-items: center;
 }
 
-/* ==========================================================================
-   3. LEFT COLUMN: OPERATOR PROFILE & INVITE HUB
-   ========================================================================== */
-.dossier-profile-card {
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 20px;
-  height: 100%;
-  min-height: 0;
-}
-
-.profile-hero-section {
+.dossier-avatar-col {
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-align: center;
-  gap: 10px;
+  gap: 0.5rem;
 }
 
-.titanium-avatar-frame {
-  position: relative;
+.dossier-avatar-img {
   width: 96px;
   height: 96px;
-  margin-bottom: 4px;
+  border-radius: 10px;
+  background: #161c2b;
+  border: 2px solid #a3e635;
+  box-shadow: 0 0 16px rgba(163, 230, 53, 0.25);
 }
 
-.titanium-ring-glow {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  padding: 4px;
-  background: linear-gradient(135deg, var(--ice-cyan) 0%, rgba(245, 158, 11, 0.5) 100%);
-  box-shadow: 0 0 24px rgba(0, 245, 212, 0.3);
+.dossier-rank-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #a3e635;
+  background: rgba(163, 230, 53, 0.1);
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
 }
 
-.avatar-img {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  object-fit: cover;
-  background: #000000;
-  border: 1px solid var(--ice-cyan);
+.dossier-username {
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 1.75rem;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: 0.04em;
 }
 
-.level-badge {
-  position: absolute;
-  bottom: -6px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #07090E;
-  color: var(--ice-cyan);
-  border: 1px solid var(--ice-cyan);
-  font-family: var(--font-header);
-  font-size: 10px;
-  font-weight: 800;
-  padding: 2px 10px;
-  box-shadow: 0 0 10px var(--ice-cyan-glow);
-  white-space: nowrap;
-}
-
-.operator-callsign-text {
-  font-family: var(--font-header);
-  font-size: 16px;
-  font-weight: 800;
-  color: #FFFFFF;
-  letter-spacing: 0.16em;
-}
-
-.operator-callsign-text span.accent-amber {
-  color: var(--tactical-amber);
-}
-
-.github-inspect-link {
+.dossier-status-badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-family: var(--font-code);
-  font-size: 11px;
-  color: var(--ice-cyan);
-  text-decoration: none;
-  padding: 4px 10px;
-  background: rgba(0, 245, 212, 0.06);
-  border: 1px solid rgba(0, 245, 212, 0.25);
-  border-radius: 4px;
-  transition: all 0.2s ease;
-}
-
-.github-inspect-link:hover {
-  background: rgba(0, 245, 212, 0.15);
-  border-color: var(--ice-cyan);
-  box-shadow: 0 0 12px var(--ice-cyan-glow);
-}
-
-/* Clean Stat Strip */
-.clean-stat-strip {
-  background: rgba(7, 9, 14, 0.7);
-  border: 1px solid var(--dossier-border-razor);
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.stat-pill {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 4px 6px;
-  border-bottom: 1px dashed rgba(255, 255, 255, 0.06);
-}
-
-.stat-pill:last-child {
-  border-bottom: none;
-}
-
-.stat-label {
-  font-family: var(--font-code);
-  font-size: 9px;
-  color: var(--muted-slate);
-  letter-spacing: 0.12em;
-}
-
-.stat-value {
-  font-family: var(--font-header);
-  font-size: 13px;
+  gap: 0.35rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: #a3e635;
   font-weight: 700;
 }
 
-.stat-value.cyan { color: var(--ice-cyan); }
-.stat-value.amber { color: var(--tactical-amber); }
-.stat-value.white { color: #FFFFFF; }
-
-/* Rank Tier Box */
-.rank-tier-box {
-  background: rgba(245, 158, 11, 0.05);
-  border: 1px solid var(--dossier-border-amber);
-  padding: 12px 14px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  box-shadow: 0 0 16px rgba(245, 158, 11, 0.1);
+.dossier-title-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8125rem;
+  color: #94a3b8;
+  display: block;
+  margin-bottom: 1rem;
 }
 
-.rank-details {
-  display: flex;
-  flex-direction: column;
+.level-progress-wrapper {
+  max-width: 480px;
 }
 
-.rank-tier-title {
-  font-family: var(--font-header);
-  font-size: 12px;
-  font-weight: 800;
-  color: var(--tactical-amber);
-  letter-spacing: 0.15em;
-}
-
-.rank-rating-sub {
-  font-family: var(--font-code);
-  font-size: 9px;
-  color: var(--muted-slate);
-}
-
-/* Primary Action Button */
-.dispatch-invite-btn {
+.level-track-bar {
   width: 100%;
-  padding: 12px;
-  font-family: var(--font-header);
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.15em;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  transition: all 0.25s ease;
+  height: 7px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  overflow: hidden;
 }
 
-.cta-hazard-amber {
-  background: var(--tactical-amber);
-  color: #000000;
-  box-shadow: 0 0 18px var(--tactical-amber-glow);
-}
-
-.cta-hazard-amber:hover {
-  background: #F59E0B;
-  box-shadow: 0 0 28px var(--tactical-amber-glow);
-  transform: translateY(-1px);
-}
-
-/* ==========================================================================
-   4. MAIN VIEWPORT TABS & CONTENT
-   ========================================================================== */
-.dossier-main-viewport {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+.level-fill-bar {
   height: 100%;
-  min-height: 0;
+  background: #a3e635;
+  box-shadow: 0 0 10px #a3e635;
 }
 
-.viewport-tab-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  border-bottom: 1px solid var(--dossier-border-razor);
-  padding-bottom: 12px;
-}
-
-.viewport-tab-btn {
-  padding: 8px 18px;
-  font-family: var(--font-header);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  color: var(--muted-slate);
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid var(--dossier-border-razor);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: all 0.2s ease;
-}
-
-.viewport-tab-btn:hover {
-  color: #FFFFFF;
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-.viewport-tab-btn.active.amber {
-  color: var(--tactical-amber);
-  border-color: var(--tactical-amber);
-  background: rgba(245, 158, 11, 0.08);
-  box-shadow: 0 0 14px var(--tactical-amber-glow);
-}
-
-.viewport-tab-btn.active.cyan {
-  color: var(--ice-cyan);
-  border-color: var(--ice-cyan);
-  background: rgba(0, 245, 212, 0.08);
-  box-shadow: 0 0 14px var(--ice-cyan-glow);
-}
-
-.dossier-tab-content {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  overflow-y: auto;
-  padding-right: 4px;
-}
-
-/* Summary Telemetry Strip */
-.telemetry-summary-strip {
-  padding: 12px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  background: rgba(7, 9, 14, 0.8);
-}
-
-.summary-col {
-  display: flex;
-  flex-direction: column;
-  padding: 0 12px;
-}
-
-.summary-col.border-left {
-  border-left: 1px solid var(--dossier-border-razor);
-}
-
-.summary-lbl {
-  font-family: var(--font-code);
-  font-size: 8px;
-  color: var(--muted-slate);
-  letter-spacing: 0.12em;
-}
-
-.summary-val {
-  font-family: var(--font-header);
-  font-size: 13px;
-  font-weight: 700;
-  color: #FFFFFF;
-}
-
-.summary-val.amber { color: var(--tactical-amber); }
-.summary-val.cyan { color: var(--ice-cyan); }
-.summary-val.green { color: var(--victory-green); }
-
-/* Match History List */
-.match-history-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.match-entry-card {
-  padding: 14px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  background: rgba(13, 17, 26, 0.75);
-}
-
-.match-entry-card.victory-border:hover {
-  border-color: var(--victory-green);
-  box-shadow: 0 0 16px rgba(16, 185, 129, 0.15);
-}
-
-.match-entry-card.defeat-border:hover {
-  border-color: var(--defeat-red);
-  box-shadow: 0 0 16px rgba(239, 68, 68, 0.15);
-}
-
-.result-banner {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  font-family: var(--font-header);
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.14em;
-  min-width: 100px;
-  justify-content: center;
-}
-
-.result-banner.victory {
-  background: rgba(16, 185, 129, 0.12);
-  border: 1px solid var(--victory-green);
-  color: var(--victory-green);
-}
-
-.result-banner.defeat {
-  background: rgba(239, 68, 68, 0.12);
-  border: 1px solid var(--defeat-red);
-  color: var(--defeat-red);
-}
-
-.match-problem-info {
-  display: flex;
-  flex-direction: column;
-  flex: 1.2;
-}
-
-.problem-title {
-  font-family: var(--font-header);
-  font-size: 14px;
-  font-weight: 700;
-  color: #FFFFFF;
-}
-
-.sector-tag {
-  font-family: var(--font-code);
-  font-size: 9px;
-  color: var(--muted-slate);
-}
-
-.match-opponent-col {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  flex: 1;
-}
-
-.opponent-lbl {
-  font-family: var(--font-code);
-  font-size: 8px;
-  color: var(--muted-slate);
-  letter-spacing: 0.1em;
-}
-
-.opponent-badge {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.opponent-avatar {
-  width: 24px;
-  height: 24px;
-  background: #000000;
-  border: 1px solid var(--tactical-amber);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-code);
-  font-size: 9px;
-  font-weight: 700;
-  color: var(--tactical-amber);
-}
-
-.opponent-name {
-  font-family: var(--font-header);
-  font-size: 11px;
-  font-weight: 700;
-  color: #E2E8F0;
-}
-
-.match-telemetry-grid {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.telemetry-cell {
-  display: flex;
-  flex-direction: column;
-  padding: 2px 8px;
-  border-left: 1px solid var(--dossier-border-razor);
-  min-width: 80px;
-}
-
-.cell-lbl {
-  font-family: var(--font-code);
-  font-size: 8px;
-  color: var(--muted-slate);
-}
-
-.cell-val {
-  font-family: var(--font-header);
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.cell-val.cyan { color: var(--ice-cyan); }
-.cell-val.white { color: #FFFFFF; }
-.cell-val.green { color: var(--victory-green); }
-.cell-val.red { color: var(--defeat-red); }
-
-/* Repository Grid Styling */
-.repo-header-info {
-  padding: 12px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.repo-header-title {
-  font-family: var(--font-header);
-  font-size: 12px;
-  font-weight: 800;
-  color: #FFFFFF;
-  letter-spacing: 0.15em;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.repo-header-sub {
-  font-size: 9px;
-  color: var(--muted-slate);
-}
-
-.repo-grid {
+.dossier-stats-col {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+.quick-stat-box {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 6px;
+  padding: 0.75rem;
+  text-align: center;
+}
+
+.qs-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: #64748b;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.qs-val {
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+/* --------------------------------------------------------------------------
+   TABS
+   -------------------------------------------------------------------------- */
+.analytics-tabs-strip {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 0.5rem;
+}
+
+.analytics-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.25rem;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: #94a3b8;
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.analytics-tab-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.analytics-tab-btn.active {
+  color: #a3e635;
+  background: rgba(163, 230, 53, 0.08);
+  border-color: rgba(163, 230, 53, 0.3);
+}
+
+/* --------------------------------------------------------------------------
+   MATCH HISTORY
+   -------------------------------------------------------------------------- */
+.match-history-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.match-card {
+  background: #0d1017;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  transition: all 0.15s ease;
+}
+
+.match-card:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.match-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.match-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 3px;
+}
+.match-badge.victory { background: rgba(163, 230, 53, 0.15); color: #a3e635; }
+.match-badge.defeat { background: rgba(244, 63, 94, 0.15); color: #f43f5e; }
+
+.match-problem-title {
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.match-mmr-delta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8125rem;
+  font-weight: 800;
+}
+.match-mmr-delta.positive { color: #a3e635; }
+.match-mmr-delta.negative { color: #f43f5e; }
+
+.match-card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.65rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* --------------------------------------------------------------------------
+   REPOSITORIES & SKILL MATRIX
+   -------------------------------------------------------------------------- */
+.github-repos-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
 }
 
 .repo-card {
-  padding: 16px;
+  background: #0d1017;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 1.25rem;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  gap: 14px;
-  background: rgba(13, 17, 26, 0.8);
-  border: 1px solid var(--dossier-border-razor);
+  transition: all 0.15s ease;
 }
 
 .repo-card:hover {
-  border-color: var(--ice-cyan);
-  box-shadow: 0 0 20px var(--ice-cyan-glow);
-  transform: translateY(-1px);
+  border-color: rgba(56, 189, 248, 0.35);
+  transform: translateY(-2px);
 }
 
 .repo-card-top {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.repo-title-row {
-  display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
 }
 
 .repo-name {
-  font-family: var(--font-header);
-  font-size: 14px;
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 1rem;
   font-weight: 700;
-  color: #FFFFFF;
-  letter-spacing: 0.1em;
+  color: #ffffff;
+}
+
+.repo-link {
+  color: #94a3b8;
+  transition: color 0.15s ease;
+}
+
+.repo-link:hover {
+  color: #38bdf8;
 }
 
 .repo-desc {
-  font-family: var(--font-code);
-  font-size: 10px;
-  color: #94A3B8;
-  line-height: 1.4;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.repo-card-bottom {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-top: 1px solid var(--dossier-border-razor);
-  padding-top: 10px;
-}
-
-.repo-meta-strip {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.repo-lang-tag {
-  font-family: var(--font-code);
-  font-size: 9px;
-  color: #CBD5E1;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.lang-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  display: inline-block;
-}
-.lang-dot-js { background-color: #f1e05a; }
-.lang-dot-py { background-color: #3572A5; }
-.lang-dot-cpp { background-color: #f34b7d; }
-.lang-dot-ts { background-color: #3178c6; }
-.lang-dot-html { background-color: #e34c26; }
-
-.repo-stat-tag {
-  font-family: var(--font-code);
-  font-size: 9px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-.repo-stat-tag.amber { color: var(--tactical-amber); }
-.repo-stat-tag.white { color: #FFFFFF; }
-
-.inspect-repo-btn {
-  padding: 4px 10px;
-  font-family: var(--font-header);
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  color: var(--ice-cyan);
-  background: rgba(0, 245, 212, 0.08);
-  border: 1px solid var(--ice-cyan);
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  transition: all 0.2s ease;
-}
-
-.inspect-repo-btn:hover {
-  background: var(--ice-cyan);
-  color: #000000;
-  box-shadow: 0 0 10px var(--ice-cyan-glow);
-}
-
-.loading-state-box {
-  padding: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.loading-pulse-text {
-  font-family: var(--font-code);
-  font-size: 11px;
-  color: var(--ice-cyan);
-  letter-spacing: 0.2em;
-  animation: beaconGlow 1.5s infinite alternate ease-in-out;
-}
-
-/* ==========================================================================
-   5. TACTICAL DISPATCH MODAL
-   ========================================================================== */
-.modal-backdrop-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(4, 6, 10, 0.85);
-  backdrop-filter: blur(12px);
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-}
-
-.tactical-modal-card {
-  width: 100%;
-  max-width: 480px;
-  padding: 24px;
-  background: rgba(13, 17, 26, 0.96);
-  border: 1px solid var(--dossier-border-amber);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), 0 0 30px rgba(245, 158, 11, 0.2);
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  animation: modalFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes modalFadeIn {
-  from { opacity: 0; transform: scale(0.95) translateY(10px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
-}
-
-.modal-header-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid var(--dossier-border-razor);
-  padding-bottom: 12px;
-}
-
-.modal-title-group {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.modal-title-text {
-  font-family: var(--font-header);
-  font-size: 13px;
-  font-weight: 800;
-  color: #FFFFFF;
-  letter-spacing: 0.15em;
-}
-
-.modal-close-btn {
-  background: transparent;
-  border: none;
-  color: var(--muted-slate);
-  cursor: pointer;
-  transition: color 0.2s ease;
-}
-
-.modal-close-btn:hover {
-  color: #FFFFFF;
-}
-
-.modal-body-content {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.dispatch-input-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.input-label {
-  font-family: var(--font-code);
-  font-size: 9px;
-  color: var(--muted-slate);
-  letter-spacing: 0.14em;
-}
-
-.input-copy-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.tactical-read-input,
-.tactical-text-input {
+  font-size: 0.8125rem;
+  color: #94a3b8;
+  line-height: 1.5;
+  margin-bottom: 1.25rem;
   flex: 1;
-  background: rgba(7, 9, 14, 0.85);
-  border: 1px solid var(--dossier-border-razor);
-  padding: 8px 12px;
-  font-family: var(--font-code);
-  font-size: 11px;
-  color: var(--ice-cyan);
-  outline: none;
 }
 
-.tactical-text-input {
-  color: #FFFFFF;
-}
-
-.tactical-text-input:focus {
-  border-color: var(--tactical-amber);
-  box-shadow: 0 0 10px var(--tactical-amber-glow);
-}
-
-.copy-btn {
-  padding: 8px 12px;
-  font-family: var(--font-header);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  color: #FFFFFF;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--dossier-border-razor);
-  cursor: pointer;
+.repo-footer {
   display: flex;
   align-items: center;
-  gap: 6px;
-  transition: all 0.2s ease;
+  justify-content: space-between;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-.copy-btn:hover {
-  border-color: var(--ice-cyan);
-  color: var(--ice-cyan);
+.repo-lang-pill {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.1);
+  padding: 0.15rem 0.45rem;
+  border-radius: 3px;
 }
 
-.dispatch-submit-btn {
-  padding: 8px 14px;
-  font-family: var(--font-header);
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  border: none;
-  cursor: pointer;
+.stats-matrix-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
 }
 
-/* Custom Scrollbar for Tab Content */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 4px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.3);
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(245, 158, 11, 0.3);
-  border-radius: 2px;
+.matrix-card {
+  background: #0d1017;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 1.5rem;
 }
 
-/* Responsive Overrides */
+.matrix-title {
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.06em;
+}
+
 @media (max-width: 1024px) {
-  .analytics-dossier-viewport {
-    height: auto;
-    max-height: none;
-    overflow-y: auto;
-  }
-  .dossier-main-layout {
+  .profile-dossier-inner {
     grid-template-columns: 1fr;
-    max-height: none;
-    overflow: visible;
+    gap: 1.25rem;
   }
-  .repo-grid {
+
+  .github-repos-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-matrix-grid {
     grid-template-columns: 1fr;
   }
 }

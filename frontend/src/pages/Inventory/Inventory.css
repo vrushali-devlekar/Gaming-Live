@@ -1,31 +1,221 @@
 /* ==========================================================================
-   PLAYER TACTICAL LOCKER // INVENTORY STYLESHEET
+   CODEBATTLE: CYBER ARENA — LOCKER & INVENTORY STYLES
    ========================================================================== */
 
-.inventory-locker-viewport {
-  width: 100vw;
-  height: 100vh;
-  max-height: 100vh;
-  overflow: hidden;
-  background-color: var(--bg-obsidian);
+.cyber-inventory-viewport {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #06070a;
+  color: #f1f5f9;
   display: flex;
   flex-direction: column;
-  color: #FFFFFF;
-  font-family: var(--font-gamer);
-  position: relative;
+  font-family: 'Outfit', sans-serif;
 }
 
 .inventory-main-grid {
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  width: 100%;
   display: grid;
-  grid-template-columns: 380px 1fr;
-  gap: 20px;
-  padding: 20px 28px;
-  flex: 1;
-  min-height: 0;
-  max-height: calc(100vh - 65px);
-  overflow: hidden;
+  grid-template-columns: 440px 1fr;
+  gap: 1.5rem;
+  align-items: stretch;
 }
 
-.item-tier-legendary { border-color: var(--hazard-amber); color: var(--hazard-amber); }
-.item-tier-rare { border-color: var(--ice-cyan); color: var(--ice-cyan); }
-.item-tier-common { border-color: var(--muted-slate); color: var(--muted-slate); }
+/* --------------------------------------------------------------------------
+   3D PREVIEW CARD
+   -------------------------------------------------------------------------- */
+.inventory-3d-preview-card {
+  background: #0d1017;
+  border: 1px solid rgba(163, 230, 53, 0.25);
+  border-radius: 10px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+}
+
+.preview-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 0.75rem;
+}
+
+.three-character-stage {
+  flex: 1;
+  min-height: 380px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.equipped-dossier-box {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 0.85rem;
+}
+
+/* --------------------------------------------------------------------------
+   ARMORY SECTION
+   -------------------------------------------------------------------------- */
+.inventory-armory-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.armory-panel {
+  background: #0d1017;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.armory-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 1rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.category-filter-tabs {
+  display: flex;
+  gap: 0.35rem;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 0.25rem;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.cat-tab-btn {
+  padding: 0.3rem 0.75rem;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: #94a3b8;
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.cat-tab-btn.active {
+  background: #a3e635;
+  color: #080a0f;
+}
+
+.inventory-items-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  overflow-y: auto;
+  max-height: 560px;
+}
+
+.inventory-item-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 1.25rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s ease;
+}
+
+.inventory-item-card:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.inventory-item-card.equipped {
+  border-color: #a3e635;
+  background: rgba(163, 230, 53, 0.04);
+  box-shadow: 0 0 20px rgba(163, 230, 53, 0.12);
+}
+
+.rarity-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 3px;
+}
+
+.equipped-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #a3e635;
+}
+
+.item-name {
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-top: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.item-desc {
+  font-size: 0.8125rem;
+  color: #94a3b8;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+  flex: 1;
+}
+
+.item-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.65rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.btn-equip-action {
+  padding: 0.3rem 0.8rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  color: #f1f5f9;
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.inventory-item-card.equipped .btn-equip-action {
+  background: #a3e635;
+  border-color: #bef264;
+  color: #080a0f;
+}
+
+@media (max-width: 1024px) {
+  .inventory-main-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .inventory-items-grid {
+    grid-template-columns: 1fr;
+  }
+}
